@@ -23,14 +23,14 @@ private renderer or a private object store.
 
 ## The substrate components
 
-| Component  | Responsibility                                                                      |
-| ---------- | ----------------------------------------------------------------------------------- |
-| Clerestory | Application environment: windows, menus, commands, focus, dialogs.                  |
-| Escutcheon | Declarative resources: menus, strings, icons, shortcuts, layout.                    |
-| Lapidary   | Scene description: rectangles, paths, text, images, clips, transforms.              |
-| Burin      | Output: display, PDF, print, thumbnail, raster, clipboard, a11y, hit map, manifest. |
-| Enfilade   | Object identity, selectors, capabilities, transactions, live relationships.         |
-| Mullion    | A future compositor and shell, deliberately deferred.                               |
+| Component  | Responsibility                                                                       |
+| ---------- | ------------------------------------------------------------------------------------ |
+| Clerestory | Application environment: windows, menus, commands, focus, dialogs.                   |
+| Escutcheon | Declarative resources: menus, strings, icons, shortcuts, layout.                     |
+| Lapidary   | Scene description: rectangles, paths, text, images, clips, transforms.               |
+| Burin      | Output: display, PDF, print, thumbnail, raster, clipboard, a11y, hit map, manifest.  |
+| Enfilade   | Object identity, selectors, the capability broker, transactions, live relationships. |
+| Mullion    | A future compositor and shell, deliberately deferred.                                |
 
 The names come from stonework and from GEM's own vocabulary. They are useful
 because they keep responsibilities distinct: Clerestory is not a renderer,
@@ -48,11 +48,19 @@ Clerestory, Lapidary, Burin and Escutcheon as production contracts. A future
 Mullion shell would add composition and shell integration; it must not
 introduce a second object system or a second rendering path.
 
+Authority belongs to the runtime's capability broker inside Enfilade. A
+provider validates its own payload and produces revisions, but it is untrusted
+until the broker grants a capability. A provider response cannot widen, extend
+or delegate a grant. A host-resource decision, such as an XDG portal
+permission, enters through the broker's adapter; the portal does not become a
+second authority owner. The [embed chapter](32-embeds.md) applies this boundary
+to object references.
+
 The practical consequence for interface design is that Cabochon cannot assume
 control of global menus, global shortcuts or the lock screen. It adapts its
 windows to the host's window management, and it uses XDG portals for files,
-printing, notifications and capture. The [window chapter](09-windows.md)
-describes the adaptation.
+printing, notifications and capture where a suitable portal exists. The
+[window chapter](09-windows.md) describes the adaptation.
 
 ## Applications and instruments
 
@@ -79,8 +87,12 @@ Three consequences follow from the topology.
    status line, inspector and state chips are environment furniture. The
    canvas, grid or page inside them belongs to the instrument.
 2. **Identity outlives presentation.** A currency object shown in a note, an
-   inspector and a print proof is one object with three presentations. The
-   interface must never suggest that the three views are three documents.
+   inspector and a print proof is one semantic object with three presentation
+   instances. The interface must never suggest that the three views are three
+   documents. Four identifiers are distinct: the semantic object, the
+   presentation definition, the presentation instance in a document, and the
+   scene or control node that draws it. A hit result names the instance or node
+   and maps to the semantic object only through the integration boundary.
 3. **Failure is a first-class surface.** Because objects can be remote, live or
    unavailable, every instrument needs a way to show a relationship that is
    stale, broken or denied. The [state chapter](08-live-relationships.md)

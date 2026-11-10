@@ -42,24 +42,29 @@ decision. A failure that can be retried without a decision must not open one.
 
 The first duty of an error path is to preserve the last committed state.
 
-- A failed mutation leaves the object at its previous revision.
-- A failed refresh keeps the last successful value, labelled **Stale** or
-  **Broken**.
-- A failed save keeps the document open and modified; it never closes the
-  window.
+- A failed atomic mutation leaves every object at its previous committed
+  revision; no successful subset is exposed.
+- A failed refresh keeps the last accepted value when authority permits its
+  display, labelled **Broken**. It keeps an unauthorised value only in
+  protected storage.
+- A failed save keeps the document open, modified and with its draft intact; it
+  never closes the window.
 - A failed import leaves the existing document untouched and reports the
   objects that could not be read.
 
 An application must never replace a value with an empty value because it could
-not read the source. The [live relationship states](08-live-relationships.md)
-exist to make preservation expressible.
+not read the source. It must also never retain a value whose authority has
+ended. The [live relationship states](08-live-relationships.md) exist to make
+preservation expressible; redaction takes precedence over preservation.
 
 ## Wording
 
-- Use the active voice: "The table could not be refreshed", not "The table
-  refresh failed".
-- Name the object and, where several similar objects exist, its identity
-  suffix.
+- Use the active voice with an explicit actor where known: "Cabochon could not
+  refresh the table", not "The table could not be refreshed". The second
+  sentence is passive, even though the contrasted "The table refresh failed" is
+  grammatically active; the latter names no actor and is less helpful.
+- Name the object and, where several similar objects exist and disclosure
+  permits, its identity suffix.
 - Avoid internal error codes as the primary message. A code may appear in a
   details block, copyable for support.
 - Avoid "invalid", "illegal" and "bad" as descriptions of user input. Say what
@@ -69,42 +74,66 @@ exist to make preservation expressible.
 
 ## Retry and recovery
 
-A retry must be safe. If repeating the operation could duplicate a change, the
-interface offers **Review** instead of **Retry**, and shows what would happen.
+A retry must be safe. An operation with an uncertain outcome is not repeated
+blindly: the runtime first resolves the original outcome or reuses an
+idempotent operation identity. If repeating the operation could duplicate a
+change, the interface offers **Review** instead of **Retry**, and shows what
+would happen.
 
 - A transient network failure offers **Retry**.
 - A permission failure offers **Request access** or **Open settings**, not
   **Retry**.
-- A malformed object offers **Edit source** or **Export original**, not
-  **Retry**.
+- A malformed object offers **Edit source**, not **Retry**.
 - A conflict offers **Compare** and **Choose**, not **Overwrite**.
 
-## Partial failure
+## Atomic operations, batches and partial failure
 
-An operation that affects several objects may partly succeed. The report must
-say which objects succeeded and which did not, and must not describe the whole
-operation as failed.
+An **atomic semantic transaction** commits its whole declared mutation set or
+none of it. It never leaves a successful subset visible. If a participating
+provider cannot support atomic preparation and commit, the runtime rejects the
+operation before mutation. Injecting a denial, a conflict, a provider crash or
+a restart at any transaction boundary leaves the observable semantic state at
+the old committed set or the new committed set.
 
-- The successful objects keep their new revision.
-- The failed objects keep their previous revision.
-- The report lists both sets and offers a retry for the failed subset.
-- The document remains usable throughout.
+Choosing a compatible subset before invocation is not partial success. The
+interface shows the chosen subset and then transacts it atomically.
+
+A **batch of independent transactions** is a different operation. It identifies
+its commit units before execution and reports each unit separately. Partial
+results in a batch are expected and are never described as partial success of
+an atomic transaction.
+
+An **import with explicit partial mode** is a batch. It states its commit
+units, its recovery behaviour and its undo grouping, and it is distinct from an
+all-or-nothing import. A partially imported document says which objects are
+absent; it does not pretend the import was complete.
 
 ## Degraded mode
 
-When a provider is missing, an object may still be readable as bytes. The
-interface says **Opaque**, preserves the object and offers **Export original**.
-It does not pretend the object is editable, and it does not delete it to tidy
-the document.
+When a provider is missing, an object may still be readable as bytes.
+Resolution, authority and cached availability remain separate. When current
+authority permits it, the interface says **Opaque**, preserves the object and
+offers **Export original**. It does not pretend the object is editable, it does
+not delete it to tidy the document, and it does not offer export when authority
+withholds it.
 
 When the runtime loses a tool registry, the affected commands become
 unavailable with a reason. The document continues to open, render, print and
 export using the last known presentations.
 
+When the display renderer fails entirely, the failure is not disguised as a
+working window. The application keeps the last committed document model, shows
+a bounded fallback surface with reachable diagnostics, disables mutations whose
+visible target cannot be validated, and redacts any retained pixel or thumbnail
+that would disclose information whose authority has ended. The
+[output chapter](37-output-parity.md) defines the retained-pixel and hit-region
+rules.
+
 ## Diagnostics
 
 A diagnostic surface is available from **Help**, from the affected object's
-context menu and from the command palette. It shows:
+context menu and from the command palette. It shows, subject to the metadata
+disclosure policy:
 
 - the object's identity and revision;
 - the provider and its version;
@@ -113,6 +142,8 @@ context menu and from the command palette. It shows:
 - a copyable diagnostic bundle that contains no document content unless the
   user chooses to include it.
 
+An opt-in diagnostic-content setting can include public metadata and public
+content. It cannot override a denial or reveal a protected metadata class.
 Diagnostics must never be the primary error message. They are the place a
 support conversation begins, not the place a user is left.
 
@@ -120,8 +151,10 @@ support conversation begins, not the place a user is left.
 
 Errors are recorded with enough context to reproduce them and without recording
 document content by default. A log entry carries the object identity, the
-operation, the outcome and the provider version. It does not carry the value
-that was read.
+operation, the outcome and the provider version when disclosure permits. It
+does not carry the value that was read, and it does not carry a protected
+identity, revision, count or timestamp. A log is one of the output surfaces
+covered by the authorisation matrix: it is not exempt because it is not visible.
 
 ## Testing
 

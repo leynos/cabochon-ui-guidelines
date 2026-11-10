@@ -95,14 +95,48 @@ line, and may also show it in the document if the operation blocks editing.
 
 ## The state chip
 
-The state chip appears at the right of the status line in every document
-window. It uses the vocabulary and colours of
+The state chip appears at the right of the status line when a document has at
+least one live relationship. It uses the canonical vocabulary and colours of
 [Live relationships](08-live-relationships.md): **Current**, **Refreshing**,
-**Stale**, **Broken** or **Denied**.
+**Stale**, **Broken** or **Denied**. No other word, colour or icon substitutes
+for one of those five.
 
-The chip is 20 pixels high with 11-pixel metadata type and a 6-pixel dot. It
-must never be the only indication of a problem; the affected object also
-carries a mark. The chip is a summary, not a notification.
+A document may contain children in different states, so the chip is a computed
+summary. It takes the first state that applies, in this order:
+
+1. **Denied**, when any live child is denied.
+2. **Broken**, when any live child is broken.
+3. **Refreshing**, when any live child is refreshing.
+4. **Stale**, when any live child is stale.
+5. **Current**, when every live child is current.
+
+The order is fixed so that a summary does not depend on the order in which
+children were created or displayed. A mixed document must not hide a denied
+child behind a milder summary. The chip's accessible name names the worst state
+and the number of children in it, and each child keeps its own mark in the
+document. The chip is a summary, not a notification, and never replaces the
+per-object marks.
+
+The chip is 20 logical units high with 11-unit metadata type and a 6-unit dot.
+It must never be the only indication of a problem.
+
+### What the chip does not report
+
+The chip reports relationship state only. Persistence, draft validity and
+resolution are independent facts and have their own carriers.
+
+- **Persistence** — modified, saving, saved or save failed — appears as the
+  title bar's modified mark and a status-line message. A save failure does not
+  make a current relationship stale.
+- **Draft validity** — a draft that does not validate — appears beside the
+  draft. The last committed result keeps its own relationship state and is not
+  presented as a fresh computation.
+- **Resolution** — Resolved, Opaque, Unavailable or Malformed — appears on the
+  embed itself and does not by itself change the chip.
+
+A document with no live relationship shows no chip. The absence of a chip means
+"nothing live to report", not **Current**, and it is not a defect. A document
+whose only content is local and committed falls into the same case.
 
 ## When there is no tool strip
 

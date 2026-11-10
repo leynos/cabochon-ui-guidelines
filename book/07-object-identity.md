@@ -30,7 +30,9 @@ objects may share a name without becoming the same object.
 
 A revision records a change to an object's content. It is not part of the
 identity, and it is not a user-visible version number in the manner of a
-document-management system; it is the basis for conflict detection and undo.
+document-management system. It is an opaque concurrency token: the interface
+compares it for equality and ancestry, and never computes with it or asserts
+that it increments by one.
 
 The interface rules are:
 
@@ -40,35 +42,86 @@ The interface rules are:
   object.
 - An object's history may be inspectable, but history is not the default view.
 
+## Operation effects
+
+Identity, committed content, revision and view state are separate effects. The
+following table is the reference for every instrument.
+
+| Operation                        | Semantic identity                             | Content and history effect                                     | View and container effect                                            |
+| -------------------------------- | --------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Edit existing content            | Preserved                                     | Commit under the platform revision and transaction policy      | Reflect the accepted revision in authorised presentations            |
+| Cancel a draft or tool operation | Preserved                                     | No committed content mutation                                  | Discard or retain the draft according to the declared editing policy |
+| Undo committed content           | Preserved                                     | Restore content through the declared undo and revision policy  | Update relevant views without reallocating the object                |
+| Change one embed's presentation  | Source identity preserved                     | Source content unchanged                                       | Change the containing document's reference record and history        |
+| Zoom, sort or filter a view      | Preserved                                     | Source content unchanged unless a distinct command edits it    | Change the declared view state                                       |
+| Duplicate a graph                | New identities in the declared copied closure | Copy content under the documented sharing and remapping policy | Preserve or remap links as declared                                  |
+| Export a presentation            | Original identity preserved                   | No source mutation                                             | Produce a declared output with explicitly stated losses              |
+| Export a portable bundle         | Included identities preserved                 | No source mutation                                             | Preserve the declared data closure; omit runtime authority           |
+
+Cancelling an edit changes neither committed content nor identity. An edit
+keeps identity and commits a new content revision. Undo restores the prior
+committed content under the same identity; it is not a second edit that
+allocates a new object. Reference repair, sorting, filtering and changing a
+category are different operations and are tested separately.
+
 ## Presentation identity
 
-A presentation is a way of showing an object. It has its own identity so that a
-document can remember *which* view of the object it contains — the compact
-currency row, the detailed card, the chart — without confusing that choice with
-the object itself.
+A presentation is a way of showing an object. Three things are distinct:
 
-This distinction appears in the interface as follows.
+- a **presentation definition**, which has its own identity and describes a
+  reusable view;
+- a **presentation instance**, which is the placement of an object with one
+  definition in one document, including its placement, clipping and scene nodes;
+- a **scene or control node**, which is one drawn or interactive rectangle in a
+  resolved scene.
 
-- Changing a presentation must not change the object.
-- A document that embeds an object stores the object identity and the
-  presentation choice.
-- Reopening a document restores the presentation, not a rendered copy.
-- A presentation that is no longer available falls back to a declared
-  placeholder and reports the problem; it does not silently substitute a
-  different view.
+A document stores the semantic object identity, the presentation definition
+identity and its own presentation-instance record. Reopening restores the
+instance, not a rendered copy.
+
+Editing a presentation instance changes the containing document's reference
+record and belongs to that document's history. It does not change the source
+object, and it does not change a second embed of the same object in the same or
+another document. Changing the shared presentation definition is a separate
+operation with its own authority and conflict rules.
+
+A presentation that is no longer available falls back to a declared placeholder
+and reports the problem; it does not silently substitute a different view.
 
 ## Duplicate, derive, export
 
-The three operations are distinct and must be labelled distinctly.
+The operations are distinct and must be labelled distinctly.
 
-| Operation | Result                                                                                           |
-| --------- | ------------------------------------------------------------------------------------------------ |
-| Duplicate | A new object with a new identity and the same content.                                           |
-| Derive    | A new identity with a declared relationship to the source, such as a variant or a computed view. |
-| Export    | A file in another format. The object remains where it was.                                       |
+| Operation               | Result                                                                                                                                                                                                    |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Duplicate               | A new identity with copied content. By default the target's owned closure is copied and its internal links are remapped; references to independently owned objects remain references to the same objects. |
+| Duplicate with contents | A new identity for the whole declared closure, including referenced objects, with every internal link remapped. External references remain external.                                                      |
+| Derive                  | A new identity with a declared relationship to the source, such as a variant or a computed view.                                                                                                          |
+| Export                  | A file in another format. The object remains where it was.                                                                                                                                                |
+
+A duplicate of a document may contain shared objects, cycles, nested live
+relationships and internal links. The command therefore states its closure
+before it runs: which objects receive new identities, which links are remapped
+and which references stay shared. The default is the document's owned closure;
+a reference to an independently owned object is not copied merely because it is
+reachable.
+
+An exported file is not a duplicate. Restoring a bundle into an installation
+that already knows an identity follows the re-import policy:
+
+- an identical revision is reused;
+- an older revision is accepted only through the platform's explicit restore or
+  conflict path;
+- a divergent revision raises a conflict and never silently overwrites live
+  content;
+- an explicit duplicate assigns new identities and records the mapping.
+
+The importer never infers sameness from a display suffix and never restores a
+runtime grant from a bundle.
 
 A menu that offers "Save a copy" for a live object is ambiguous: it could mean
-duplicate, derive or export. Cabochon menus should use the precise verb.
+duplicate, derive or export. Cabochon menus should use the precise verb. Menu
+commands and their ellipsis policy are defined once in [Menus](10-menus.md).
 
 ## Identity in the interface
 
@@ -97,11 +150,21 @@ should be able to rely on it without seeing it.
 When an object cannot be loaded, its identity must survive. A placeholder that
 says "Unavailable" still refers to the original object, so that a later
 provider update can restore it. Replacing an unavailable object with an empty
-object of the same type destroys the link and is forbidden.
+object of the same type destroys the link and is forbidden. Restoring a
+recoverable identity and creating a replacement are different actions, and the
+recovery command says which it will do.
 
 The same rule applies to deletion. Deleting an object that is referenced
-elsewhere must warn, and the warning must name the references. An orphaned
-placeholder is recoverable; a silently deleted object is not.
+elsewhere must warn. The warning lists the references the runtime knows and the
+user may inspect, and says when that assessment may be incomplete. It does not
+invent a global list it cannot establish and does not reveal references that
+the metadata disclosure policy protects. An orphaned placeholder is
+recoverable; a silently deleted object is not.
+
+Identity disclosure is not content disclosure. The inspector, diagnostics,
+search results, backlinks and manifests show an identity, name, revision or
+count only when the current grant permits that metadata class, as described in
+[Live relationships](08-live-relationships.md).
 
 ## What identity is not
 

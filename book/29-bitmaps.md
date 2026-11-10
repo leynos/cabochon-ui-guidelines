@@ -14,26 +14,32 @@ needed to prove editable embedding, not a full paint package.
 
 A bitmap object declares:
 
+- its stored sample format and bit depth;
 - its pixel dimensions;
 - its physical resolution, in pixels per inch;
-- its colour intent, such as sRGB or a print intent;
-- its alpha behaviour, opaque or transparent;
+- its colour space and embedded profile;
+- its output intent when one is declared for print;
+- its alpha representation, straight or premultiplied, and whether it is
+  opaque or transparent;
 - its identity and revision.
 
-A presentation may scale the bitmap for display, but scaling never changes the
-stored pixels. Upscaling for export requires an explicit choice and is recorded
-in the exported metadata.
+Colour space, profile and output intent are distinct. sRGB is a colour space
+with a profile; print is an output intent. A presentation may scale the bitmap
+for display, but scaling never changes the stored pixels. Upscaling for export
+requires an explicit choice and is recorded in the exported metadata.
 
 ## Layout
 
 The bitmap editor uses a document plane with rulers, a compact tool palette and
 an inspector.
 
-- Rulers: 20 pixels, in metadata type, showing the current unit.
-- Tool palette: 48 pixels wide, one column of 30-pixel tools.
+- Rulers: 20 logical units, in the operational metadata role, showing the
+  current unit.
+- Tool palette: 48 logical units wide, one column of 30-unit tools.
 - Document plane: the image on a checkerboard for transparency, at the current
   zoom.
-- Inspector: 240 pixels, showing dimensions, resolution, intent and state.
+- Inspector: 240 logical units, showing dimensions, resolution, colour space,
+  intent and state.
 - Status line: pointer position, colour under the pointer, zoom and the active
   tool.
 
@@ -42,36 +48,46 @@ an inspector.
 The first batch provides select, move, brush, eraser, rectangle, ellipse,
 eyedropper and text. Each tool:
 
-- has a 30-pixel button, a 16-pixel glyph and a tooltip naming its shortcut;
+- has a 30-unit button, a 16-unit glyph and a tooltip naming its shortcut;
 - shows its options in the tool strip or the inspector, not in a floating
   palette;
 - commits its stroke as one transaction when the pointer is released;
 - cancels cleanly on Escape, restoring the pixels from before the stroke.
 
-A tool must not leave a half-applied stroke when the user switches tools or the
-window loses focus.
+A tool must not leave a half-applied stroke when the user switches tools, the
+window loses focus or the tool is switched by shortcut. The commit boundary is
+one deterministic rule and applies to every switching route. Selection and pan
+create no content mutation.
 
 ## Zoom and pan
 
 - Zoom range: 10 to 1600 per cent.
 - Zoom steps: 10, 25, 50, 100, 200, 400, 800, 1600.
-- At 100 per cent, one image pixel maps to one device pixel at the declared
-  scale.
+- At 100 per cent, one image pixel maps to one logical unit at the interface
+  scale, and the logical unit maps to device pixels through the declared device
+  transform.
 - Space-drag pans; the scroll wheel scrolls; Control with the wheel zooms.
 - The zoom level is remembered per bitmap, not per application.
 
-The editor must not resample for display at integer zoom levels, so that pixel
-art remains crisp.
+Display sampling follows the scale factor. An exact integer enlargement factor
+uses nearest-neighbour sampling so that pixel art remains crisp; a non-integer
+factor, including 25 per cent, uses the declared filtered sampling. Neither
+changes the stored pixels. The editor does not force an integer factor to
+obtain a sharp preview.
 
 ## Colour
 
-- The foreground and background colours are shown as two 24-pixel swatches at
+- The foreground and background colours are shown as two 24-unit swatches at
   the bottom of the tool palette.
 - The palette is the environment palette plus a greyscale ramp. A bitmap may
   contain other colours; the editor does not restrict the image to the
   interface palette.
-- The eyedropper samples the displayed colour, and the status line reports
-  both the hex value and the colour intent.
+- The eyedropper samples the document pixel by default and reports the stored
+  colour and the colour space. A display-composited sampling mode, which
+  includes the checkerboard and display transform, is a separately labelled
+  choice.
+- A sampled colour is converted explicitly before it is written back when the
+  document's colour space differs from the sampled colour's space.
 - A colour that cannot be represented in the document's intent is marked in
   the inspector, not silently converted.
 
@@ -98,15 +114,19 @@ preflight report records the choice.
 ## Editing and identity
 
 - Every presentation of the bitmap updates when one is edited.
-- A crop or a resize is an edit with a revision, not a new object.
+- A crop or a resize is an edit with a content revision, not a new object.
 - **Duplicate** creates a new object; **Export** writes a file and leaves the
   object in place.
 - Undo restores pixels, not identity.
+- Cancelling a stroke changes neither committed pixels nor identity.
+- A display zoom or theme change does not mutate pixels, resolution or
+  identity.
 
 ## Embedded bitmaps
 
-A note may embed a bitmap as a block, a thumbnail or an inline mark. The embed
-carries the object's state edge and chip. Opening the embed opens the bitmap
+A note may embed a bitmap using the block, inline or thumbnail profile. The
+block embed carries the object's state edge and chip; the compact forms keep
+the state mark and an inspection route. Opening the embed opens the bitmap
 editor at the object's last zoom and selection.
 
 ## What the bitmap editor is not

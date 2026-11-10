@@ -17,52 +17,71 @@ is examined and maintained.
 
 ## Layout
 
-- Categories panel: 210 pixels, listing saved filters with row counts.
-- Formula bar: 34 pixels, showing the selected cell's expression.
+- Categories panel: 210 logical units, listing saved filters with row counts.
+- Formula bar: 34 logical units, showing the selected cell's expression.
 - Grid: the flexible remainder.
-- Cell inspector: 240 pixels, showing address, type, value, format,
+- Cell inspector: 240 logical units, showing address, type, value, format,
   validation and selection aggregates.
 - Status line: aggregate, row count and column count.
 
 The categories panel is the instrument's navigator. It lists **All rows** and
-each saved category, with the selected category filled in pine 2.
+each saved category, with the selected category drawn in the selected-fill role.
 
 ## The grid at scale
 
-- Header row: 30 pixels, with column names in 11-pixel metadata.
-- Body rows: 28 pixels minimum, 34 preferred.
+- Header row: 30 logical units, with column names in the 12-unit operational
+  role, bold and letter-spaced.
+- Body rows: 28 logical units minimum, 34 preferred.
 - Column widths are draggable and remembered per view.
 - The grid virtualizes rows and columns; a 100,000-row table remains
   scrollable at interactive speed.
 - Frozen columns keep the key column visible while scrolling horizontally.
 - Numbers align to the trailing edge with tabular figures; text aligns to the
   leading edge.
-- The selected cell uses pine 2; the selected range uses a 2-pixel oxide
-  outline; the active cell keeps a white caret.
+- The selected cell uses the selected-fill and selected-text roles; the selected
+  range uses a 2-unit oxide outline; the active cell keeps a contrasting caret.
 
-## Types
+## Types and value production
 
-The studio table supports the workspace types plus:
+A column declares four independent things: its scalar type, its nullability,
+its validation rules and its value-production mode.
 
-- **reference**, holding another object's identity;
-- **enum**, holding one of a declared set of values;
-- **computed**, holding a live formula with its own identity;
-- **blob**, holding opaque bytes with a declared media type.
+The studio table supports the workspace scalar types, including **reference**
+and **text**, and adds these capabilities:
 
-A computed column is a provider-owned object. Editing its expression edits the
-column's definition, not each cell. A reference column resolves names through
-the provider and shows **Denied** or **Unavailable** without revealing the
-referenced value.
+- **enum**, constraining a column to a declared set of values;
+- **blob**, holding opaque bytes with a declared media type;
+- **computed column**, producing each cell's value from an expression.
+
+Reference is not an additional studio type; it is the same reference type the
+workspace dataframe editor already offers.
+
+A computed column is a provider-owned object with its own identity. Editing its
+expression edits the column definition and commits a new revision of that
+object; it does not allocate a fresh identity and does not edit each cell. Each
+cell result has an address in the column's result space, and that address is
+stable for the entity the cell represents, not for the row's current display
+position.
+
+A reference column resolves names through the provider and shows **Denied** or
+**Unavailable** without revealing the referenced value or protected metadata.
 
 ## Validation at scale
 
-Validation is declared per column and may depend on other columns.
+Structural type validity and semantic validation are different.
+
+- A value that does not match its column's scalar type is rejected at entry and
+  leaves the previous typed value intact. This is a structural error.
+- A value that matches its type but violates a business rule is accepted, marked
+  and reported. This is a validation violation.
+
+Validation rules are declared per column and may depend on other columns.
 
 - The inspector lists every rule that applies to the selected cell, with its
   scope and message.
-- A violated cell carries a 2-pixel oxide corner mark.
-- The status line reports the number of violating rows in the current
-  category.
+- A violated cell carries a 2-unit oxide corner mark and a message on focus.
+- The status line reports the number of violating rows in the current category,
+  subject to the disclosure policy.
 - The categories panel can create a **Violations** category, which is a view,
   not a stored filter on the object.
 - Validation never blocks reading, sorting, filtering or exporting. It marks
@@ -76,8 +95,11 @@ between two tables is a computed view, not a mutation of either table.
 - Creating a join declares its key columns and its output columns.
 - The join is previewed before it is saved.
 - A broken reference appears in the **Broken references** category and offers
-  **Repair** or **Clear**.
-- Deleting a referenced object warns and lists the tables that reference it.
+  **Restore**, **Rebind** or **Remove reference**, named by their identity
+  effect. A general **Create** does not silently replace the missing identity.
+- Deleting a referenced object warns and lists the tables the runtime knows and
+  the user may inspect. It says when the assessment may be incomplete and does
+  not enumerate protected references.
 
 ## Categories
 
@@ -97,21 +119,32 @@ definition, depending on the selection.
 - The bar shows the expression, not the formatted result.
 - A computed column's expression names its sources in the inspector.
 - A malformed expression is reported at its location and does not change the
-  column.
+  committed column definition. The last committed result remains intact and is
+  not presented as a fresh computation.
 - A computed column that becomes stale keeps its last value and reports its
   state.
+- Editing an existing expression updates the same computed-column object and
+  commits a new revision. Cancelling the edit preserves the committed
+  expression, result and identity.
 
 ## Import and export
 
 - Import accepts CSV, TSV, Parquet and a Cabochon table bundle.
 - Import previews the inferred types, the delimiter and the encoding before
   committing.
-- A failed row is reported with its line number and does not abort the
-  imported rows unless the user chooses all-or-nothing.
+- A failed record is reported with a structured location: record and field plus
+  the physical line span for delimited text, row group, row and column for
+  Parquet, or a file-level failure when the format cannot localise it.
+- A failed record does not abort the imported rows in an explicit partial-import
+  mode. That mode states its commit units, its undo grouping and its recovery
+  behaviour. An all-or-nothing import commits nothing on failure.
 - Export writes the table's values and its declared types, not its formatted
   display.
-- The export manifest records the table's identity, revision and any computed
-  columns that were evaluated.
+- A plain delimited export cannot carry types, references or formulas. It
+  declares those losses and may write a sidecar schema or a Cabochon table
+  bundle when the user asks for a type-preserving export.
+- The export manifest records the table's identity, revision, encoding, declared
+  losses and any computed columns that were evaluated.
 
 ## What Enfilade Table is not
 
@@ -123,5 +156,8 @@ definition, depending on the selection.
 ## Testing
 
 A reviewer should build a table with a reference column, break the reference,
-create a violations category, repair the reference and confirm that the table's
-identity, revision and exported types are unchanged by the view operations.
+create a violations category, restore the reference and confirm that the
+table's identity, committed content and exported types are unchanged by the
+view operations. Sorting, filtering and category changes alter view state only.
+Reference repair is a content operation and is tested separately. A stale
+writer remains detectably stale after an intervening edit and undo.

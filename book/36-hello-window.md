@@ -43,7 +43,7 @@ The reference application exercises five contracts.
 1. **Resources.** Menus, strings, icons and shortcuts load from Escutcheon,
    including a pseudo-localized bundle.
 2. **Scene.** One Lapidary scene describes the document, its text, its
-   controls and its hit regions.
+   controls, their scene-node identities and their hit regions.
 3. **Output.** Burin renders that scene to display, PDF, print, raster,
    thumbnail, clipboard, accessibility, hit-testing and manifest targets.
 4. **Access.** Every control has a role, a name, a state and a position in the
@@ -66,13 +66,40 @@ promise the rest of the environment depends on.
 | `thumbnail.png`      | Small raster for lists and previews          |
 | `accessibility.json` | Roles, names, states and bounds              |
 | `clipboard/`         | Text and geometry for the clipboard          |
-| `hit-map.json`       | Hit regions keyed by object identity         |
+| `hit-map.json`       | Hit regions keyed by scene node              |
 | `export.json`        | Manifest of intents, tolerances and versions |
 
 All eight come from the same scene. Geometry, text placement, clipping and
 metadata must agree within the tolerances in
 [Output parity](37-output-parity.md). The accessibility and hit-map outputs
-must describe the same objects that were drawn.
+must describe the same nodes that were drawn.
+
+## Identity in a substrate-only scene
+
+`hello-window` proves that the substrate works without the semantic plane. It
+therefore distinguishes four identifiers that other chapters also use.
+
+- **Semantic object identity.** An Enfilade object such as `note:transition`.
+  `hello-window` has none.
+- **Presentation definition.** A reusable description of how an object is
+  drawn. `hello-window` has none.
+- **Presentation instance.** One placement of a definition in a scene. The
+  greeting, the explanation and the two buttons are instances.
+- **Scene or control node.** The Lapidary node that carries geometry, hit
+  region and accessible role. Every visible element is one.
+
+A hit result identifies a scene node and may name the presentation instance and
+the semantic object through the integration boundary. It must not require a
+semantic revision or a capability grant for a rectangle or a button. Two
+instances of one semantic object therefore return distinct instances with a
+shared optional semantic reference.
+
+The manifest records which identity fields apply to the scene. A substrate-only
+scene carries scene and node identifiers, instance identifiers and the scene
+revision. Semantic object identities, object revisions and authority references
+appear only when the Enfilade bridge supplies them, and their absence is
+declared rather than inferred. An optional semantic annotation survives a scene
+round trip without ever becoming rendering authority.
 
 ## What it must not do
 
@@ -81,6 +108,8 @@ must describe the same objects that were drawn.
 - Hard-code a string that belongs in a resource.
 - Omit the status line, the menu bar or the accessibility tree because the
   application is small.
+- Require an Enfilade provider, a semantic revision or a capability grant to
+  draw a rectangle or a button.
 - Add features that the contract does not require. The point of the
   application is that its surface is entirely explained by the contract.
 

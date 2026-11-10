@@ -19,8 +19,9 @@ not become the place where every property is edited.
 
 ## Structure
 
-The inspector is 240 pixels wide by default and uses the pane plane. Its head
-carries the word **Inspector** and, where useful, the selected object's type.
+The inspector is 240 logical units wide by default and uses the pane plane. Its
+head carries the word **Inspector** and, where useful, the selected object's
+type.
 
 The body is divided into four blocks.
 
@@ -37,8 +38,9 @@ push identity below the fold.
 
 The identity block shows:
 
-- the object's display name, in 18-pixel display italic;
-- its type and a short identity suffix, in 11-pixel metadata;
+- the object's display name, in 18-unit display italic;
+- its type and a short identity suffix, in the operational metadata role at the
+  12-unit floor;
 - its provider;
 - its revision;
 - its parent object or document.
@@ -47,10 +49,21 @@ Each value is selectable and copyable. A command copies the full identity, not
 the displayed suffix. The inspector must never show a file path in place of an
 identity.
 
+Identity, name, revision and provider are metadata classes. They are shown only
+when the current grant's disclosure policy permits that class. A denied object
+may therefore show a non-disclosing placeholder in place of any of them, as
+described in [Live relationships](08-live-relationships.md).
+
 ## Presentation block
 
-Every presentation of the object is listed, with the current presentation
-marked. Choosing another presentation changes the view, not the object.
+Every presentation instance relevant to the object is listed, with the current
+one marked. The list distinguishes the shared presentation definition from the
+placement in this document.
+
+Choosing another presentation for this placement changes the containing
+document's reference record and its undo history. It does not change the source
+object and does not change a second embed of the same object. Changing the
+shared definition is a separate operation.
 
 - The list names the presentation and its context: **In note**, **Dataframe**,
   **Print**.
@@ -61,25 +74,29 @@ marked. Choosing another presentation changes the view, not the object.
 ## Authority block
 
 The authority block lists the capabilities relevant to the selection and
-whether each is granted, denied or not requested.
+whether the runtime's capability broker granted, denied or has not been asked
+for each.
 
-- Granted appears in pine 2.
-- Denied appears in oxide and names the capability in plain language.
-- Not requested appears in soft text.
+- Granted appears in the pine role.
+- Denied appears in the oxide role and names the capability in plain language.
+- Not requested appears in the soft-text role.
 
 A denied capability must not reveal the protected value anywhere in the
-inspector, including in a tooltip, a count or a revision number that could leak
-activity.
+inspector, including in a tooltip, a count, a revision number or a timestamp
+that could leak activity. The block states the broker's decision; it does not
+offer to widen a grant.
 
 ## State block
 
 The state block shows the live relationship state using the vocabulary of
 [Live relationships](08-live-relationships.md). It includes the last successful
-refresh time in metadata and the action that can restore the relationship.
+refresh time in the operational metadata role and the action that can restore
+the relationship.
 
 The state block is the one place where the inspector may show a provider's
 diagnostic text. It must be a sentence, not a stack trace, and it must be
-paired with a user action.
+paired with a user action. Diagnostic text is subject to the same metadata
+disclosure policy as the rest of the inspector.
 
 ## Read-mostly by default
 
@@ -87,12 +104,22 @@ The inspector may edit a property, but editing happens through the same
 transaction as the document. It must not maintain a parallel copy of the object
 or a private undo stack.
 
-The rule has three consequences.
+The rule has four consequences.
 
 - A property change made in the inspector is undoable with the document's undo.
-- The inspector shows the object's current revision, not a draft.
+- The inspector shows the object's committed revision and, separately, any
+  draft that has not been committed.
+- A failed save preserves both the unsaved draft and the committed identity;
+  it does not present the draft as committed.
 - A conflict in the inspector is resolved with the same conflict surface as a
   conflict in the document.
+
+An inspector edit that spans several objects is one atomic semantic
+transaction. It commits every declared mutation or none of them; it never
+leaves a successful subset visible. If the runtime cannot make the
+participating providers atomic, it rejects the edit before mutation. Choosing a
+compatible subset of objects is a separate step that happens before invocation
+and is shown to the user; it is not partial success.
 
 ## What the inspector is not
 
@@ -106,13 +133,23 @@ The rule has three consequences.
 
 With no selection, the inspector shows the document's identity and state. With
 multiple objects selected, it shows the shared properties and a count, and
-every property that differs reads **Mixed**. Editing a mixed property applies
-the new value to every selected object through one transaction, and the
-inspector says so before the change is committed.
+every property that differs reads **Mixed**. The count is a metadata class and
+is withheld when the disclosure policy protects it.
+
+Editing a mixed property applies the new value to every selected object through
+one atomic transaction, and the inspector says so before the change is
+committed. The whole declared set commits or none of it does. An explicitly
+independent batch is a different command and names its commit units in advance.
 
 ## Width and scrolling
 
-The inspector scrolls vertically, never horizontally. Its labels truncate at
-the end and reveal the full value in a tooltip. A user may widen it by dragging
-the splitter, up to 360 pixels; beyond that, the content should move to a
-dedicated pane.
+The inspector scrolls vertically, never horizontally. A metadata or value field
+truncates at the end and reveals the full value in a tooltip and through a
+keyboard-reachable expansion. An essential field label does not truncate: it
+wraps, or the block reflows. Truncation never removes the only route to the
+value.
+
+A user may widen the inspector by dragging the splitter, up to 360 logical
+units; beyond that, the content should move to a dedicated pane. The requested
+width is remembered separately from the width currently feasible in the window,
+as described in [Panes](20-panes.md).

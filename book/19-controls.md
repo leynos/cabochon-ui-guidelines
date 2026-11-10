@@ -46,8 +46,9 @@ label.
   disabled if its value can still be selected and copied.
 - A field that accepts a typed identity, such as a provider name, must
   validate on commit and show the error beside the field, not in a dialog.
-- Password fields are not used in the first batch. A capability is granted
-  through a host portal, not typed into an application.
+- Password fields are not used in the first batch. A capability is granted by
+  the runtime's capability broker, not typed into an application; a host
+  resource is reached through a portal.
 
 ## Choice controls
 
@@ -83,6 +84,20 @@ A tab names a view, never a verb. **Note**, **Table** and **Diagram** are tabs;
 - Tabs are 32 pixels high and at least 100 pixels wide when labels allow.
 - A tab bar with more than seven tabs should become a list or a pane.
 - Tabs are one tab stop; arrow keys move between them.
+
+## Consent and host portals
+
+A control may request a capability, but it does not own the decision.
+
+- A semantic operation asks the runtime's capability broker for a grant. The
+  broker may grant, deny or delegate it, and the control reports the outcome.
+- A host-resource decision, such as access to a file, a printer or a
+  notification channel, enters through the host's portal. The portal's consent
+  is an input to the broker's adapter, not a second authority owner.
+- A control must not present a portal's permission dialog as its own, and must
+  not imply that a portal grant authorises a semantic operation.
+- A denied request names the capability and offers the route to request it; it
+  does not retry the portal silently.
 
 ## Menus and popovers
 

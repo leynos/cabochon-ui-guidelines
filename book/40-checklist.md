@@ -23,7 +23,9 @@ reviewer has seen the behaviour, not that the code appears to implement it.
 - [ ] Export produces the full bundle: PDF, print PDF, raster, thumbnail,
       accessibility, clipboard, hit map and manifest.
 - [ ] The manifest records identities, revisions, presentations and any
-      substitutions.
+      substitutions, and declares which identity fields apply to the scene.
+- [ ] A substrate-only scene needs no semantic object identity, revision or
+      capability grant to draw or to be accessible.
 - [ ] The application survives `en-XA` and `ar-XB`.
 
 ## Window and structure
@@ -66,17 +68,41 @@ reviewer has seen the behaviour, not that the code appears to implement it.
 ## Objects and state
 
 - [ ] Every object has a stable, unique, opaque and copyable identity.
-- [ ] Duplicate, derive and export are distinct operations.
+- [ ] Semantic object, presentation definition, presentation instance and scene
+      node identities are distinct, and a hit or accessible node names its
+      instance.
+- [ ] Duplicate, derive and export are distinct operations, with the declared
+      shallow or deep closure.
+- [ ] Every mutation has an operation identity; retrying it is idempotent and
+      does not duplicate effects.
+- [ ] An atomic transaction commits all of its effects or none; independent
+      batch work and partial import are explicit, separately labelled modes.
 - [ ] Embed resolution renders as **Resolved**, **Opaque**, **Unavailable** or
       **Malformed**, and only a resolved embed carries a live state.
+- [ ] Resolution, current authority and cached-result availability are treated
+      as independent facts; an unresolved embed gains no export right.
 - [ ] Live relationships render as **Current**, **Refreshing**, **Stale**,
       **Broken** or **Denied**.
 - [ ] Every transition in the state table is witnessed, and no other transition
       occurs.
+- [ ] Revocation, expiry and provider loss act from every reachable state
+      without an intervening refresh, and a late reply cannot reverse them.
 - [ ] A state is visible in the object, the inspector and the status line.
 - [ ] A stale object keeps its last good value and says it is stale.
-- [ ] A denied object reveals its value in no text, tooltip, preview, thumbnail,
-      accessibility label or diagnostic.
+- [ ] A denied object reveals its value or protected metadata in no text,
+      tooltip, preview, thumbnail, accessible name, search result, backlink,
+      diagnostic or manifest.
+- [ ] A mixed-state document reports the most severe child state without
+      hiding a less severe one, using the declared precedence.
+- [ ] Persistence, draft validity, resolution and relationship freshness are
+      separate facts with separate carriers.
+- [ ] A presentation edit changes its container, not the source object, and is
+      undone in the container's history.
+- [ ] Names, identities, revisions, counts, timestamps, source chips,
+      backlinks, search results, diagnostics and manifests each obey the
+      metadata disclosure policy.
+- [ ] A portable bundle carries reconstructable data and never a capability
+      grant, host secret or machine-local handle; import reacquires authority.
 
 ## Controls and keyboard
 

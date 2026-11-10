@@ -120,6 +120,15 @@ The `accessibility.json` artefact in the export bundle contains the tree:
 roles, names, states, bounds and order. It is generated from the same scene as
 the pixels.
 
+Each accessible node carries its scene-node identity. When two placements of
+one semantic object appear in the scene, they are two nodes with distinct
+identities and the same optional semantic reference; collapsing them into one
+node would make one placement unreachable. A semantic object identity is
+present only when the Enfilade bridge supplies it, and it never substitutes for
+the node identity. A substrate-only scene, such as
+[hello-window](36-hello-window.md), is fully accessible without any semantic
+object identity at all.
+
 A test compares the tree with the scene and fails when:
 
 - a drawn control has no role;

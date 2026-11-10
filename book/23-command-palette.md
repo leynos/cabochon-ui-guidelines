@@ -50,6 +50,26 @@ A command that is currently unavailable appears greyed with the reason. A
 command that is destructive appears with its destructive mark and never becomes
 the default result of an empty query.
 
+## Disclosure
+
+The palette is a search surface, so it obeys the metadata disclosure policy in
+[Live relationships](08-live-relationships.md) as strictly as the document does.
+
+- An object the user may not inspect is omitted from the results. It is not
+  shown as a greyed row, a placeholder or a count.
+- A result's name, identity suffix, provider and source chip are separate
+  metadata classes. Each is withheld when the current grant protects it, and
+  the row remains usable only if enough of it is disclosable to identify the
+  result.
+- The palette must not reveal a protected object's existence through result
+  ordering, an empty-query count or a "no results" message that distinguishes
+  "none" from "none you may see".
+- A recent-command list contains commands, not objects, so it is not a
+  disclosure channel. A recent-object list would be, and the first batch does
+  not provide one.
+- A diagnostic or error surfaced from a result follows the same policy: it
+  names the failure, not a protected object's identity or revision.
+
 ## Query behaviour
 
 - Matching is case-insensitive and ignores diacritics.

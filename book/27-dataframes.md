@@ -53,8 +53,11 @@ A cell's type is part of the object, not a property of its display.
 - Changing a format must not change the stored value.
 - A value that does not fit its column's type is a validation error, not a
   silent conversion.
-- A reference cell holds another object's identity and shows its name; it
-  becomes stale when the referenced object is unavailable.
+- A reference cell holds another object's identity and shows its name and its
+  relationship state. It is **Stale** when the referenced object's source
+  revision has advanced, **Broken** when the provider is unavailable and
+  **Denied** when the current grant does not permit reading it. Unavailable is
+  not stale, and the cell must not claim knowledge of a revision it cannot read.
 
 ## Formula bar
 
@@ -87,6 +90,24 @@ The selection is a range of cells with an anchor and an extent.
 A selection must remain visible when the grid loses focus, drawn as an outline
 rather than a fill.
 
+## Addresses and identity
+
+A visible address such as `B2` is a presentation address, not an identity. The
+table distinguishes three things:
+
+- a **row identity**, stable for the entity the row represents, independent of
+  its current display position;
+- a **column identity**, stable across reordering and renaming;
+- a **cell address**, the pair of the two.
+
+Sorting, filtering and inserting rows change display positions without changing
+row or column identity. A formula or a reference that means an entity records
+that identity; one that means "whatever is at B2" records positional semantics
+and says so when it is created. Deleting a row leaves a recoverable broken
+reference for an entity-bound expression, not a silent attachment to the next
+row. A tombstone keeps the identity resolvable until the reference is repaired
+or removed.
+
 ## Editing
 
 - Typing replaces the cell's content; F2 or a double-click edits in place.
@@ -117,6 +138,27 @@ actions are reversible and are recorded in the view, not in the object.
 
 A filter that removes the selected row moves the selection to the nearest
 visible row and says so in the status line.
+
+## State and persistence
+
+The dataframe keeps four independent kinds of state apart.
+
+- **Relationship state.** A reference cell carries **Current**, **Refreshing**,
+  **Stale**, **Broken** or **Denied** from
+  [Live relationships](08-live-relationships.md). The table's status chip
+  summarises these with the same precedence as a document.
+- **Draft validity.** An incomplete or malformed expression in the formula bar
+  is a draft error. The committed cell or computed column keeps its last valid
+  result and reports the draft error beside the editor.
+- **Persistence.** Modified, saving, saved and save failed belong to the
+  document's save state, not to a relationship. A failed save does not make a
+  current reference stale.
+- **View state.** Sorting, filtering, column widths and category selection are
+  recorded in the view and never change the object's identity or revision.
+
+An empty table still has a type and a revision, and its status line says "0
+rows" rather than implying that content failed to load. A table with no
+reference columns has no relationship state to summarise.
 
 ## Large tables
 
