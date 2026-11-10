@@ -20,12 +20,13 @@ between three and eight commands, grouped by purpose.
 
 Geometry:
 
-- button: 30 by 30 pixels;
-- glyph: 16 by 16 pixels, centred;
-- gap inside a group: 8 pixels;
-- group separator: a one-pixel rule with 8 pixels on each side;
-- text label: 12-pixel interface type, placed to the right of the glyph when
-  the command needs one.
+- button: 30 by 30 units for an icon-only command;
+- glyph: 16 by 16 units, centred;
+- gap inside a group: 8 units;
+- group separator: a one-unit rule with 8 units on each side;
+- text label: 12-unit interface type, placed to the right of the glyph when the
+  command needs one. A labelled button keeps the 30-unit height and widens to
+  fit the label; it is not a 30-unit square.
 
 A tool strip button must have a tooltip that names the command and its
 shortcut. The tooltip appears after 600 milliseconds and disappears when the
@@ -59,7 +60,9 @@ is denser.
 
 ## The status line
 
-The status line is 26 pixels high and spans the window. It has three zones.
+The status line is 26 units high and spans the window. It grows to 28 units
+when it carries an action, so that the action's 28-unit target is not clipped
+by the band. It has three zones.
 
 - **Left.** A message about the current operation, selection or hover. It
   clears when the condition ends.
@@ -89,9 +92,13 @@ line, and may also show it in the document if the operation blocks editing.
 - Determinate progress must show the completed proportion, not a fake
   percentage.
 - Indeterminate progress must not imply completion.
-- A cancellable operation must offer **Cancel** in the status line or the
-  document, and the cancel action must take effect within 200 milliseconds.
+- A cancellable operation must offer **Cancel** in a 28-unit action region or in
+  the document. Cancellation is acknowledged within 200 milliseconds and
+  suppresses publication immediately; cleanup may continue in a separate
+  **Cancelling** state. [Motion](17-motion.md) defines the commitment.
 - A completed operation must remove its progress and leave one message.
+- A background refresh that completes quickly leaves no progress rule and no
+  message of its own. The value updates and the status line records the time.
 
 ## The state chip
 
@@ -117,8 +124,9 @@ and the number of children in it, and each child keeps its own mark in the
 document. The chip is a summary, not a notification, and never replaces the
 per-object marks.
 
-The chip is 20 logical units high with 11-unit metadata type and a 6-unit dot.
-It must never be the only indication of a problem.
+The chip is 20 units high with 12-unit operational type and a 6-unit dot. The
+state word is essential, so it uses the operational floor even though it sits
+in a metadata-shaped surface. It must never be the only indication of a problem.
 
 ### What the chip does not report
 

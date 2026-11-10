@@ -61,22 +61,29 @@ vocabulary rather than drawing a private variant of an existing one.
 Every icon has four states, and every state must be distinguishable without
 colour.
 
-| State    | Colour    | Additional cue                        |
-| -------- | --------- | ------------------------------------- |
-| Default  | Ink       | None                                  |
-| Active   | Oxide     | Pressed or selected background        |
-| Stale    | Amber ink | A word beside the icon                |
-| Disabled | Line      | Removed from focus; no hover response |
+| State    | Colour    | Additional cue                               |
+| -------- | --------- | -------------------------------------------- |
+| Default  | Ink       | None                                         |
+| Active   | Oxide     | Pressed or selected background               |
+| Stale    | Amber ink | A word beside the icon                       |
+| Disabled | Line      | No pressed state; reason in tooltip and name |
 
 Hover is a background change, not an icon colour change. A hovered icon keeps
 its default ink and gains the control plane's hover fill.
+
+An icon-only button that leaves the tab order is not thereby silent. It shows
+no pressed state, but it still shows a non-activating explanatory tooltip on
+hover, and its accessible name carries the same reason. The reason is the
+single applicability reason from the command record, so the tool strip, the
+menu and the palette explain the same unavailability in the same words. An icon
+is never enabled merely so that its reason can be discovered.
 
 ## Icons with labels
 
 An icon may stand alone only when its meaning is in the shared vocabulary and
 its tooltip names it. A command that is new, rare or destructive must carry a
-text label. The label sits 8 pixels to the right of the glyph, aligned to the
-text baseline.
+text label. The label sits 8 units from the glyph, aligned to the text baseline
+on the reading side.
 
 In a tool strip, a labelled button widens to fit the label; it does not shrink
 the glyph or truncate the word.

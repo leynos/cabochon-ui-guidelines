@@ -16,9 +16,12 @@ the document.
 ## Opening and closing
 
 - The palette opens with Control+K from anywhere in the application.
-- It closes with Escape, returning focus to the control that opened it.
-- It opens over the document, centred horizontally and 80 pixels from the top
-  of the document plane.
+- It closes with Escape and returns focus through the focus-return chain defined
+  in [Focus and the keyboard](18-focus-keyboard.md): the invoker that opened it
+  when that control still exists, otherwise the surviving logical context, and
+  otherwise the document's first operable control.
+- It opens over the document, centred horizontally and 80 units from the top of
+  the document plane.
 - It never opens as a separate window and never appears in the window list.
 
 ## What it searches
@@ -41,14 +44,19 @@ because the instrument considers it rare.
 
 Each row carries:
 
-- the result's name, in 12-pixel interface type;
-- its kind, in 11-pixel metadata;
+- the result's name, in 12-unit interface type;
+- its kind, in 11-unit metadata;
 - its shortcut, right-aligned, when it has one;
 - its source or provider, when the result is an object or a tool.
 
-A command that is currently unavailable appears greyed with the reason. A
-command that is destructive appears with its destructive mark and never becomes
-the default result of an empty query.
+A command that is unavailable but applicable appears greyed with the single
+applicability reason from its command record, described in
+[Menus](10-menus.md). The reason is part of the row's accessible name and is
+available without invoking the command. A command that cannot apply at all is
+absent, because an inapplicable command is not a disabled one. A result that is
+unavailable is still reachable with the arrow keys, so its reason can be read;
+it never runs and it never mutates. A command that is destructive appears with
+its destructive mark and never becomes the default result of an empty query.
 
 ## Disclosure
 
@@ -85,17 +93,23 @@ The palette is a search surface, so it obeys the metadata disclosure policy in
 
 ## Keyboard
 
-| Key       | Action                                  |
-| --------- | --------------------------------------- |
-| Up / Down | Move the selection                      |
-| Enter     | Invoke the selected result              |
-| Escape    | Close without invoking                  |
-| Tab       | Complete the current word, where useful |
-| Control+K | Close, when the palette is already open |
+| Key       | Action                                           |
+| --------- | ------------------------------------------------ |
+| Up / Down | Move the selection                               |
+| Enter     | Invoke the selected result                       |
+| Escape    | Close without invoking                           |
+| Tab       | Complete the current word, inside the query only |
+| Control+K | Close, when the palette is already open          |
 
 The palette is one tab stop. The field keeps focus while the arrow keys move
-the result selection. The result list is exposed to assistive technology as a
-listbox with an active option.
+the result selection, so Tab never leaves the palette and never moves between
+results. Tab completion applies only inside the query field: it completes the
+word under the caret from the currently visible results, and it does nothing
+when there is no unique completion. It never invokes a result and never inserts
+a command's arguments. Escape clears an active completion before it closes the
+palette, so the first Escape undoes the completion and the second leaves. The
+result list is exposed to assistive technology as a listbox with an active
+option.
 
 ## Running a command
 
@@ -103,6 +117,13 @@ If the selected command needs no further input, the palette closes and the
 command runs. If it needs input, the palette closes and the command's own
 surface opens, with the query carried into its first field where that is
 sensible.
+
+The command captures its invocation context when it is chosen: window,
+document, selected object identifiers, extent and expected revisions. The
+palette's own result row is not part of that context and is never a focus
+target once the palette has closed. When a second surface opens from the
+palette, focus returns through the chain to the context that opened the
+palette, not to the vanished row.
 
 The palette must not run a command in the background while remaining open, and
 it must not keep a command's progress inside itself. Progress belongs to the

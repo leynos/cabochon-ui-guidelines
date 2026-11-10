@@ -56,8 +56,12 @@ Text grows when it is translated. The layout must absorb the growth.
   English text.
 - A menu bar that cannot fit its menus moves whole menus into **More**. A tool
   strip that cannot fit its commands moves a whole group into its overflow
-  menu. Neither shrinks a target below 28 pixels.
+  menu. Neither shrinks a target below 28 units.
 - A dialog that grows beyond the window reflows or scrolls; it does not clip.
+  Its title and its action row stay fixed, and its body scrolls. A button row
+  that no longer fits wraps onto a second row rather than shrinking its
+  buttons. A dialog never grows wider than the window's feasible width, and it
+  never hides its primary action below the fold.
 - A status line may shorten its message but must keep its state and its
   object count.
 

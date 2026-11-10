@@ -19,21 +19,32 @@ It is not a demo. It is the program that fails loudly when a contract regresses.
 
 `hello-window` has one window, three menus and one fixed document.
 
-- **File** contains **Export** and **Quit**.
-- **View** contains **Zoom** and **Appearance**.
+- **File** contains **Export**, **Print** and **Quit**.
+- **View** contains **Command palette**, **Zoom** and **Appearance**.
 - **Help** contains **About** and **Diagnostics**.
 - The document plane holds a greeting, a short explanation and two buttons:
   **Export** as the primary action and **About** as the secondary.
 - The status line reports the document and the last export time.
 
 The document is read-only and there is only one window, so the menu bar omits
-**Edit** and **Window**. It also omits **New**, **Open** and **Save**, which
-have nothing to act on. It omits **Print** as a deliberate fixture-surface
-exemption: the fixed document is printable, and the print target is still
-proved by the export bundle. The omission is about the reference surface, not
-about printable content. A menu bar shows only menus that contain at least one
-command; the exemption is recorded here so that the reference application is
-not mistaken for a contract violation.
+**Edit** and **Window**: every command that would live there, such as **Undo**,
+**Cut** or **Copy**, has nothing to act on. It also omits **New**, **Open** and
+**Save**, which have nothing to act on either. Each omission is recorded here
+as a deliberate fixture-surface exemption, so that the reference application is
+not mistaken for a contract violation, and so that a reviewer can tell an
+applicability rule from a hard-coded command list.
+
+`hello-window` does **not** omit **Print**. The fixed document is printable,
+and the print target is proved both by the export bundle and by the command,
+which opens the print surface with its declared intent and reports the result.
+The earlier exemption would have implied that printable content could be
+declared unprintable, and that is not a contract the environment can test.
+
+The **Command palette** command is present because the palette is a universal
+command surface. Its absence from a menu would make it undiscoverable by a user
+who does not know Control+K. **Print** and **Export** are distinct records:
+**Print** opens the print surface, and **Export** writes the file or bundle the
+user asks for. Neither stands in for the other.
 
 Every menu, string, icon and shortcut is loaded from Escutcheon resources. The
 application must not hard-code a menu or a label. Changing the resource bundle

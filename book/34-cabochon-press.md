@@ -34,8 +34,8 @@ layout budget is derived from the bands and panes actually present, as
 A page declares a size, an orientation and a bleed.
 
 - The default page is A4 portrait with a 3-millimetre bleed.
-- The pages panel shows the current page with a 2-pixel oxide keyline and the
-  others with a 1-pixel line.
+- The pages panel shows the current page with a 2-unit oxide keyline and the
+  others with a one-unit line, both drawn in interface space.
 - A page's number is metadata; its name is optional.
 - Reordering pages is a drag in the panel and one undoable transaction.
 - A page may be a plate, a spread or a cover, and the panel says which.

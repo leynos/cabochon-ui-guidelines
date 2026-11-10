@@ -30,6 +30,13 @@ reports the number of documents, objects and links when the disclosure policy
 permits those counts. The identity panel is read-only except for renaming and
 pinning; editing belongs to the document's own instrument.
 
+The project window is a **Document**-role window in the sense of
+[Windows](09-windows.md). It carries the full band set, its activation is
+independent of the documents it lists, and it is never modal. Its focus ring
+uses the theme's focus role, and its selected rows use the selected-fill and
+selected-text roles, so a theme change preserves the meaning of selection and
+focus rather than reusing a light-theme literal.
+
 ## The tree
 
 The tree shows a working arrangement, not necessarily a directory listing. A

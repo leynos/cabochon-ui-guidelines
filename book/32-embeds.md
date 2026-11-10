@@ -137,9 +137,15 @@ furniture fits.
 A block is the default for notes and reports. An inline mark cannot contain the
 block's furniture; it keeps the state mark, the object's accessible name and a
 keyboard-reachable inspection route that exposes the name, identity, state and
-actions in a popover or the inspector. A thumbnail at least 48 pixels on its
+actions in a popover or the inspector. A thumbnail at least 48 units on its
 shorter side carries a shape mark; a smaller thumbnail carries the state in its
 list row and in the manifest.
+
+An inspection opened from an inline mark or a thumbnail is a **pinned read-only
+inspection** in the sense of [Selection and tools](24-selection-tools.md). It
+does not dismiss the surface that opened it, it keeps the captured context
+visible on return, and it closes on Escape without committing. Opening it does
+not change the document selection.
 
 The host application must not add its own private chrome around the embed. A
 dataframe embedded in a note and a dataframe embedded in a report should be

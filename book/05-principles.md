@@ -50,13 +50,13 @@ rendered as a raster image, copied with usable geometry and read by an
 accessibility client. Output is not a screenshot of a window; it is a second
 rendering of the same resolved scene through a different Burin target.
 
-Parity is claimed between outputs of the same declared intent, not between every
-visible pixel and every file. A print intent may choose a different presentation
-for a live object, and that choice is recorded. Application chrome, guides,
-grids and selection handles are excluded from document output by the
-participation policy, while state marks that belong to an object remain. A
-diagnostic whole-interface export is a separate operation that declares that it
-includes chrome.
+Parity is claimed between outputs of the same declared intent, not between
+every visible pixel and every file. A print intent may choose a different
+presentation for a live object, and that choice is recorded. Application
+chrome, guides, grids and selection handles are excluded from document output
+by the participation policy, while state marks that belong to an object remain.
+A diagnostic whole-interface export is a separate operation that declares that
+it includes chrome.
 
 The principle forbids a class of shortcuts: drawing directly to the screen,
 composing a PDF from a separate code path, or treating accessibility as a text
@@ -74,7 +74,15 @@ The principle is the basis for the
 [live relationship states](08-live-relationships.md), the status line, the
 state chip and the error vocabulary. It also governs progress: an operation
 that takes longer than 200 milliseconds must announce itself, and an operation
-that finishes must say so once.
+that finishes must say so once. The rule is scoped to meaningful operations. A
+quick background refresh updates the value quietly, and ordinary editing is not
+narrated; a stream of success messages is noise, not speech.
+
+Timing is defined by events, not by wall-clock anecdotes. The measurement
+starts when the user's action is accepted and ends at the first frame that
+shows the new state. Cancellation is acknowledged within 200 milliseconds and
+suppresses publication immediately, while cleanup may continue in a separate
+**Cancelling** state. [Motion](17-motion.md) gives the full contract.
 
 ## Resolving conflicts
 

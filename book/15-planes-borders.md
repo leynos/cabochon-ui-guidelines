@@ -32,17 +32,25 @@ None of them uses a gradient or a texture.
 
 ## Borders
 
-- A keyline is 1 pixel in ink for structural edges and in line for internal
-  separators.
-- An overlay border is 1.5 pixels in ink, so that it remains visible over a
+- A keyline is 1 unit in ink for structural edges and in the decorative line
+  role for internal separators.
+- An overlay border is 1.5 units in ink, so that it remains visible over a
   busy document.
-- A focused control's border is replaced by the 3-pixel oxide focus ring, not
-  drawn twice.
+- A control that must be identifiable as a control uses the essential border
+  role, not the decorative line. The essential border passes 3:1 against its
+  actual adjacent surface; the decorative line does not and is not asked to.
+- A focused control keeps its allocated border and gains the 3-unit focus ring
+  outside it. The border is never removed to make room for the ring, because
+  removing a layout-participating border would change the control's geometry.
 - A disabled control keeps its border but loses its fill contrast and its
   text becomes soft.
 
 Borders belong to the edge of a thing. A border drawn inside a pane to decorate
-its content is a separator, and should use the line colour at 1 pixel.
+its content is a separator, and should use the decorative line role at 1 unit.
+
+The distinction between a decorative line and an essential boundary is a
+contrast rule, not a taste rule. A faint separator is acceptable. A faint field
+edge is not, because the edge is the information that identifies the field.
 
 ## Radii
 
@@ -88,9 +96,12 @@ Use a separator to divide groups inside one plane, not to divide planes.
 ## Dark theme
 
 In the dark theme, paper becomes `#121816`, pane and overlay become `#1B2420`,
-and control becomes `#26312C`. Keylines use `#3A453F` rather than ink, because
-ink is invisible on the dark ground. The shadow becomes black at 40 per cent,
-with the same offset and no blur.
+and control becomes `#26312C`. Decorative keylines use `#3A453F` rather than
+ink, because ink is invisible on the dark ground. That keyline is about 1.59:1
+against the surface and is therefore decorative only. An essential control
+boundary uses `#74847B`, which passes 3:1 against the ground, the surface and
+the control fill. The shadow becomes black at 40 per cent, with the same offset
+and no blur.
 
 ## What to avoid
 

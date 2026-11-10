@@ -121,6 +121,43 @@ participating providers atomic, it rejects the edit before mutation. Choosing a
 compatible subset of objects is a separate step that happens before invocation
 and is shown to the user; it is not partial success.
 
+## Editing text in the inspector
+
+An inspector value that accepts text is an editable control, and it owns the
+text-editing commands while it has focus. Cut, Copy, Paste, Delete, Select all
+and Undo act on the field's text selection before they act on the document
+selection. The rule is the one stated in
+[Selection and tools](24-selection-tools.md), applied here.
+
+- A command that is document-scoped says so in its label and in its accessible
+  name, and its invocation context names the document rather than the field.
+- Leaving the field commits or cancels according to the field's declared
+  behaviour; it does not silently leave a draft that the document's undo cannot
+  reach.
+- A field that shows a read-only value still allows selection and copying, and
+  its Copy command copies the value, not the object identity.
+- A context menu opened inside a field targets the field's text selection. It
+  does not retarget the document selection, and it does not offer commands that
+  are ineffective on the field.
+
+## Bounds and accessibility
+
+The inspector reports the same five bounds as every other control, defined in
+[Spacing and metrics](14-spacing-metrics.md): layout, visual, focus-decoration,
+effective hit region and accessible.
+
+- The accessible bounds of a value are the bounds of the semantic region that
+  carries it, after the same transform as the visual bounds. They are not the
+  hit region, and they are not required to equal it.
+- A value that is clipped by the pane reports its unclipped semantic bounds
+  only when the assistive technology can scroll it into view; otherwise it
+  reports the visible region and its accessible name carries the full value.
+- A focus ring drawn outside the control does not enlarge the accessible
+  bounds, and toggling focus changes neither the layout bounds nor the command
+  target.
+- A block that reflows under enlargement reports the bounds of its reflowed
+  region, not the bounds it had at the default width.
+
 ## What the inspector is not
 
 - A second copy of the document.

@@ -31,26 +31,63 @@ application omits the items and menus it does not implement: one with no
 editable document omits **Edit**, and one with a single window omits
 **Window**. A menu that would be empty is never drawn.
 
+Two commands have a fixed home even in a small application. **Command palette**
+lives in the **View** menu and is never palette-only, because a shortcut that
+is the only route to a surface is undiscoverable. **Inspect** and **Copy
+identity** live in **Edit** whenever they can apply to the current selection. A
+command that is advertised in a toolstrip, a context menu or the palette also
+appears in its menu home; the menu is the complete inventory, and the other
+surfaces are shortcuts to it.
+
 An instrument must not rename **File** or **Edit**, and must not move **Help**
 away from the end. A user who learns one Cabochon application should find the
 same anchors in the next.
 
+## Command records
+
+Every advertised command resolves to one canonical record. A menu item, a tool
+strip button, a context-menu item and a palette result are views of that
+record, not independent definitions.
+
+A record declares:
+
+- its **semantic operation**, which is the stable identity used by tests and
+  diagnostics;
+- its **localized label**, which is a complete resource string;
+- its **input requirement** — none, or further input required before the
+  operation can run;
+- its **availability predicate**, which says when it applies and when it is
+  temporarily unavailable;
+- its **shortcut**, if it has one;
+- its **menu location**, including the contextual menu where it normally lives;
+- its **invocation context requirements**, such as a selection, a document or a
+  focused editable field.
+
+The surfaces must agree on semantics and on input policy. They may differ in
+invocation context: the same **Copy identity** record can appear in the Edit
+menu, an object's context menu and the palette, and each invocation captures
+its own target.
+
 ## Wording
 
-Menu items are verb phrases in sentence case: **Save a copy**, **Insert
-reference**, **Refresh now**. A noun-only item is acceptable only when it names
-a toggle or a property, such as **Rulers** or **Dark appearance**.
+Menu items are verb phrases in sentence case: **Insert reference**, **Refresh
+now**, **Export plate**. A noun-only item is acceptable only when it names a
+toggle or a property, such as **Rulers** or **Dark appearance**.
 
 Rules for wording:
 
 - Use the same verb everywhere for the same operation. If the toolbar says
   **Export**, the menu says **Export**.
-- Use an ellipsis when the command opens a dialog that requires more input.
+- Use an ellipsis when the command requires further input before it can act.
+  The requirement is the test, not the shape of the surface that collects it.
 - Do not use an ellipsis for a command that acts immediately.
-- Do not add "…" to a command that opens a sheet the user can cancel without
-  consequence; the ellipsis marks a request for information, not a warning.
+- A command that opens a cancelable sheet still takes an ellipsis when it
+  requires input. Cancellability is not the test.
 - Prefer the specific verb to the generic one: **Insert reference** beats
   **Insert**, and **Export plate** beats **Export**.
+- Do not use an ambiguous verb for a live object. **Save a copy** could mean
+  duplicate, derive or export, so the menu uses the precise operation described
+  in [Object identity](07-object-identity.md).
 
 ## Shortcuts
 
@@ -91,6 +128,11 @@ unavailable, such as **Paste** with an empty clipboard or **Undo** at the start
 of history. It remains visible with a reason available on hover and to
 accessibility clients.
 
+A disabled menu item stays in the menu's roving navigation. Arrow keys reach
+it, its reason is announced, and Enter or Space performs no mutation. Removing
+it from the keyboard path would make the reason unreachable to the users who
+most need it.
+
 Absence is for a command that cannot apply to this object at all, such as
 **Format cell** on a note. A command that can never act on the current object
 must not be shown greyed; it is left out of the menu, the tool strip and the
@@ -102,12 +144,32 @@ A context menu is a subset of the menu bar, not a parallel command system. It
 may contain only commands that apply to the object under the pointer, plus
 **Inspect** and **Copy identity** where relevant.
 
+A context menu has a **context target**, which is the object under the pointer
+or the focused object when the menu is opened from the keyboard. The context
+target is separate from the persistent document selection.
+
+- Opening a context menu does not change the persistent selection.
+- A command invoked from the context menu acts on the context target, which is
+  visibly indicated by the menu's own header or by a transient outline.
+- A command that is not effective on the context target is absent, even when it
+  would be effective on the persistent selection.
+- A selection command, such as **Select all**, is the exception: it names the
+  selection as its target and says so.
+- The invocation captures the context target, the document, the expected
+  revisions and any local text selection. An asynchronous command does not
+  retarget itself when the pointer moves or the selection changes.
+
 Context menus must:
 
 - open on the keyboard's context-menu key as well as the secondary button;
 - close on Escape without changing the document;
 - place the most specific command first;
-- never contain a command that has no effect on the current selection.
+- never contain a command that has no effect on the context target.
+
+Contextual commands have a stable menu home when they apply to the current
+selection. **Inspect** and **Copy identity** live in the **Edit** menu as well
+as in the context menu, so that a keyboard user who never opens a context menu
+can still reach them.
 
 ## Menu behaviour
 
@@ -127,3 +189,8 @@ When the window is too narrow for the full menu bar, whole menus move into a
 final **More** menu in their original order. Individual items must not be
 plucked out of their menus, because a menu's grouping carries meaning. The
 **More** menu uses the same typography and marks as the menu bar.
+
+**Help** remains last. If **Help** itself moves into **More**, it is the last
+entry inside **More**, and the **More** label does not take Help's place at the
+end of the visible menu bar. A user who looks for Help at the end of the bar
+finds it in the overflow, not in a different position.

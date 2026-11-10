@@ -34,14 +34,20 @@ The bitmap editor uses a document plane with rulers, a compact tool palette and
 an inspector.
 
 - Rulers: 20 logical units, in the operational metadata role, showing the
-  current unit.
-- Tool palette: 48 logical units wide, one column of 30-unit tools.
+  current unit and its scale.
+- Tool palette: 48 logical units wide, one column of the **tool button** role
+  from [Spacing and metrics](14-spacing-metrics.md): 30 units high, 28 units
+  minimum, with a 16-unit glyph and a 28-unit effective target.
 - Document plane: the image on a checkerboard for transparency, at the current
   zoom.
 - Inspector: 240 logical units, showing dimensions, resolution, colour space,
   intent and state.
 - Status line: pointer position, colour under the pointer, zoom and the active
   tool.
+
+The rulers measure document space, not interface space. Their unit labels are
+metadata, and the tick spacing is computed from the document zoom rather than
+from the interface scale.
 
 ## Tools
 
@@ -58,6 +64,13 @@ A tool must not leave a half-applied stroke when the user switches tools, the
 window loses focus or the tool is switched by shortcut. The commit boundary is
 one deterministic rule and applies to every switching route. Selection and pan
 create no content mutation.
+
+Every tool in this palette is a **canvas tool** in the sense of
+[Selection and tools](24-selection-tools.md). It has no **Insert** action and
+no **Cancel** button of its own; its effect is the gesture it completes, and
+Escape cancels the pending gesture. A read-only inspection, such as the
+eyedropper's sampled-colour report, is not a canvas tool and does not commit
+pixels.
 
 ## Zoom and pan
 
@@ -78,7 +91,10 @@ obtain a sharp preview.
 ## Colour
 
 - The foreground and background colours are shown as two 24-unit swatches at
-  the bottom of the tool palette.
+  the bottom of the tool palette. Their visible mark is below the 28-unit
+  minimum, so each effective hit region is expanded to 28 units and the two
+  regions do not overlap. The swatch reports its colour and its swap action
+  through its accessible name.
 - The palette is the environment palette plus a greyscale ramp. A bitmap may
   contain other colours; the editor does not restrict the image to the
   interface palette.

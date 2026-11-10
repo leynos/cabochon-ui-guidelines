@@ -15,19 +15,22 @@ its contents are read.
 
 ## The bands
 
-The metrics below are production values at 100 per cent scale.
+The metrics below are production values in logical units at 100 per cent
+interface scale.
 
 | Band        | Height | Contents                                           |
 | ----------- | ------ | -------------------------------------------------- |
-| Masthead    | 44 px  | Instrument name and primary command; optional.     |
-| Title bar   | 31 px  | Title, object state, window controls.              |
-| Menu bar    | 29 px  | Top-level menus, right-aligned status if required. |
-| Tool strip  | 30 px  | Frequent commands, grouped and separated.          |
+| Masthead    | 44 lu  | Instrument name and primary command; optional.     |
+| Title bar   | 31 lu  | Title, object state, window controls.              |
+| Menu bar    | 29 lu  | Top-level menus, right-aligned status if required. |
+| Tool strip  | 30 lu  | Frequent commands, grouped and separated.          |
 | Document    | Fill   | The document plane and its panes.                  |
-| Status line | 26 px  | Message, progress and state chip.                  |
+| Status line | 26 lu  | Message, progress and state chip.                  |
 
-The bands are stacked without gaps. A one-pixel rule in `#AAA99F` separates the
-window from its work surface and the document plane from the chrome.
+The bands are stacked without gaps. A one-unit rule in the decorative line role
+separates the window from its work surface and the document plane from the
+chrome. The status line grows to 28 units when it carries an action, as
+described in [Toolbars and status](11-toolbars-status.md).
 
 ## Title bar
 
@@ -43,14 +46,15 @@ Rules for the title bar:
 - The title must truncate in the middle, preserving the beginning and the
   extension, rather than at the end.
 - Window controls are minimize, maximize and close, in that order, with a
-  16-pixel glyph inside a 28-pixel target inset one pixel from the band.
+  16-unit glyph inside a 28-unit target inset one unit from the band, when the
+  application owns the window controls.
 - A modified document appends a single bullet, not the word "modified".
 - Double-clicking the title bar must perform the host's configured action.
 
-Cabochon does not draw its own window decorations in hosted mode. The host
-desktop supplies the frame, the shadow and the resize handles. The title bar
-described here is the application's internal header, which remains when the
-host draws decorations outside it.
+The title bar described here is the application's internal **document header**.
+It is not the same object as a host-drawn title bar, and the two may both show
+the document's name. Which one carries the window controls is decided by the
+decoration profile, not by the header.
 
 ## Menu bar
 
@@ -66,10 +70,10 @@ The tool strip is optional. It holds commands that the user invokes repeatedly
 and that benefit from a visible, one-click target. It is not a place for every
 command, and it must not grow beyond one row.
 
-A tool strip button is 30 pixels square with a 16-pixel glyph. Related buttons
-are grouped with an 8-pixel gap and separated from the next group by a
-one-pixel vertical rule with 8 pixels of space on each side. The strip must
-carry a text label for any command whose icon is not universally understood.
+A tool strip button is 30 units square with a 16-unit glyph. Related buttons
+are grouped with an 8-unit gap and separated from the next group by a one-unit
+vertical rule with 8 units of space on each side. The strip must carry a text
+label for any command whose icon is not universally understood.
 
 ## Document area
 
@@ -85,43 +89,104 @@ short message about the current operation or selection. Its right side carries
 the document's state chip and, where relevant, a progress indicator. The rules
 are given in [Toolbars and status](11-toolbars-status.md).
 
-## Window states
+## Four independent properties
 
-Cabochon distinguishes four window states.
+A window has four properties that vary independently. They are not one state
+list, and an instrument must not derive one from another.
 
-- **Active** — the window receives input. Its title bar uses the paper fill
-  and ink text.
-- **Inactive** — the window is visible but not focused. Its title text uses
-  the soft ink `#59625D`, and its controls remain legible.
-- **Modal** — the window blocks its parent. It uses a sheet inside the parent
-  where the host supports sheets, and a centred dialog otherwise.
-- **Detached** — an inspector or palette that the user has torn off. It keeps
-  the same furniture and gains a title bar of its own.
+| Property   | Values                                             |
+| ---------- | -------------------------------------------------- |
+| Activation | Active, Inactive                                   |
+| Modality   | None, Document, Application                        |
+| Attachment | Primary, Detached, Sheet, Host portal              |
+| Role       | Document, Tool, Inspector, Palette, Utility, Alert |
+
+- **Activation** says only which window receives input. An inactive window
+  keeps readable content and keeps its selection visible as an outline.
+- **Modality** says which other windows the window blocks while it is open. It
+  is declared when the window is created and cannot be inferred from its
+  appearance.
+- **Attachment** says what the window is attached to. A detached inspector is
+  a window in its own right but keeps the layout it was torn from; a sheet is
+  attached to one window; a host portal is presented by the host.
+- **Role** says what the window is for, and therefore which furniture is
+  permitted. A **Tool** window keeps its tool options and no document title; a
+  **Utility** window carries no live document relationship of its own.
+
+Modality, attachment and role are reported in the window's accessible name and
+in the instrument's window list. A window that is inactive is not thereby
+modal, and a modal window is not thereby detached.
 
 An inactive window must not dim its content below readable contrast. The
-distinction between active and inactive is carried by the title bar and the
-focus ring, not by a veil over the document.
+distinction between active and inactive is carried by the document header, the
+window-control strip and the focus ring, not by a veil over the document.
+
+## Permitted window roles
+
+Cabochon does not forbid secondary windows. It forbids secondary windows that
+duplicate the document's own plane without declaring a role.
+
+| Role      | May contain                                          | Furniture permitted     |
+| --------- | ---------------------------------------------------- | ----------------------- |
+| Document  | A document and its panes                             | Full band set           |
+| Tool      | Options for the active canvas tool                   | Head, options, close    |
+| Inspector | Object properties for one or more objects            | Head, scrolling content |
+| Palette   | Commands, search, or a colour set                    | Field, list             |
+| Utility   | Transient environment work, such as a transfer queue | Head, list, status      |
+| Alert     | One message and its responses                        | Message, buttons        |
+
+Each role has a maximum of one open window per document, except **Utility** and
+**Alert**. Opening a second window of the same role for the same document
+focuses the existing one or replaces its content, and says which it did.
 
 ## Size and position
 
-- A window must open at a size that shows its document without horizontal
-  scrolling at 1024 by 768.
+- A window requests its initial size from its layout profile, as defined in
+  [Spacing and metrics](14-spacing-metrics.md). At the supported floor of 512
+  by 384 logical units the compact profile applies.
 - The minimum size must be declared per instrument, and must never be smaller
-  than the sum of its pane minimums plus the chrome.
-- The environment should restore the last size and position per document, not
-  per application.
+  than the sum of its pane minimums plus the chrome. The compact profile is the
+  only layout that may go below that sum, and it is declared per instrument.
+- A window that receives less than its requested width shows the feasible
+  width, not a squeezed copy of the requested layout.
+- The environment restores the last size and position per document, not per
+  application.
 - A window restored onto a display that no longer exists must be moved onto
   the nearest available display rather than opened off-screen.
+- Persisted geometry is clamped to the requested-width interval when it is
+  restored, so a saved size that exceeds the current display opens at the
+  largest feasible width and says so in the status line once.
 
-## Host adaptation
+## Decoration profiles
 
-In hosted mode the window manager may add its own title bar, shadow and resize
-border. Cabochon must not duplicate the host's controls or fight its placement
-rules. Where the host provides server-side decorations, the application hides
-its internal window controls and keeps its title and state chip. Where the host
-provides client-side decorations, the application draws the full title bar
-described above.
+Exactly one profile is active for a window, and it names the owner of each
+decorative element. An instrument must not mix ownership within one window.
 
-The test is observable: under both GNOME and KDE Plasma the window shows
-exactly one title bar and one set of window controls, and never two close
-buttons.
+| Profile          | Window controls | Move and resize | Shadow      | Document header |
+| ---------------- | --------------- | --------------- | ----------- | --------------- |
+| Server-decorated | Host            | Host            | Host        | Hidden          |
+| Client-decorated | Application     | Application     | Application | Drawn           |
+| Undecorated      | Application     | Application     | Application | Drawn           |
+
+- **Server-decorated.** The host draws the frame and the controls. The
+  application hides its own window controls and its document header; the
+  document's name is still available through the window's accessible name and
+  the document's own pane head.
+- **Client-decorated.** The application draws the document header and the
+  window controls, and is responsible for move and resize gestures and for its
+  own shadow. This is the default when the host offers no server decoration.
+- **Undecorated.** The application draws the document header and controls but
+  presents no shadow, for example when the window is embedded in another
+  surface. It must not leave the user without a way to move or close the window.
+
+The document header and a host title bar are different objects. A
+client-decorated window has a document header and no host title bar; a
+server-decorated window has a host title bar and no document header. If a host
+insists on drawing a title bar for a client-decorated window, the application
+hides its document header rather than show two. Two titles for one document is
+a configuration error, and the instrument reports it rather than negotiating
+silently.
+
+The test is observable: under a server-decorated host, under a client-decorated
+host, and undecorated, each window shows exactly one set of window controls and
+at most one title, and no window has two close buttons.

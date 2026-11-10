@@ -60,39 +60,79 @@ colour-blind user. The state chip, the icon and the text carry it together.
 
 ## Focus and keyboard
 
-- Every interactive object is reachable by keyboard in a logical order.
-- The focus ring is 3 pixels of oxide at 3 pixels offset, visible against both
-  the control and its surround.
+- Every interactive object is reachable by keyboard in a logical order, except
+  a disabled control that leaves the tab order. Its reason remains reachable
+  through its help text, its mirrored menu item or the command palette, as
+  described in [Controls](19-controls.md).
+- The focus ring uses the theme's focus role: 3 units at 3 units offset. The
+  ring is drawn outside the control and keeps the control's allocated border,
+  so focus changes neither the layout bounds nor the command target.
+- The ring is evaluated against the surfaces actually adjacent to it, which a
+  3-unit offset may make the window ground rather than the control. Where the
+  adjacent surfaces cannot both meet 3:1, the ring gains a one-unit inner
+  keyline in the contrasting role, as
+  [Planes and borders](15-planes-borders.md) requires.
 - Focus is never trapped except in a modal dialog, and a modal dialog returns
-  focus to the control that opened it.
+  focus through the focus-return chain in
+  [Focus and the keyboard](18-focus-keyboard.md).
 - Focus is never moved without a reason, such as opening a dialog or
   revealing a pane.
 - Access keys are declared in resources and shown in menus.
 - The command palette is reachable by keyboard and announces its results.
 - A skipped focusable object is a defect, even if it is reachable by pointer.
+  A disabled one is not skipped; it is excluded by policy and explained.
+
+Keyboard behaviour depends on the input mode, as defined in
+[Focus and the keyboard](18-focus-keyboard.md). In navigation mode, Enter or
+Space activates the focused control. In text-editing and composition modes,
+those keys belong to the text or the composition first. Every composite
+declares how Tab leaves it and how Escape returns to navigation, so no control
+traps the keyboard without an exit. A destructive dialog's safe default is not
+a guarantee that its focused destructive button is unreachable: deliberate
+activation of that button remains possible.
 
 ## Targets and pointer
 
-- Pointer targets are at least 28 by 28 pixels and 32 preferred; a dialog's
-  primary action is 36.
-- The splitter is the one exception: its 8-pixel hit edge spans the full pane
-  boundary, which is a larger continuous target than a 28-pixel square.
+The target minimum applies to the **effective hit region**, not to the visible
+glyph and not to an area average. A target is at least 28 by 28 units in both
+dimensions; 32 is preferred, and a dialog's primary action is 36.
+
 - A small glyph may sit inside a larger target; the target, not the glyph,
   determines the hit region.
-- Adjacent targets have at least 8 pixels between their hit regions.
+- Adjacent targets have at least 8 units between their effective hit regions.
+- A composite control's internal geometry is declared, as in
+  [Spacing and metrics](14-spacing-metrics.md); its parts are not independent
+  targets, and the composite as a whole is one stop.
+- The splitter's 8-unit hit edge spans the full pane boundary, which is a
+  larger continuous target than a 28-unit square. It is a declared exception
+  and it is not the only way to resize.
+- The scrollbar is a declared exception only where a wheel, keyboard and
+  drag-anywhere alternative is always present.
 - A drag interaction has a keyboard alternative.
 - A context menu is reachable from the keyboard.
+- Clipping is declared. When an expanded hit region is clipped by its
+  container, the clipped region is the target that must satisfy the policy, and
+  the instrument provides a deterministic resolution where two clipped regions
+  overlap.
 
 ## Contrast and colour
 
 - Body text meets 4.5:1 against its background.
-- Large text and essential icons meet 3:1.
-- Focus indicators meet 3:1 against both adjacent colours.
-- A boundary that is required to identify a control meets 3:1.
+- Large text is text at 18 points or 14 points bold, which at the baseline
+  scale is 24 units or 18 units bold. An 18-unit regular label is not large
+  text and is held to 4.5:1.
+- Essential icons and boundaries that identify a control meet 3:1.
+- Focus indicators meet 3:1 against each adjacent surface.
+- The semantic roles are the ones in [Palette](12-palette.md): text, muted
+  text, essential border, selected fill and text, primary fill and text,
+  destructive fill and text, focus, refresh mark and text, stale, denied and
+  disabled. Each resolves in every supported theme.
+- Decorative teal never carries text. The refresh **text** role is the readable
+  tint, and it is the only teal-family colour used for words.
 - Colour is never the only carrier of meaning; every state also has a mark, a
   label or a shape.
-- The teal tokens in the palette are decorative and do not carry text.
-- The dark theme meets the same ratios as the light theme.
+- The dark theme meets the same ratios as the light theme, measured after tint
+  compositing rather than against an accent in isolation.
 
 ## Motion and timing
 
@@ -105,13 +145,20 @@ colour-blind user. The state chip, the icon and the text carry it together.
 
 ## Zoom and reflow
 
-- Interface text does not fall below 12 pixels.
-- At 200 per cent zoom, panes may collapse, but every control remains
-  reachable, no control overlaps another and no text is clipped.
+- Essential interface text does not fall below 12 units at the user's chosen
+  text scale. The operational floor and the 11-unit metadata allowance are
+  defined in [Typography](13-typography.md).
+- At 200 per cent interface scale, panes may collapse, but every control
+  remains reachable, no control overlaps another and no text is clipped. The
+  compact layout profile applies below the requested width, as described in
+  [Spacing and metrics](14-spacing-metrics.md).
+- Narrowing a pane does not undo the user's requested text enlargement. Text
+  wraps and rows grow; it is not shrunk to fit.
 - Text reflows rather than clipping; horizontal scrolling is acceptable for a
   data grid but not for prose.
-- At the minimum window size the application declares, the document plane
-  remains at least 420 pixels wide and every control remains reachable.
+- At the supported floor of 512 by 384 logical units, the compact profile
+  keeps every control reachable and the document plane scrolls rather than
+  shrinking below its declared minimum.
 - A high-contrast theme replaces the palette rather than tinting it.
 
 ## The accessibility output
@@ -129,13 +176,25 @@ the node identity. A substrate-only scene, such as
 [hello-window](36-hello-window.md), is fully accessible without any semantic
 object identity at all.
 
+Each node reports **accessible bounds**, which are the bounds of the semantic
+region the node represents, after the same transform as the visual bounds. They
+are not the hit region and are not required to equal it. The five bounds are
+defined in [Spacing and metrics](14-spacing-metrics.md): layout, visual,
+focus-decoration, effective hit region and accessible. A declared hit expansion
+or a focus ring outside the control changes the hit or decoration bounds, not
+the accessible bounds.
+
 A test compares the tree with the scene and fails when:
 
 - a drawn control has no role;
 - a named control has no accessible name;
 - a state is visible but not exposed;
 - the order disagrees with the focus order;
-- bounds disagree with the hit map beyond 1 pixel.
+- accessible bounds do not correspond to the chosen semantic region after the
+  same transform;
+- the hit map does not equal the declared expansion and clipping of the visual
+  target;
+- toggling focus changes the layout bounds or the command target.
 
 ## Testing
 

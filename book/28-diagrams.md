@@ -70,8 +70,9 @@ fix where one is known.
   in the soft-text role.
 - The source line is marked in the gutter and underlined with a 1-unit wavy
   rule.
-- The message appears below the source pane in the 12-unit operational
-  metadata role, with the line number.
+- The message appears below the source pane in the 12-unit operational role,
+  with the line number. A diagnostic is essential information, so it uses the
+  operational floor even though it is short and metadata-shaped.
 - Selecting a diagnostic moves the caret to its location.
 - A diagnostic must not be shown as a modal dialog.
 
@@ -94,6 +95,25 @@ target's gamut and is not coerced into an interface role.
 - Hovering an element shows its label and its source location in a tooltip.
 - The drawing may be zoomed from 25 to 400 per cent; the fit command resets it
   to the pane.
+
+## Keyboard and editing modes
+
+The two views have different keyboard modes, and the instrument declares which
+one has focus. The modes follow [Focus and the keyboard](18-focus-keyboard.md).
+
+- **Source editing.** The source pane has focus and accepts text. Typing
+  inserts, Tab inserts an indent rather than leaving the pane, and Escape
+  leaves the pane for the drawing. Control+Tab leaves the source pane for the
+  next control, so the pane is never a keyboard trap.
+- **Drawing navigation.** The drawing has focus and no text is being edited.
+  Arrow keys move between elements, Enter inspects the focused element, and Tab
+  leaves the drawing for the next control.
+- **Split view.** Focus belongs to exactly one pane at a time. The status line
+  names the focused pane, and the mode is the one that pane declares.
+
+A completion or a diagnostic jump moves the caret in the source pane and enters
+source editing. It does not leave the user in a mode where the next keystroke
+is ambiguous.
 
 ## Elements and selection
 

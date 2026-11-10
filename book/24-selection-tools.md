@@ -65,6 +65,26 @@ The formula tool's **Insert live value** and **Cancel** belong to the
 transactional operation. A selection or brush tool does not acquire them merely
 because it is also contextual.
 
+The three kinds also differ in how they end.
+
+| Kind                               | Ends when                                 | Result shape                     |
+| ---------------------------------- | ----------------------------------------- | -------------------------------- |
+| Canvas tool                        | Its gesture ends, or the tool is switched | One content transaction or none  |
+| Read-only inspection               | The user closes it or looks elsewhere     | No mutation                      |
+| Transactional contextual operation | Its primary action or its cancel action   | One atomic object change or none |
+
+A read-only inspection is not modal. It may stay open while the user inspects
+another object, and it does not acquire a primary action merely because it has
+a surface. A canvas tool has no **Insert** button; its effect is the gesture it
+completes. A transactional operation has no canvas gesture; its effect is the
+commit its primary action performs.
+
+A source inspection opened from a transactional popover is a pinned read-only
+inspection. It suspends the popover rather than dismissing it, keeps the
+captured destination and authority visible on return, and closes on Escape
+without committing. It is the declared exception to the rule that a popover
+closes when the user interacts outside it.
+
 ## Point of use
 
 A transactional contextual operation appears beside the selection it can act

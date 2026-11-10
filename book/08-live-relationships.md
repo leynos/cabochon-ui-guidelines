@@ -142,10 +142,12 @@ context and may destroy work. The correct behaviour is:
 
 ## Refresh
 
-A refresh must be visible but quiet. The **Refreshing** state uses the teal
-accent, which is reserved for motion and decoration and never used for
-body-size text. A refresh that completes within 200 milliseconds may skip the
-chip entirely, provided the value updates and the status line records the time.
+A refresh must be visible but quiet. The **Refreshing** state uses the refresh
+mark role for its dot and rule, and the refresh text role for any word. The
+decorative teal role is never used for text, and the refresh text role is a
+separate, darker tint that meets contrast at body size. A refresh that
+completes within 200 milliseconds may skip the chip entirely, provided the
+value updates and the status line records the time.
 
 Rules for refresh:
 
@@ -165,8 +167,9 @@ have advanced, the cached value is still readable, and the user should decide
 whether to refresh. Stale is not an error, and it is not the same as a source
 becoming unavailable: a missing provider is **Broken**, not **Stale**.
 
-- Use the amber-ink role for the chip and its label at body size.
-- The amber accent role may be used for a large icon or a 3-pixel rule, never
+- Use the stale role for the chip and its label at body size; it is the
+  readable amber tint, not the decorative amber accent.
+- The amber accent role may be used for a large icon or a 3-unit rule, never
   for small text.
 - The stale value remains selectable, copyable and printable.
 - The object's menu offers **Refresh now** as its first item.

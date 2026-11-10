@@ -2,7 +2,7 @@
 title: Dialogs
 part: Interaction
 figure: fig-19-dialog.svg
-summary: One question, one object, one way out, and Cancel as the safe default.
+summary: Modality, presentation and purpose stated separately, with a safe way out of each.
 ---
 
 # Dialogs
@@ -14,16 +14,52 @@ one question, names the object concerned and offers a clear way out. It is not
 a place to arrange the application, explain the product or collect unrelated
 settings.
 
-## When to use a dialog
+## Three separate properties
 
-Use a dialog when all three statements hold.
+Every interrupting surface declares three properties independently. Confusing
+them is how a sheet acquires a dialog's restrictions without earning them, or a
+dialog escapes its own rules by changing shape.
+
+**Modality** says what the surface blocks.
+
+- **None.** The user may work elsewhere while the surface is open.
+- **Document.** The containing document is inert; other documents remain usable.
+- **Application.** The whole application is inert.
+
+**Presentation** says how the surface is drawn.
+
+- **Inline.** A region inside the document or pane.
+- **Popover.** A small surface anchored to a control or a selection.
+- **Sheet.** A document-modal surface attached to its window.
+- **Window.** A separate window with its own title bar.
+- **Host portal.** A surface owned by the host, such as a file or print dialog.
+
+**Purpose** says what the surface is for.
+
+- **Information.** It reports something and needs acknowledgement.
+- **Input.** It collects values before an operation.
+- **Confirmation.** It asks whether to proceed with a named action.
+- **Recovery.** It resolves a failure and preserves work.
+
+A sheet is the host presentation of a document-modal dialog. It does not bypass
+the rules for its purpose merely because it is attached to a window. A separate
+window with the same purpose follows the same transaction and default rules.
+
+## When to interrupt
+
+Use an interrupting surface when all three statements hold.
 
 1. The decision cannot be deferred.
 2. The decision needs information that the document does not show.
 3. Proceeding without the decision would lose work or authority.
 
-When any statement fails, use a sheet, a popover, an inline message or a status
-line instead. A routine, reversible operation must not open a dialog.
+When any statement fails, use an inline message, a popover, a pane or the
+status line instead. A routine, reversible operation must not interrupt.
+
+An information surface that only reports a completed operation belongs in the
+status line or the document, not in a dialog. A recovery surface is justified
+when the failure blocks the current task and the user must choose how to
+preserve work.
 
 ## Anatomy
 
@@ -39,7 +75,9 @@ A Cabochon dialog has five parts.
   the practical maximum; a fourth question belongs in a different surface.
 
 The dialog uses the overlay plane and the offset shadow. Its width is between
-420 and 560 pixels; a dialog that needs more should become a sheet or a pane.
+420 and 560 units; a dialog that needs more should become a sheet or a pane.
+The dialog reflows and scrolls when text is enlarged or a translation grows. It
+does not hold a fixed height that clips its content.
 
 ## Wording
 
@@ -54,23 +92,37 @@ The dialog uses the overlay plane and the offset shadow. Its width is between
 
 ## Defaults and focus
 
-For a destructive dialog, focus starts on **Cancel**. The destructive button is
-never the default action of the Return key.
+The default action is scoped to the purpose and the destructive risk.
 
-For a non-destructive dialog, focus may start on the primary action when the
-dialog is a confirmation of an action the user has just requested. Even then,
-Escape must cancel without side effects.
+- A **destructive confirmation** starts with focus on its safe action. The
+  destructive button is never the Return default. It remains reachable by Tab
+  and activatable by Enter or Space when it has focus, so that a deliberate
+  choice is still possible.
+- A **non-destructive confirmation** may start with focus on its primary action
+  when it confirms an action the user has just requested. Escape still cancels
+  without side effects.
+- An **information** surface starts with focus on its dismiss action.
+- An **input** surface starts with focus on its first field, not on a button.
+- A **recovery** surface starts with focus on the action that preserves work.
+  The failed-save flow in [Facet Notes](26-facet-notes.md) is the named
+  exception: **Keep open** is the default because it preserves the draft, even
+  though it is not the affirmative button.
 
 The focus ring is drawn on the focused button, as described in
 [Focus and keyboard](18-focus-keyboard.md).
 
 ## Behaviour
 
-- Escape cancels the dialog.
-- Return activates the default action.
-- Tab cycles within the dialog; focus does not escape to the document behind.
-- The document behind is inert and visibly dimmed, but remains readable.
-- Closing the dialog returns focus to the control that opened it.
+- Escape follows the surface's declared safe exit. It cancels without
+  committing a draft change.
+- Return activates the default action, except while focus is in a text field or
+  an input-method composition is active.
+- Tab cycles within a modal surface; focus does not escape to the document
+  behind.
+- The document behind a document-modal surface is inert and visibly dimmed, but
+  remains readable.
+- Closing the surface returns focus through the focus-return chain in
+  [Focus and keyboard](18-focus-keyboard.md).
 - A dialog must not open another dialog. If a second question is required, the
   first dialog closes and the second takes its place, or the questions are
   combined.
@@ -105,8 +157,17 @@ as a sheet. Where it does not, the dialog is centred over the window. In hosted
 mode, file, print and portal dialogs belong to the host and must not be
 imitated by the application.
 
+A sheet's modality is document, not application. It does not block another
+document, and it does not change the transaction semantics of the operation it
+confirms.
+
 ## Testing
 
-A reviewer should be able to cancel every dialog with Escape, confirm the safe
-default with Return, and return to the exact control that opened it. A dialog
-that fails any of these tests is not ready.
+A reviewer should be able to cancel every surface with Escape, confirm that its
+modality matches its focus and inertness behaviour, and return through the
+focus-return chain. A destructive confirmation starts on its safe action; a
+non-destructive confirmation may start on its primary action; a recovery
+surface starts on the action that preserves work. Presenting the same question
+as a sheet or a separate window must not change what is committed.
+
+A dialog that fails any of these tests is not ready.

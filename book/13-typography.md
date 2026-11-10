@@ -40,21 +40,54 @@ not a stylistic choice.
 | Section   | 16–20 / 1.2        | Humanist sans bold | Pane and dialog headings  |
 | Body      | 15–16 / 1.6        | Georgia or sans    | Notes and long-form prose |
 | Interface | 12 / 1.35          | Humanist sans      | Controls, labels, menus   |
-| Metadata  | 11 / 1.4           | Humanist mono      | Identity, state, units    |
+| Metadata  | 11 / 1.4           | Humanist mono      | Supplementary metadata    |
 | Folio     | 10 / 1.2           | Humanist mono      | Folios and plate marks    |
+
+Sizes are logical units at the baseline text scale. The user's text scale
+multiplies them; the floors below are floors at the user's chosen scale, not
+ceilings that override it.
+
+## Voice and essentiality
+
+Voice and essentiality are different questions. Voice says which face and
+rhythm a string belongs to. Essentiality says whether a person needs the string
+to operate, identify, validate or copy something.
+
+The operational floor is 12 units. It applies to every string that is
+essential, whatever its voice:
+
+- state words and state chips;
+- column names, row headers and units;
+- validation messages and diagnostics;
+- control labels, help that explains availability, and field labels;
+- object identity, revision, provider and other copyable metadata;
+- values a user must read to act.
+
+The 11-unit metadata row is for supplementary text only: a timestamp, a count
+that is also available elsewhere, a secondary hint. Monospace does not lower
+the floor. A string that is exact and copyable is essential even when it is
+short.
 
 The floors are binding.
 
-- No interface text below 12 pixels.
-- Metadata may be 11 pixels only when it is non-essential, such as a
-  timestamp or a count that is also available elsewhere.
-- 10 pixels is reserved for folios and plate marks, which are not required
+- No essential interface text below 12 units.
+- Metadata may be 11 units only when it is non-essential.
+- 10 units is reserved for folios and plate marks, which are not required
   for operation.
 - A control's label must never use metadata type merely to fit.
 
-The design book's mockups used 9- and 10-pixel labels to suggest density. At
+The design book's mockups used 9- and 10-unit labels to suggest density. At
 production size those labels fail both legibility and contrast. The corrected
 floors above preserve the density of the layout without shrinking the words.
+
+## Pane and dialog headings
+
+A pane head uses the 12-unit interface role in bold, not the section scale. The
+section scale is for a heading inside a pane's content and for a dialog title.
+The distinction keeps a pane head from competing with the document it frames.
+
+A dialog title uses the section scale at 16 to 20 units. A document title uses
+the title scale. Neither is a pane head.
 
 ## Weights and styles
 
@@ -71,8 +104,10 @@ floors above preserve the density of the layout without shrinking the words.
 ## Measure and alignment
 
 - Long-form prose in a document plane should measure 60 to 75 characters per
-  line. A notes pane narrower than 45 characters should reduce its type scale
-  rather than its margins.
+  line. A notes pane narrower than 45 characters wraps its prose and grows its
+  rows; it does not reduce the type scale below the operational floor or below
+  the user's requested text scale. If the pane cannot show a usable measure, it
+  collapses or the document moves to a wider window.
 - Interface labels align to the leading edge of their container. Centred text
   is reserved for dialogs, empty states and short button labels.
 - Numbers in tables use tabular figures and align to the trailing edge.

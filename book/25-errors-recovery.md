@@ -86,6 +86,28 @@ would happen.
 - A malformed object offers **Edit source**, not **Retry**.
 - A conflict offers **Compare** and **Choose**, not **Overwrite**.
 
+## Cancellation
+
+Cancellation is a request, not an instant. The interface acknowledges it within
+200 milliseconds, stops presenting the operation as still running, and
+suppresses any result the operation would otherwise publish. The work itself
+may continue briefly while it cleans up, and that is a separate **Cancelling**
+state.
+
+- A late reply from a cancelled operation is discarded. It cannot publish a
+  value, insert a reference, allocate an object or reverse a denial.
+- Cleanup that outlives the acknowledgement is shown as **Cancelling**, not as
+  **Cancelled** and not as still running.
+- Rollback completes only when the runtime has confirmed it; the interface does
+  not report a committed state before that confirmation.
+- A cancellation that hands work to an external system, such as a print job or
+  a portal upload, may be beyond recall. The interface says so and reports the
+  external outcome rather than implying that the work stopped.
+- A cancelled operation leaves no partial object, no dangling reference and no
+  retained grant.
+- The timing contract, including the 200-millisecond acknowledgement, is
+  defined in [Motion](17-motion.md).
+
 ## Atomic operations, batches and partial failure
 
 An **atomic semantic transaction** commits its whole declared mutation set or

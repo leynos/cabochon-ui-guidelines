@@ -70,11 +70,19 @@ The book uses three normative words.
   departure is deliberate, documented and better for the user.
 - **May** marks a permitted option.
 
-Numbers are production values at one device pixel per CSS pixel, with the
-system font scale at 100 per cent. They are starting points for the first small
-world, not eternal constants. A change to a number should be argued from a user
-need, applied everywhere, and recorded in the figure generator so that the book
-and the software cannot drift apart.
+Numbers are production values in **logical units** (lu) at 100 per cent
+interface scale, with the system font scale at 100 per cent. One logical unit
+is one device-independent interface unit: at the baseline it is one physical
+pixel at 96 dpi, and the interface scale multiplies it. The book keeps three
+coordinate spaces apart — interface, document and sample — and names the one it
+means; a figure caption or a legacy note that says "pixel" for an interface
+measurement means the baseline logical unit. The distinction is defined in
+[Spacing and metrics](14-spacing-metrics.md).
+
+The numbers are starting points for the first small world, not eternal
+constants. A change to a number should be argued from a user need, applied
+everywhere, and recorded in the figure generator so that the book and the
+software cannot drift apart.
 
 ## Relationship to the design book
 

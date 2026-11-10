@@ -29,9 +29,14 @@ A button performs an action. Its label is a verb phrase in sentence case:
 - A destructive button appears only in a confirmation or in a menu, never as
   the default action of a routine form.
 - A disabled button remains visible and explains why it is unavailable in a
-  tooltip and to assistive technology.
-- Button heights are 28 pixels minimum and 32 preferred. A dialog button is 32
-  pixels minimum; a primary action in a dialog is 36.
+  tooltip and to assistive technology. It leaves the tab order; its reason
+  stays reachable through the associated help text, the menu item that mirrors
+  the command, or the command palette. It is never enabled merely so that its
+  reason can be discovered.
+- Button heights are 28 units minimum and 32 preferred. The primary action is
+  36 units in a dialog and outside one. A dialog button is 32 units minimum.
+- A labelled button widens to fit its label. It does not shrink its glyph, its
+  text or its target.
 
 ## Fields
 
@@ -40,8 +45,9 @@ leading edge, in 12-pixel interface type. A unit or a format hint sits at the
 field's trailing side or inside it as placeholder metadata, never as the only
 label.
 
-- A field's border is 1 pixel in line. On focus it gains the 3-pixel oxide
-  ring instead of a thicker border.
+- A field's border is 1 unit in the essential border role, because the edge is
+  what identifies the field. On focus the border remains and the field gains
+  the 3-unit focus ring outside it.
 - A read-only field keeps the pane fill and uses soft text; it must not look
   disabled if its value can still be selected and copied.
 - A field that accepts a typed identity, such as a provider name, must
@@ -71,8 +77,9 @@ exact value with a small range. Neither replaces a field when the exact value
 matters.
 
 A slider must show its current value and its unit at all times, not only while
-dragging. Its track is 4 pixels high; its thumb is an 8-pixel circle with a
-2-pixel pine border. The keyboard changes the value by one step with an arrow
+dragging. Its track is 4 units high; its thumb is an 8-unit circle with a
+2-unit pine border. The thumb's effective target is 28 units, clipped to the
+slider's container. The keyboard changes the value by one step with an arrow
 and by ten steps with Page Up and Page Down.
 
 ## Tabs
@@ -109,22 +116,33 @@ A popover must close when the user clicks outside it or presses Escape. It must
 not contain a second popover. If a task needs two levels, it needs a dialog or
 a pane.
 
+A pinned read-only inspection is the one declared exception: it suspends the
+surface that opened it instead of dismissing it, and returns the user to the
+same captured context. It is not a second popover, and it never commits a
+change.
+
 ## Labels and help
 
 - Every control has a visible label or an accessible name from the shared
   vocabulary.
 - A control that needs a paragraph of explanation needs a different control.
-- Help text sits below the control in 11-pixel metadata and is associated with
-  the control for assistive technology.
-- Units are metadata, placed consistently: pixels in a drawing tool, points in
-  a page tool, currency codes in a value.
+- Help text sits below the control in the 12-unit operational role when it
+  explains availability, validation or a required format. A purely
+  supplementary hint may use 11-unit metadata. Help is associated with the
+  control for assistive technology.
+- Units are metadata, placed consistently: logical units in a drawing tool,
+  points in a page tool, currency codes in a value.
 
 ## Sizes and spacing
 
-Controls sit on the 4-pixel grid. Related controls are 8 pixels apart; groups
-are 12 or 16 pixels apart. A row of buttons aligns on the baseline of its
-labels and uses equal heights. The primary button may be taller only when it
-sits alone as the main action of a dialog.
+Controls sit on the 4-unit grid. Related controls are 8 units apart; groups are
+12 or 16 units apart. A row of buttons aligns on the baseline of its labels and
+uses equal heights. The primary button may be taller only when it is the main
+action of a surface.
+
+A dense pane keeps its composite internal geometry, as described in
+[Spacing and metrics](14-spacing-metrics.md). A row of independent controls
+inside that pane still keeps the 8-unit group spacing.
 
 ## What not to build
 

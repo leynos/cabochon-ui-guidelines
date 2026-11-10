@@ -29,14 +29,16 @@ services menu, because the environment does not have one.
 
 ## The popover
 
-The formula popover is anchored to the selection. It is 430 pixels wide and
+The formula popover is anchored to the selection. It is 430 units wide and
 contains:
 
 - a **Formula** kicker and an Escape hint;
 - an expression field, focused, with the current expression selected;
 - a **Sources** block listing every object and selector the expression reads;
 - an **Authority** block listing the capabilities used and their outcome;
-- the computed result in large metadata type, with its state chip;
+- the computed result at 18 units in the interface voice bold, using the
+  section size for a previewed value rather than for a heading, with its state
+  chip;
 - **Insert live value** as the primary action and **Cancel** as the way out.
 
 The popover must not cover the selected cells. It flips above or beside the
@@ -169,7 +171,7 @@ becomes **Copy result** and the reason is stated.
 | Key           | Action                                                                                |
 | ------------- | ------------------------------------------------------------------------------------- |
 | Enter         | Insert the live value when the expression field has focus and composition is complete |
-| Escape        | Cancel and restore the selection                                                      |
+| Escape        | Dismiss a completion, then cancel and restore the selection                           |
 | Control+Space | Offer selector completions                                                            |
 | Tab           | Move between expression, sources and actions                                          |
 
@@ -178,6 +180,12 @@ so that the user can reach the actions without a pointer. Enter while another
 control has focus activates that control; it does not insert the value. While
 an input-method composition is active, Enter commits the composition first. The
 input-mode rules are those of [Focus and keyboard](18-focus-keyboard.md).
+
+A selector completion lives inside the expression field and never traps focus.
+The first Escape dismisses an open completion and leaves the expression
+unchanged; only a second Escape cancels the operation. Arrow keys move within
+the completion list while it is open, and the list closes without invoking
+anything when focus leaves the field.
 
 ## What the tool is not
 

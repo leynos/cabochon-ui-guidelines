@@ -69,7 +69,9 @@ The batch is coherent when six statements hold across every application.
 2. Panes use the same heads, splitters and minimum widths.
 3. Objects keep their identity when they move between instruments.
 4. Every live relationship shows one of the agreed states.
-5. Every command appears in a menu and, where useful, in the command palette.
+5. Every advertised command resolves to one canonical record with a menu home,
+   and appears in the palette where that is useful. The palette, the tool strip
+   and context menus are views of the record, not separate command lists.
 6. The same document exports to display, print and raster with the same
    geometry and text.
 

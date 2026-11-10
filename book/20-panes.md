@@ -44,31 +44,39 @@ belong in the pane's context menu or in the main menu bar.
 
 ## Splitters
 
-- Visible rule: 6 pixels wide in the line colour.
-- Hit area: 8 pixels wide, centred on the rule.
-- Cursor: horizontal resize over the splitter.
+- Visible rule: 6 units wide in the decorative line role.
+- Hit area: 8 units wide, centred on the rule and extending one unit into each
+  neighbour. The extension is hit-only and does not reduce either pane's width.
+- Cursor: derived from the splitter's orientation — horizontal resize for a
+  vertical splitter, vertical resize for a horizontal one.
 - Drag: immediate, with no preview pane and no snapping unless the user holds
   a modifier.
 - Double-click: restores the pane's default width.
 - Keyboard: the splitter is a tab stop; use the arrow keys to resize by 8
-  pixels, or Shift with an arrow to resize by 32.
+  units, or Shift with an arrow to resize by 32.
 
-A splitter must not move a pane below its minimum width. When the window is too
-narrow for the minimums, the inspector collapses first, then the navigator, and
-the document keeps its 420-pixel minimum.
+A splitter must not move a pane below its minimum width or above the space
+remaining after the other panes and the document minimum. The displayed width
+is the requested width clamped to that interval, as described in
+[Spacing and metrics](14-spacing-metrics.md). When the window is too narrow for
+the minimums, the inspector collapses first, then the navigator, and the
+document keeps its 420-unit minimum. Below that, the compact profile applies.
 
 ## Collapse and restore
 
-A collapsed pane keeps its head and a 42-pixel handle showing its name
+A collapsed pane keeps its head and a 42-unit handle showing its name
 vertically. It does not vanish into an unlabelled edge.
 
 - Collapse state and width are stored per project, not per application
   session.
 - Reopening a project restores the layout the user left.
-- A pane that reopens after a window resize returns to its remembered width,
-  clamped to the new minimum.
+- A pane that reopens after a window resize returns to its requested width,
+  clamped to the interval between its minimum and the remaining space.
 - A pane must be reachable from the **View** menu and from the command
   palette, not only by dragging.
+- Reopening a pane restores focus to its last active control only when the
+  reopening action requests focus. Background restoration and project reopening
+  do not take the keyboard from an unrelated edit.
 
 ## Nested splits
 
@@ -79,10 +87,15 @@ nesting is ambiguous and the user cannot tell which region a drag will resize.
 
 ## Scrollbars
 
-Panes scroll independently. A scrollbar is 12 pixels wide, with a 6-pixel thumb
+Panes scroll independently. A scrollbar is 12 units wide, with a 6-unit thumb
 and no arrow buttons. It appears on hover or when the content overflows, and it
 remains visible while the pointer is over the pane. Scroll position is
 remembered per pane and per document.
+
+A scrollbar is a declared essential-geometry exception to the 28-unit target
+minimum. Its effective target is the whole 12-unit track and its full length,
+and the exception is valid only because a wheel, keyboard and drag-anywhere
+alternative is always available. It is never the only way to scroll.
 
 ## Empty panes
 

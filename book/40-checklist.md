@@ -32,39 +32,53 @@ reviewer has seen the behaviour, not that the code appears to implement it.
 
 ## Window and structure
 
-- [ ] Title bar 31, menu bar 29, tool strip 30, status line 26.
+- [ ] Title bar 31, menu bar 29, tool strip 30, status line 26, in logical
+      units.
 - [ ] The window has one document plane and no decorative gradient.
 - [ ] Menus follow File, Edit, View, instrument, Window, Help, omitting any menu
       with no commands.
 - [ ] Ellipses mark commands that request further information before acting;
       immediate commands have none.
 - [ ] The status line reports something true; it does not say **Ready**.
-- [ ] Secondary windows are sheets or dialogs, not free-floating copies of the
-      main window.
+- [ ] Every window declares its role, activation, modality and attachment
+      independently, and its furniture matches the role.
+- [ ] Exactly one decoration profile is active, and it names one owner for
+      window controls, move and resize gestures and shadows.
+- [ ] A window shows at most one title and one set of window controls.
+- [ ] A secondary window is a declared role, not an undeclared copy of the
+      document plane.
 
 ## Layout
 
-- [ ] Spacing uses the 4-pixel grid: 4, 8, 12, 16 within a pane and 24, 32,
+- [ ] Spacing uses the 4-unit grid: 4, 8, 12, 16 within a pane and 24, 32,
       48, 64 between structures.
-- [ ] Pane padding is 16 pixels.
-- [ ] The navigator is at least 210 pixels and the inspector at least 240.
-- [ ] The document plane is at least 420 pixels and remains the flexible
+- [ ] Pane padding is 16 units.
+- [ ] The navigator is at least 210 units and the inspector at least 240.
+- [ ] The document plane is at least 420 units and remains the flexible
       element.
 - [ ] No more than two side panes are open beside the document.
-- [ ] Splitters are 6 pixels visible with an 8-pixel hit region.
+- [ ] Splitters are 6 units visible with an 8-unit hit region that does not
+      reduce either pane.
 - [ ] Panes collapse and restore without losing their state.
+- [ ] The window declares a layout profile, a requested width and a feasible
+      width, and the compact profile applies below the supported floor.
+- [ ] Every component role and variant used is declared in the catalogue, and
+      no control invents a height.
 
 ## Type and colour
 
-- [ ] Interface text is at least 12 pixels; metadata is 11; folios are 10.
-- [ ] Body text is 15 or 16 pixels with 1.6 leading.
+- [ ] Essential interface text is at least 12 units; supplementary metadata is
+      11; folios are 10.
+- [ ] Body text is 15 or 16 units with 1.6 leading.
 - [ ] Display and titles use Georgia italic; interface text uses the humanist
       sans; metadata uses the humanist mono.
 - [ ] Body text meets 4.5:1; large text and essential icons meet 3:1.
-- [ ] Teal is never used for text that carries meaning.
-- [ ] The dark theme meets the same contrast ratios as the light theme.
+- [ ] Decorative teal never carries text; the refresh text role is the only
+      teal-family colour used for words.
+- [ ] Every semantic role resolves in every supported theme, and the dark theme
+      meets the same ratios as the light theme.
 - [ ] Colour is never the only carrier of a state.
-- [ ] Radii do not exceed 2 pixels.
+- [ ] Radii do not exceed 2 units.
 - [ ] There is at most one offset shadow, with no blur.
 
 ## Objects and state
@@ -108,16 +122,32 @@ reviewer has seen the behaviour, not that the code appears to implement it.
 
 ## Controls and keyboard
 
-- [ ] Every interactive object is reachable by keyboard in a logical order.
-- [ ] The focus ring is 3 pixels of oxide at 3 pixels offset.
-- [ ] Focus returns to the opener when a dialog closes.
-- [ ] Targets are at least 28 pixels; the splitter's 8-pixel edge is the
-      declared exception, and a dialog's primary action is 36.
+- [ ] Every interactive object is reachable by keyboard in a logical order,
+      except a disabled control that leaves the tab order with its reason
+      reachable elsewhere.
+- [ ] The focus ring uses the theme's focus role, 3 units at 3 units offset,
+      and keeps the control's allocated border.
+- [ ] Focus returns through the focus-return chain: invoker, surviving logical
+      context, then a safe fallback.
+- [ ] Effective targets are at least 28 units; the splitter, scrollbar and
+      other declared exceptions are valid only with their alternatives, and a
+      dialog's primary action is 36.
+- [ ] Focus toggling changes neither layout bounds nor the command target.
+- [ ] Accessible bounds describe the semantic region and are not required to
+      equal the hit map.
 - [ ] Every icon-only button has an accessible name.
 - [ ] A drag interaction has a keyboard alternative.
+- [ ] Every composite declares its input modes, how Tab leaves it and how
+      Escape returns to navigation.
+- [ ] Enter and Space activate only the focused control in navigation mode;
+      text editing and composition take them first.
 - [ ] A pressed control responds within one refresh interval, no more than
       16.7 milliseconds at 60 hertz.
-- [ ] The command palette opens with Control+K and announces its results.
+- [ ] The command palette opens with Control+K, completes inside its query
+      field only, and announces its results.
+- [ ] A command record declares one semantic identity across menus, palette,
+      toolbar and context menus, with an invocation context captured at
+      invocation.
 
 ## Feedback and failure
 
@@ -126,8 +156,15 @@ reviewer has seen the behaviour, not that the code appears to implement it.
 - [ ] A destructive action names its object and offers Cancel as the default.
 - [ ] An operation longer than 200 milliseconds announces itself, and one that
       finishes says so once.
-- [ ] A cancel action takes effect within 200 milliseconds.
+- [ ] A cancel action is acknowledged within 200 milliseconds, suppresses
+      publication immediately, and any cleanup continues in a separate
+      **Cancelling** state.
+- [ ] Timing is measured from the accepted action to the first frame showing
+      the new state, and each background operation is bounded by its own
+      trigger.
 - [ ] Progress is visible and does not block unrelated work.
+- [ ] A dialog declares modality, presentation and purpose separately, and a
+      sheet does not bypass the purpose's decision rules.
 - [ ] A failed export leaves the previous output intact.
 - [ ] A partial export is marked as partial.
 - [ ] Diagnostics are reachable from Help.
@@ -157,11 +194,15 @@ reviewer has seen the behaviour, not that the code appears to implement it.
 - [ ] Both pseudo-locales build and export without clipping or overlap.
 - [ ] Panes, menus, icons and focus order mirror for right-to-left locales.
 - [ ] Numbers, dates and currency use the locale's formats.
-- [ ] The accessibility tree exposes roles, names, states, bounds and order.
+- [ ] The accessibility tree exposes roles, names, states, accessible bounds
+      and order.
 - [ ] A screen-reader user can complete the primary task.
-- [ ] At 200 per cent zoom, every control is reachable and no control or text
-      overlaps.
-- [ ] Reduced motion collapses animation to 0.01 milliseconds.
+- [ ] At 200 per cent interface scale, every control is reachable and no
+      control or text overlaps; the compact profile applies where needed.
+- [ ] Narrowing a pane or enlarging text never shrinks text below the user's
+      requested scale.
+- [ ] Reduced motion makes finite transitions effectively immediate, keeps
+      activity indicators static, and never speeds an infinite animation up.
 
 ## Documentation and review
 

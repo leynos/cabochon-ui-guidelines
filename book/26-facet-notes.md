@@ -49,12 +49,21 @@ renaming it does not change its identity.
 
 The note's title is a display-italic heading, 24 logical units, editable in
 place. Below it, a metadata line records the last update, the word count and
-the number of embeds when disclosure permits those classes.
+the number of embeds when disclosure permits those classes. Those values are
+supplementary metadata and may use the 11-unit metadata role; a value the user
+must act on, such as a save failure time, uses the 12-unit operational floor.
 
 Prose uses the 15- or 16-unit body role with a 1.6 line height. Paragraphs are
 separated by 16 units. Headings within the note use the section voice at 18 or
 20 units. Inline code and object identities use the operational mono role at
-the 12-unit floor, because they carry exact, copyable information.
+the 12-unit floor, because they carry exact, copyable information. Monospace
+does not lower the floor.
+
+When the document plane narrows, the measure shortens and the text wraps. The
+note does not shrink its type below the user's requested text scale, and it
+does not undo an enlargement to make a line fit. If the plane cannot show the
+requested scale, the pane collapses or the window reports the feasible width,
+as described in [Spacing and metrics](14-spacing-metrics.md).
 
 The note must support:
 

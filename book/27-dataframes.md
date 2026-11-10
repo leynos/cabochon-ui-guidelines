@@ -15,11 +15,11 @@ visible.
 
 The dataframe editor uses a categories pane, a grid and a cell inspector.
 
-- Categories pane: 210 pixels, listing saved filters with their row counts.
-- Formula bar: 34 pixels, directly below the menu bar, showing the selected
+- Categories pane: 210 units, listing saved filters with their row counts.
+- Formula bar: 34 units, directly below the menu bar, showing the selected
   cell's expression or value.
 - Grid: the flexible remainder.
-- Cell inspector: 240 pixels, showing the selected cell's address, type,
+- Cell inspector: 240 units, showing the selected cell's address, type,
   value, format and validation.
 
 The categories pane is optional for a small table. The formula bar and the
@@ -27,15 +27,16 @@ inspector are not: they are how the instrument explains what a cell is.
 
 ## The grid
 
-- Header row: 30 pixels, with column names in 11-pixel metadata, bold and
-  letter-spaced.
-- Body rows: 28 pixels minimum, 34 preferred.
-- Cell padding: 12 pixels horizontally.
-- Grid lines: 1 pixel in line; horizontal lines only when row density
-  requires them.
+- Header row: 30 units, with column names in 12-unit operational interface
+  type, bold and letter-spaced. A column name is essential, so it uses the
+  operational floor even though it sits in a metadata-shaped band.
+- Body rows: 28 units minimum, 34 preferred.
+- Cell padding: 12 units horizontally.
+- Grid lines: 1 unit in the decorative line role; horizontal lines only when
+  row density requires them.
 - Alternating rows use high and white, not a tint.
-- The selected cell uses the pine-2 fill with white text.
-- The selected range uses a 2-pixel oxide outline around its extent.
+- The selected cell uses the selected-fill and selected-text roles.
+- The selected range uses a 2-unit oxide outline around its extent.
 
 Numbers align to the trailing edge and use tabular figures. Text aligns to the
 leading edge. Dates and times follow the locale but keep a stable, sortable
@@ -110,21 +111,40 @@ or removed.
 
 ## Editing
 
-- Typing replaces the cell's content; F2 or a double-click edits in place.
-- Enter commits and moves down; Tab commits and moves right.
-- Escape cancels the edit and restores the previous value.
+The grid has two keyboard modes, and the same key means different things in
+each. The modes are the ones defined in
+[Focus and the keyboard](18-focus-keyboard.md).
+
+- **Grid navigation.** The grid has focus but no cell is being edited. Arrow
+  keys move the active cell, Tab leaves the grid for the next control, and
+  Enter opens the active cell for editing.
+- **Cell editing.** A cell is open for editing. Typing inserts text, Tab
+  commits the edit and moves right, Enter commits and moves down, and Escape
+  cancels the edit and restores the previous value.
+
+Tab never commits and moves right while the grid is merely navigating, and it
+never cycles inside the grid indefinitely. Shift+Tab leaves the grid in
+navigation mode and moves left within the row in cell-editing mode. The mode is
+shown in the status line, so a user can tell which behaviour Tab will have.
+
+- Typing in navigation mode replaces the cell's content and enters cell
+  editing; F2 or a double-click edits in place without replacing.
 - A committed edit is one undoable transaction.
 - A paste larger than the current range asks before expanding the table, and
   states how many rows and columns will be added.
 - A paste that would overwrite non-empty cells is confirmed with the count and
   the range.
+- A context menu opened on a cell targets that cell. Opening it does not change
+  the persistent range selection, and its commands act on the context target
+  unless the command is a selection command, as described in
+  [Menus](10-menus.md).
 
 ## Validation
 
 Validation rules belong to the column, not to individual cells.
 
 - A rule is shown in the inspector with its scope and its message.
-- A violated cell carries a 2-pixel oxide mark in its corner and a message on
+- A violated cell carries a 2-unit oxide mark in its corner and a message on
   focus.
 - The table's status line reports how many cells violate a rule.
 - A rule must not prevent reading or exporting the table; it marks the data,
