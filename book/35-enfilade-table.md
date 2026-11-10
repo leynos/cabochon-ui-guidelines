@@ -17,10 +17,10 @@ is examined and maintained.
 
 ## Layout
 
-- Categories panel: 200 pixels, listing saved filters with row counts.
+- Categories panel: 210 pixels, listing saved filters with row counts.
 - Formula bar: 34 pixels, showing the selected cell's expression.
 - Grid: the flexible remainder.
-- Cell inspector: 250 pixels, showing address, type, value, format,
+- Cell inspector: 240 pixels, showing address, type, value, format,
   validation and selection aggregates.
 - Status line: aggregate, row count and column count.
 
@@ -29,7 +29,7 @@ each saved category, with the selected category filled in pine 2.
 
 ## The grid at scale
 
-- Header row: 30 pixels, with column names in 10-pixel metadata.
+- Header row: 30 pixels, with column names in 11-pixel metadata.
 - Body rows: 28 pixels minimum, 34 preferred.
 - Column widths are draggable and remembered per view.
 - The grid virtualizes rows and columns; a 100,000-row table remains

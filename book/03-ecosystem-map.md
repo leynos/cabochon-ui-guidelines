@@ -7,7 +7,7 @@ summary: The two planes, the GEM substrate and the deferred shell.
 
 # Ecosystem map
 
-![The book in eight parts.](../figures/fig-01-map.svg)
+![The application above the two planes.](../figures/fig-01-map.svg)
 
 Cabochon has two planes. The upper plane is the GEM-derived application and
 graphics substrate: Clerestory for interaction, Lapidary for device-independent

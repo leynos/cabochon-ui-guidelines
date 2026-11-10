@@ -73,8 +73,8 @@ colour-blind user. The state chip, the icon and the text carry it together.
 
 ## Targets and pointer
 
-- Pointer targets are at least 28 by 28 pixels, 32 preferred and 36 for a
-  primary action.
+- Pointer targets are at least 28 by 28 pixels and 32 preferred; a dialog's
+  primary action is 36.
 - A small glyph may sit inside a larger target; the target, not the glyph,
   determines the hit region.
 - Adjacent targets have at least 8 pixels between their hit regions.

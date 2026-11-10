@@ -19,6 +19,7 @@ The metrics below are production values at 100 per cent scale.
 
 | Band        | Height | Contents                                           |
 | ----------- | ------ | -------------------------------------------------- |
+| Masthead    | 44 px  | Instrument name and primary command; optional.     |
 | Title bar   | 31 px  | Title, object state, window controls.              |
 | Menu bar    | 29 px  | Top-level menus, right-aligned status if required. |
 | Tool strip  | 30 px  | Frequent commands, grouped and separated.          |
@@ -42,7 +43,7 @@ Rules for the title bar:
 - The title must truncate in the middle, preserving the beginning and the
   extension, rather than at the end.
 - Window controls are minimise, maximise and close, in that order, with a
-  12-pixel glyph inside a 22-pixel target.
+  16-pixel glyph inside a 28-pixel target inset one pixel from the band.
 - A modified document appends a single bullet, not the word "modified".
 - Double-clicking the title bar must perform the host's configured action.
 
@@ -55,8 +56,9 @@ host draws decorations outside it.
 
 The menu bar follows the ordering rules in [Menus](10-menus.md). It must remain
 visible at every window size; an application must not collapse its menus into a
-hamburger button. When the window is too narrow, overflow items move into a
-final **More** menu.
+hamburger button. When the window is too narrow, whole menus move into a final
+**More** menu in their original order. Individual items are never plucked out
+of their menus, because a menu's grouping carries meaning.
 
 ## Tool strip
 
@@ -65,8 +67,8 @@ and that benefit from a visible, one-click target. It is not a place for every
 command, and it must not grow beyond one row.
 
 A tool strip button is 30 pixels square with a 16-pixel glyph. Related buttons
-are grouped with a 9-pixel gap and separated from the next group by a one-pixel
-vertical rule with 6 pixels of space on each side. The strip must carry a text
+are grouped with an 8-pixel gap and separated from the next group by a one-pixel
+vertical rule with 8 pixels of space on each side. The strip must carry a text
 label for any command whose icon is not universally understood.
 
 ## Document area

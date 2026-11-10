@@ -15,8 +15,8 @@ the document's physical units, so that what is drawn is what will print.
 
 ## Layout
 
-- Tool palette: 48 pixels wide, one column of 32-pixel tools with 30-pixel
-  glyph targets.
+- Tool palette: 48 pixels wide, one column of 32-pixel tool buttons with
+  16-pixel glyphs.
 - Rulers: 20 pixels along the top and left, in the document's unit.
 - Canvas: the flexible remainder, on a white page with a 1-pixel keyline.
 - Inspector: 240 pixels, showing geometry, fill, stroke and guides.

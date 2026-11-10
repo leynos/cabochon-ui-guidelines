@@ -50,8 +50,8 @@ belong in the pane's context menu or in the main menu bar.
 - Drag: immediate, with no preview pane and no snapping unless the user holds
   a modifier.
 - Double-click: restores the pane's default width.
-- Keyboard: focus the splitter and use the arrow keys to resize by 8 pixels,
-  or Shift with an arrow to resize by 32.
+- Keyboard: the splitter is a tab stop; use the arrow keys to resize by 8
+  pixels, or Shift with an arrow to resize by 32.
 
 A splitter must not move a pane below its minimum width. When the window is too
 narrow for the minimums, the inspector collapses first, then the navigator, and

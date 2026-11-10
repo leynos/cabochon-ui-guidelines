@@ -144,10 +144,10 @@ def kicker(x: float, y: float, value: str, colour: str = OXIDE) -> str:
 
 
 def chip(x: float, y: float, label: str, colour: str = PINE2, fill: str = HIGH, size: float = 11) -> tuple[str, float]:
-    width = max(58.0, len(label) * size * 0.62 + 20)
-    body = rect(x, y, width, 24, fill=fill, stroke=colour, sw=1)
-    body += circle(x + 11, y + 12, 3.5, fill=colour, stroke=None)
-    body += txt(x + 20, y + 16, label, size=size, fill=colour, family=F_MONO, weight="bold")
+    width = max(58.0, len(label) * size * 0.62 + 18)
+    body = rect(x, y, width, 20, fill=fill, stroke=colour, sw=1)
+    body += circle(x + 10, y + 10, 3, fill=colour, stroke=None)
+    body += txt(x + 18, y + 14, label, size=size, fill=colour, family=F_MONO, weight="bold")
     return body, width
 
 
@@ -194,22 +194,29 @@ def mini_note(x: float, y: float, w: float, h: float, dark: bool = False) -> str
 def mini_table(x: float, y: float, w: float, h: float) -> str:
     body = rect(x, y, w, h, fill=WHITE, stroke=LINE)
     body += rect(x, y, w, 24, fill=PINE2, stroke=None)
-    body += txt(x + 10, y + 16, "Generation mix", size=10, fill=WHITE, family=F_MONO, weight="bold")
-    for row in range(4):
-        for col in range(4):
-            body += rect(x + 10 + col * (w - 20) / 4, y + 34 + row * 20, (w - 20) / 4, 15, fill=HIGH if row % 2 == 0 else WHITE, stroke=LINE, sw=0.5)
+    body += txt(x + 10, y + 16, "GBP · DAILY RATES", size=9, fill=WHITE, family=F_MONO, weight="bold")
+    body += txt(x + 10, y + 40, "DATE", size=8, fill=SOFT, family=F_MONO, weight="bold")
+    body += txt(x + w - 74, y + 40, "RATE", size=8, fill=SOFT, family=F_MONO, weight="bold", anchor="end")
+    body += txt(x + w - 10, y + 40, "SOURCE", size=8, fill=SOFT, family=F_MONO, weight="bold", anchor="end")
+    rows = [("13 Apr 2026", "1.2840", "ECB"), ("12 Apr 2026", "1.2790", "ECB"), ("11 Apr 2026", "1.2860", "ECB")]
+    for index, (date, rate, source) in enumerate(rows):
+        ry = y + 58 + index * 20
+        if index == 0:
+            body += rect(x + 6, ry - 12, w - 12, 17, fill=PINE2, stroke=None)
+        fill = WHITE if index == 0 else INK
+        body += txt(x + 10, ry, date, size=9, fill=fill, family=F_MONO)
+        body += txt(x + w - 74, ry, rate, size=9, fill=fill, family=F_MONO, anchor="end")
+        body += txt(x + w - 10, ry, source, size=9, fill=WHITE if index == 0 else SOFT, family=F_MONO, anchor="end")
     return body
 
 
 def mini_page(x: float, y: float, w: float, h: float) -> str:
     body = rect(x, y, w, h, fill=WHITE, stroke=LINE)
-    body += txt(x + 16, y + 34, "What survives", size=20, family=F_DISPLAY, style="italic")
-    body += txt(x + 16, y + 54, "the transition?", size=20, family=F_DISPLAY, style="italic")
-    for index, width in enumerate([0.74, 0.82, 0.68, 0.78, 0.55]):
-        body += rect(x + 16, y + 72 + index * 12, (w - 32) * width, 4, fill=SOFT, stroke=None)
-    body += rect(x + 16, y + h - 62, w - 32, 40, fill=PAPER, stroke=OXIDE)
-    for index, height in enumerate([18, 26, 34, 24, 30]):
-        body += rect(x + 26 + index * 18, y + h - 24 - height, 10, height, fill=PINE2, stroke=None)
+    body += txt(x + 16, y + 26, "NORTH SEA CURRENCY", size=8, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
+    body += txt(x + 16, y + 52, "GBP 1,284", size=22, fill=INK, family=F_MONO, weight="bold")
+    body += line(x + 16, y + 64, x + w - 16, y + 64, stroke=LINE)
+    body += para(x + 16, y + 82, w - 32, "Printed from the same object, with its source and revision attached.", size=8, leading=11, fill=SOFT)
+    body += txt(x + 16, y + h - 8, "1 / 1 · proof · obj:c128", size=8, fill=SOFT, family=F_MONO)
     return body
 
 
@@ -285,71 +292,116 @@ def fig_cover() -> str:
 
 
 def fig_map() -> str:
-    body = title_block(64, 72, "The book in eight parts", "A reading path from the idea to the checklist. Every part ends with the same question: does this help a person do the work?")
-    parts = [
-        ("I", "Orientation", "1-4", ["idea", "small world", "first batch"]),
-        ("II", "Principles", "5-9", ["rectangles", "objects", "failure"]),
-        ("III", "Foundations", "10-15", ["colour", "type", "motion"]),
-        ("IV", "The frame", "16-20", ["windows", "menus", "inspectors"]),
-        ("V", "Interaction", "21-27", ["controls", "focus", "palette"]),
-        ("VI", "Instruments", "28-33", ["notes", "draw", "press", "table"]),
-        ("VII", "Object world", "34-37", ["projects", "embeds", "output"]),
-        ("VIII", "Craft", "38-40", ["words", "access", "checklist"]),
+    body = title_block(64, 70, "Two planes, one substrate", "An application draws through the upper plane and reaches objects through the lower. It never reaches around either.")
+    # Application.
+    body += rect(64, 158, 740, 96, fill=HIGH, stroke=INK)
+    body += txt(84, 184, "APPLICATION", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
+    body += txt(84, 212, "Facet Notes", size=18, family=F_DISPLAY, style="italic")
+    body += txt(84, 236, "Uses the substrate; never reaches around it.", size=11, fill=SOFT)
+    # Upper plane.
+    body += rect(64, 276, 740, 190, fill=HIGH, stroke=INK)
+    body += txt(84, 300, "UPPER PLANE · GEM SUBSTRATE", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
+    upper = [
+        ("Clerestory", "windows · menus · commands · focus"),
+        ("Escutcheon", "menus · strings · icons · shortcuts"),
+        ("Lapidary", "rectangles · paths · text · images"),
+        ("Burin", "display · PDF · raster · print · a11y"),
     ]
-    for index, (numeral, name, span, words) in enumerate(parts):
-        col = index % 4
-        row = index // 4
-        x = 64 + col * 274
-        y = 166 + row * 252
-        body += rect(x, y, 250, 220, fill=HIGH, stroke=INK)
-        body += txt(x + 16, y + 30, numeral, size=22, family=F_DISPLAY, style="italic", fill=OXIDE)
-        body += txt(x + 16, y + 60, name, size=17, weight="bold")
-        body += txt(x + 16, y + 82, f"Chapters {span}", size=10, fill=SOFT, family=F_MONO, spacing=0.6)
-        body += line(x + 16, y + 98, x + 234, y + 98, stroke=LINE)
-        for word_index, word in enumerate(words):
-            body += txt(x + 16, y + 126 + word_index * 22, word, size=12, fill=SOFT)
-        body += txt(x + 16, y + 200, f"{index + 1:02d}", size=10, fill=LINE, family=F_MONO, anchor="end")
-    body += txt(64, 726, "40 chapters · 33 figures · one set of rules", size=11, fill=SOFT, family=F_MONO, spacing=0.8)
-    return svg_doc(1200, 760, "The book in eight parts", "Eight part cards covering orientation, principles, foundations, the application frame, interaction, instruments, the object world and craft.", body)
+    for index, (name, role) in enumerate(upper):
+        bx = 86 + (index % 2) * 352
+        by = 316 + (index // 2) * 72
+        body += rect(bx, by, 332, 62, fill=PAPER, stroke=LINE)
+        body += txt(bx + 12, by + 24, name, size=13, weight="bold")
+        body += txt(bx + 12, by + 44, role, size=10, fill=SOFT, family=F_MONO)
+    # Boundary.
+    body += line(434, 466, 434, 506, stroke=OXIDE, sw=2)
+    body += path("M 428 500 L 434 506 L 440 500", stroke=OXIDE, sw=2)
+    body += txt(448, 494, "selectors · capabilities · transactions", size=10, fill=OXIDE, family=F_MONO)
+    # Lower plane.
+    body += rect(64, 506, 740, 170, fill=HIGH, stroke=INK)
+    body += txt(84, 530, "LOWER PLANE · SEMANTIC", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
+    body += rect(86, 544, 696, 62, fill=PAPER, stroke=LINE)
+    body += txt(98, 568, "Enfilade", size=13, weight="bold")
+    body += txt(98, 588, "object identity · selectors · capabilities · transactions · live relationships", size=10, fill=SOFT, family=F_MONO)
+    body += txt(98, 632, "runtime services: portals · storage · identity providers", size=10, fill=SOFT, family=F_MONO)
+    # Deferred shell.
+    body += rect(830, 158, 306, 150, fill=PAPER, stroke=INK)
+    body += txt(850, 184, "DEFERRED SHELL", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
+    body += rect(850, 200, 266, 88, fill=HIGH, stroke=INK, dash="5 5")
+    body += txt(864, 226, "Mullion", size=14, family=F_DISPLAY, style="italic")
+    body += para(864, 246, 238, "A future compositor and shell. It must not add a second object system or rendering path.", size=10, leading=15)
+    # Consequences.
+    body += rect(830, 326, 306, 350, fill=HIGH, stroke=INK)
+    body += txt(850, 352, "WHAT THE MAP IMPLIES", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
+    consequences = [
+        ("Chrome is shared; content is specific.", "Windows, menus, state chips and inspectors are environment furniture."),
+        ("Identity outlives presentation.", "One object, many presentations, one identity."),
+        ("Failure is a first-class surface.", "Stale, broken and denied are interface states, not log lines."),
+    ]
+    for index, (headline, detail) in enumerate(consequences):
+        cy = 388 + index * 92
+        body += txt(850, cy, f"{index + 1:02d}", size=10, fill=OXIDE, family=F_MONO, weight="bold")
+        body += txt(880, cy, headline, size=12, weight="bold")
+        body += para(880, cy + 18, 234, detail, size=10, leading=15)
+    body += txt(64, 716, "The substrate is production, even when the shell is deferred.", size=13, fill=SOFT, family=F_DISPLAY, style="italic")
+    return svg_doc(1200, 760, "The two-plane Cabochon ecosystem map", "An application above the GEM substrate of Clerestory, Escutcheon, Lapidary and Burin, and a semantic lower plane led by Enfilade, with Mullion deferred.", body)
 
 
 def fig_small_world() -> str:
-    body = title_block(64, 70, "One small world, three rings", "The guidelines begin with the smallest useful environment, not a complete desktop. The same frame, tokens and state vocabulary reach every ring.")
-    body += rect(150, 170, 900, 500, fill="none", stroke=LINE, sw=1.5)
-    body += txt(170, 198, "STUDIO INSTRUMENTS", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
-    body += rect(270, 240, 660, 370, fill=HIGH, stroke=INK)
-    body += txt(290, 268, "WORKSPACE", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
-    body += rect(390, 310, 420, 230, fill=PAPER, stroke=INK)
-    body += txt(410, 338, "CONTRACTS", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
-
-    contracts = ["hello-window", "escutcheon-check", "Lapidary scene", "Burin output"]
-    workspace = ["Facet Notes", "dataframe", "diagram", "bitmap", "formula", "inspector"]
-    studio = ["Burin Draw", "Cabochon Press", "Enfilade Table", "command palette"]
-
-    for index, label in enumerate(contracts):
-        body += rect(410 + (index % 2) * 190, 360 + (index // 2) * 52, 176, 34, fill=HIGH, stroke=LINE)
-        body += txt(420 + (index % 2) * 190, 382 + (index // 2) * 52, label, size=9, family=F_MONO, fill=PINE2)
-    for index, label in enumerate(workspace):
-        x = 292 + (index % 3) * 198
-        y = 292 + (index // 3) * 44
-        body += rect(x, y, 184, 32, fill=HIGH, stroke=LINE)
-        body += txt(x + 10, y + 21, label, size=9, family=F_MONO, fill=INK)
-    for index, label in enumerate(studio):
-        x = 176 + (index % 2) * 430
-        y = 228 + (index // 2) * 44
-        body += rect(x, y, 250, 32, fill=PINE, stroke=PINE)
-        body += txt(x + 12, y + 21, label, size=10, family=F_MONO, fill=WHITE, weight="bold")
-
-    body += line(720, 660, 720, 706, stroke=OXIDE, sw=2)
-    body += txt(736, 704, "The same rules apply at every ring: identity, state, focus, words and targets.", size=12, fill=SOFT)
-    return svg_doc(1200, 760, "One small world in three rings", "Nested frames for contracts, workspace and studio instruments, each containing the first tools.", body)
+    body = title_block(64, 70, "The Cabochon character", "Four structural choices, not a decoration kit. Each one can be recognised in a window without reading its label.")
+    cards = [
+        ("01", "Compact", "rather than cramped", "Short rows and generous padding. Density never removes the space a hand or an eye needs.", "compact"),
+        ("02", "Document-centred", "rather than application-centred", "The document holds the largest plane; the instrument sits at its edges.", "document"),
+        ("03", "Liberal", "rather than paternal", "The user owns the work. Export stays available, formats stay open and no account gates local content.", "liberal"),
+        ("04", "Practical", "rather than ornamental", "A rule separates planes, a tint marks a state, a shadow lifts a sheet. Nothing decorates.", "practical"),
+    ]
+    for index, (number, title, aside, claim, kind) in enumerate(cards):
+        x = 64 + (index % 2) * 548
+        y = 166 + (index // 2) * 252
+        w, h = 524, 236
+        body += rect(x, y, w, h, fill=HIGH, stroke=INK)
+        body += txt(x + 20, y + 28, number, size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
+        body += txt(x + 20, y + 62, title, size=22, family=F_DISPLAY, style="italic")
+        body += txt(x + 20, y + 82, aside, size=12, fill=SOFT)
+        body += line(x + 20, y + 96, x + w - 20, y + 96, stroke=LINE)
+        body += para(x + 20, y + 118, w - 40, claim, size=11, leading=16)
+        if kind == "compact":
+            bands = [("title bar", "31", PINE, WHITE), ("menu bar", "29", PINE2, WHITE), ("tree row", "28", TEAL, INK)]
+            for band_index, (name, measure, fill, colour) in enumerate(bands):
+                by = y + 148 + band_index * 24
+                body += rect(x + 20, by, 220, 18, fill=fill, stroke=None)
+                body += txt(x + 30, by + 13, name, size=9, fill=colour, family=F_MONO)
+                body += txt(x + 252, by + 13, f"{measure} px", size=10, fill=SOFT, family=F_MONO)
+        elif kind == "document":
+            body += rect(x + 20, y + 142, 280, 60, fill=HIGH, stroke=INK)
+            body += rect(x + 20, y + 142, 42, 60, fill=PAPER, stroke=LINE)
+            body += rect(x + 68, y + 148, 180, 48, fill=WHITE, stroke=LINE)
+            body += rect(x + 254, y + 142, 46, 60, fill=PAPER, stroke=LINE)
+            body += txt(x + 20, y + 220, "rail 126 · document ≥ 420 · inspector 240", size=10, fill=SOFT, family=F_MONO)
+        elif kind == "liberal":
+            cx = x + 20
+            for label, chip_w in [("Export", 84), ("Open format", 120), ("No account", 116)]:
+                body += rect(cx, y + 150, chip_w, 26, fill=PAPER, stroke=INK)
+                body += txt(cx + 12, y + 168, label, size=11, fill=INK)
+                cx += chip_w + 12
+            body += txt(x + 20, y + 206, "The user owns the work.", size=11, fill=SOFT)
+        else:
+            specimens = [("flat fill", HIGH, True, 0), ("1 px keyline", PAPER, True, 0), ("2 px radius", HIGH, True, 2), ("offset shadow", HIGH, False, 0)]
+            for spec_index, (label, fill, stroked, radius) in enumerate(specimens):
+                sx = x + 20 + spec_index * 120
+                if not stroked:
+                    body += rect(sx + 4, y + 150, 40, 40, fill="#17201C18", stroke=None)
+                body += rect(sx, y + 146, 40, 40, fill=fill, stroke=INK if stroked else None, rx=radius)
+                body += txt(sx, y + 204, label, size=10, fill=SOFT, family=F_MONO)
+    body += txt(64, 700, "A surface that fails any one of these choices is not Cabochon, however closely it copies the palette.", size=13, fill=SOFT, family=F_DISPLAY, style="italic")
+    return svg_doc(1200, 760, "Four structural choices of the Cabochon character", "Cards for compact, document-centred, liberal and practical character, each with a small specimen.", body)
 
 
 def fig_first_batch() -> str:
     body = title_block(64, 70, "The first batch", "Ship the contracts, then the workspace, then the studio. A tool may be deferred; the interface rules are not.")
     bands = [
         ("NOW", "Contracts", PINE, ["hello-window", "escutcheon-check", "Lapidary scene", "Burin output"], "done"),
-        ("NEXT", "Workspace", PINE2, ["Facet Notes", "dataframe", "diagram", "bitmap", "formula", "inspector"], "active"),
+        ("NEXT", "Workspace", PINE2, ["Facet Notes", "dataframe", "diagram", "bitmap", "formula", "inspector", "project window"], "active"),
         ("LATER", "Studio", TEAL_INK, ["Burin Draw", "Cabochon Press", "Enfilade Table"], "later"),
     ]
     for index, (when, name, colour, tools, mark) in enumerate(bands):
@@ -419,20 +471,26 @@ def fig_document_centre() -> str:
     body += txt(600, 426, "OBJ", size=15, fill=WHITE, family=F_MONO, weight="bold", anchor="middle")
     body += txt(600, 498, "stable identity", size=11, fill=SOFT, family=F_MONO, anchor="middle", spacing=0.6)
     frames = [
-        (64, 166, "NOTES", "prose"),
+        (64, 166, "NOTE", "prose"),
         (896, 166, "TABLE", "data"),
-        (64, 570, "DRAW", "geometry"),
-        (896, 570, "PRESS", "page"),
+        (64, 570, "REPORT", "card"),
+        (896, 570, "PROOF", "page"),
     ]
     for x, y, label, kind in frames:
         body += rect(x, y, 240, 170, fill=HIGH, stroke=INK)
         body += txt(x + 12, y + 22, label, size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=0.8)
+        body += txt(x + 228, y + 22, "GBP 1,284", size=9, fill=SOFT, family=F_MONO, anchor="end")
         if kind == "prose":
             body += mini_note(x + 12, y + 34, 216, 120)
+            body += rect(x + 30, y + 86, 76, 16, fill=HIGH, stroke=PINE2)
+            body += txt(x + 34, y + 97, "GBP 1,284", size=10, fill=PINE2, family=F_MONO)
         elif kind == "data":
             body += mini_table(x + 12, y + 34, 216, 120)
-        elif kind == "geometry":
-            body += mini_canvas(x + 12, y + 34, 216, 120)
+        elif kind == "card":
+            body += rect(x + 12, y + 34, 216, 120, fill=WHITE, stroke=LINE)
+            body += txt(x + 24, y + 60, "North Sea currency", size=11, fill=SOFT)
+            body += txt(x + 24, y + 94, "GBP 1,284", size=24, fill=INK, family=F_MONO, weight="bold")
+            body += txt(x + 24, y + 120, "report card · 2026", size=10, fill=SOFT, family=F_MONO)
         else:
             body += mini_page(x + 12, y + 34, 216, 120)
         start_x = x + 240 if x < 600 else x
@@ -459,23 +517,34 @@ def fig_state() -> str:
         body += rect(x, 166, 204, 190, fill=HIGH, stroke=colour, sw=2 if name in {"Stale", "Denied"} else 1)
         body += circle(x + 22, 194, 7, fill=colour, stroke=None)
         body += txt(x + 38, 200, name.upper(), size=12, fill=colour, family=F_MONO, weight="bold", spacing=0.6)
-        body += lines(x + 18, 232, text.split(" ", 3)[:3], size=11, fill=SOFT, leading=16)
+        body += para(x + 18, 226, 168, text, size=11, leading=16)
         body += line(x + 18, 300, x + 186, 300, stroke=LINE)
         body += txt(x + 18, 326, action, size=11, fill=INK, weight="bold")
 
-    y = 470
-    body += line(120, y, 1080, y, stroke=LINE, sw=2)
-    for x, label in [(150, "CURRENT"), (380, "REFRESHING"), (620, "STALE"), (875, "BROKEN")]:
-        body += circle(x, y, 7, fill=HIGH, stroke=INK, sw=2)
-        body += txt(x, y + 30, label, size=9, fill=SOFT, family=F_MONO, anchor="middle", spacing=0.5)
-    body += path(f"M 390 {y - 12} Q 500 {y - 46} 610 {y - 12}", stroke=PINE2, sw=2)
-    body += path(f"M 630 {y + 12} Q 500 {y + 46} 390 {y + 12}", stroke=PINE2, sw=2)
-    body += txt(500, y - 24, "refresh succeeds", size=10, fill=PINE2, family=F_MONO, anchor="middle")
-    body += txt(500, y + 62, "recovery keeps the last good value", size=10, fill=PINE2, family=F_MONO, anchor="middle")
-    body += line(620, y - 8, 875, y - 8, stroke=OXIDE, sw=2)
-    body += txt(748, y - 16, "source lost", size=10, fill=OXIDE, family=F_MONO, anchor="middle")
-    body += txt(64, 640, "Denied is a gate, not a destination: the user can grant authority and return to current.", size=13, fill=SOFT, family=F_DISPLAY, style="italic")
-    return svg_doc(1200, 700, "Five live-relationship states", "Cards for current, refreshing, stale, broken and denied, with recovery and failure transitions.", body)
+    # Legal transitions, taken from the state table in chapter 8.
+    body += txt(64, 400, "LEGAL TRANSITIONS", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
+    body += txt(80, 430, "FROM", size=9, fill=OXIDE, family=F_MONO, weight="bold", spacing=0.6)
+    body += txt(250, 430, "EVENT", size=9, fill=OXIDE, family=F_MONO, weight="bold", spacing=0.6)
+    body += txt(760, 430, "TO", size=9, fill=OXIDE, family=F_MONO, weight="bold", spacing=0.6)
+    body += txt(900, 430, "OWNER", size=9, fill=OXIDE, family=F_MONO, weight="bold", spacing=0.6)
+    transitions = [
+        ("Current", "A newer revision is reported", "Stale", "Provider"),
+        ("Current, Stale", "A refresh begins", "Refreshing", "Application"),
+        ("Refreshing", "The source value returns", "Current", "Application"),
+        ("Refreshing", "The source is unreachable", "Broken", "Application"),
+        ("Refreshing", "The read is refused", "Denied", "Host"),
+        ("Broken", "A retry begins and the source answers", "Refreshing", "User"),
+        ("Denied", "A capability is granted and a refresh begins", "Refreshing", "User or host"),
+    ]
+    for index, (source, event, target, owner) in enumerate(transitions):
+        ty = 460 + index * 28
+        body += line(64, ty - 18, 1136, ty - 18, stroke=LINE, sw=0.5)
+        body += txt(80, ty, source, size=11, fill=INK, family=F_MONO)
+        body += txt(250, ty, event, size=11, fill=SOFT)
+        body += txt(760, ty, target, size=11, fill=PINE2, family=F_MONO)
+        body += txt(900, ty, owner, size=11, fill=SOFT, family=F_MONO)
+    body += txt(64, 700, "Every refresh logically enters Refreshing. There is no direct Current to Broken or Denied.", size=13, fill=SOFT, family=F_DISPLAY, style="italic")
+    return svg_doc(1200, 740, "Five live-relationship states and their legal transitions", "Cards for current, refreshing, stale, broken and denied, followed by the legal transition table with owners.", body)
 
 
 # ---------------------------------------------------------------------------
@@ -483,7 +552,7 @@ def fig_state() -> str:
 
 
 def fig_palette() -> str:
-    body = title_block(64, 70, "The material palette", "Paper, ink, pine, oxide and amber. Colour is material and state, not decoration.")
+    body = title_block(64, 70, "The material palette", "Paper, ink, pine, teal, oxide and amber. Colour is material and state, not decoration.")
     light = [
         ("Paper", PAPER, INK, "ground"),
         ("High", HIGH, INK, "raised pane"),
@@ -491,15 +560,17 @@ def fig_palette() -> str:
         ("Soft", SOFT, PAPER, "secondary"),
         ("Pine", PINE, PAPER, "window edge"),
         ("Pine 2", PINE2, PAPER, "selection"),
+        ("Teal", TEAL, INK, "decoration only"),
+        ("Teal ink", TEAL_INK, PAPER, "refresh text"),
         ("Oxide", OXIDE, PAPER, "authority"),
+        ("Amber", AMBER, INK, "large marks"),
         ("Amber ink", AMBER_INK, PAPER, "stale text"),
-        ("Signal", AMBER, INK, "large mark"),
         ("Line", LINE, INK, "hairline"),
     ]
     for index, (name, colour, text_colour, note) in enumerate(light):
-        x = 64 + (index % 5) * 220
-        y = 166 + (index // 5) * 150
-        body += rect(x, y, 204, 128, fill=colour, stroke=INK)
+        x = 64 + (index % 6) * 180
+        y = 166 + (index // 6) * 150
+        body += rect(x, y, 168, 128, fill=colour, stroke=INK)
         body += txt(x + 12, y + 22, name, size=11, fill=text_colour, family=F_MONO, weight="bold")
         body += txt(x + 12, y + 44, colour, size=10, fill=text_colour, family=F_MONO)
         body += txt(x + 12, y + 108, note, size=10, fill=text_colour)
@@ -537,7 +608,7 @@ def fig_type() -> str:
     body = title_block(64, 70, "Three typographic voices", "Display argues, interface explains, metadata accounts. They do not trade places.")
     body += rect(64, 166, 352, 240, fill=HIGH, stroke=INK)
     body += kicker(84, 196, "Display / Georgia italic")
-    body += lines(84, 250, ["Pages know", "where they", "are going."], size=38, family=F_DISPLAY, style="italic", leading=42)
+    body += lines(84, 248, ["Pages know", "where they", "are going."], size=42, family=F_DISPLAY, style="italic", leading=46)
     body += txt(84, 380, "Long-form titles and pull quotes only.", size=10, fill=SOFT, family=F_MONO)
 
     body += rect(432, 166, 352, 240, fill=HIGH, stroke=INK)
@@ -553,6 +624,7 @@ def fig_type() -> str:
     rows = [
         ("Display", "42-96 / 0.95", "Georgia italic", "chapter and cover titles"),
         ("Title", "24-32 / 1.1", "Georgia italic", "tool and document titles"),
+        ("Subtitle", "18 / 1.2", "Georgia italic", "inspector object names"),
         ("Section", "16-20 / 1.2", "Humanist sans bold", "pane and dialog headings"),
         ("Body", "15-16 / 1.6", "Georgia or humanist sans", "notes and long-form prose"),
         ("Interface", "12 / 1.35", "Humanist sans", "controls, labels, menus"),
@@ -564,14 +636,14 @@ def fig_type() -> str:
     body += txt(330, 458, "FACE", size=9, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
     body += txt(560, 458, "USE", size=9, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
     for index, (name, size, face, use) in enumerate(rows):
-        y = 486 + index * 34
+        y = 482 + index * 30
         body += line(64, y, 1136, y, stroke=LINE)
-        body += txt(64, y + 22, name, size=12, weight="bold")
-        body += txt(180, y + 22, size, size=11, family=F_MONO, fill=SOFT)
-        body += txt(330, y + 22, face, size=11, fill=SOFT)
-        body += txt(560, y + 22, use, size=11, fill=SOFT)
+        body += txt(64, y + 20, name, size=12, weight="bold")
+        body += txt(180, y + 20, size, size=11, family=F_MONO, fill=SOFT)
+        body += txt(330, y + 20, face, size=11, fill=SOFT)
+        body += txt(560, y + 20, use, size=11, fill=SOFT)
     body += txt(64, 740, "No interface text below 12 px. 11 px metadata is for non-essential labels; 10 px only for folios and plate marks.", size=11, fill=OXIDE)
-    return svg_doc(1200, 760, "Three typographic voices and a type scale", "Display, interface and metadata specimens above a six-row type scale.", body)
+    return svg_doc(1200, 760, "Three typographic voices and a type scale", "Display, interface and metadata specimens above an eight-row type scale.", body)
 
 
 def fig_spacing() -> str:
@@ -764,17 +836,17 @@ def para(x: float, y: float, width: float, value: str, size: float = 11, leading
     return lines(x, y, wrap_words(value, max(8, int(width / (size * 0.52)))), size=size, leading=leading, fill=fill, **kwargs)
 
 
-def titlebar(x: float, y: float, w: float, title: str, rtl: bool = False) -> str:
+def titlebar(x: float, y: float, w: float, title: str, rtl: bool = False, controls: bool = True) -> str:
     body = rect(x, y, w, 31, fill=PAPER, stroke=None)
     body += line(x, y + 30.5, x + w, y + 30.5, stroke=LINE)
     if rtl:
-        body += txt(x + w - 12, y + 20, title, size=12, weight="bold", anchor="end")
+        body += txt(x + w - (112 if controls else 12), y + 20, title, size=12, weight="bold", anchor="end")
     else:
         body += txt(x + 12, y + 20, title, size=12, weight="bold")
-    for index, glyph in enumerate(["–", "□", "×"]):
-        bx = x + 12 + index * 22 if rtl else x + w - 70 + index * 22
-        body += rect(bx, y + 9, 12, 12, fill=HIGH, stroke=INK)
-        body += txt(bx + 6, y + 19, glyph, size=10, anchor="middle")
+    if controls:
+        for index, glyph in enumerate(["–", "□", "×"]):
+            bx = x + 4 + index * 36 if rtl else x + w - 104 + index * 36
+            body += txt(bx + 14, y + 22, glyph, size=16, anchor="middle")
     return body
 
 
@@ -890,20 +962,21 @@ def fig_window() -> str:
     body += rect(x, y + 60, w, 30, fill=PAPER, stroke=None)
     body += line(x, y + 90, x + w, y + 90, stroke=LINE)
     for index, glyph in enumerate(["select", "text", "rect", "pen", "link"]):
-        bx = x + 10 + index * 34
+        bx = x + 10 + index * 38
         active = index == 1
-        body += rect(bx, y + 65, 30, 22, fill=PINE2 if active else HIGH, stroke=LINE)
+        body += rect(bx, y + 60, 30, 30, fill=PINE2 if active else HIGH, stroke=LINE)
         colour = WHITE if active else INK
+        cx, cy = bx + 15, y + 75
         if glyph == "select":
-            body += path(f"M {bx + 9} {y + 69} L {bx + 17} {y + 80} L {bx + 13} {y + 80} L {bx + 15} {y + 86} L {bx + 11} {y + 87} L {bx + 9} {y + 81} L {bx + 6} {y + 84} Z", stroke=colour, sw=1.5)
+            body += path(f"M {cx - 5} {cy - 7} L {cx + 3} {cy + 4} L {cx - 1} {cy + 4} L {cx + 1} {cy + 10} L {cx - 3} {cy + 11} L {cx - 5} {cy + 5} L {cx - 8} {cy + 8} Z", stroke=colour, sw=1.4)
         elif glyph == "text":
-            body += txt(bx + 15, y + 81, "T", size=13, fill=colour, weight="bold", anchor="middle")
+            body += txt(cx, cy + 5, "T", size=13, fill=colour, weight="bold", anchor="middle")
         elif glyph == "rect":
-            body += rect(bx + 8, y + 72, 14, 10, fill="none", stroke=colour, sw=1.5)
+            body += rect(cx - 7, cy - 5, 14, 10, fill="none", stroke=colour, sw=1.4)
         elif glyph == "pen":
-            body += path(f"M {bx + 8} {y + 86} L {bx + 10} {y + 79} L {bx + 19} {y + 70} L {bx + 23} {y + 74} L {bx + 14} {y + 83} Z", stroke=colour, sw=1.5)
+            body += path(f"M {cx - 6} {cy + 7} L {cx - 4} {cy} L {cx + 5} {cy - 9} L {cx + 9} {cy - 5} L {cx} {cy + 4} Z", stroke=colour, sw=1.4)
         else:
-            body += path(f"M {bx + 9} {y + 82} L {bx + 7} {y + 84} M {bx + 21} {y + 74} L {bx + 23} {y + 72} M {bx + 8} {y + 80} L {bx + 20} {y + 76}", stroke=colour, sw=1.5)
+            body += path(f"M {cx - 6} {cy + 4} L {cx - 8} {cy + 6} M {cx + 6} {cy - 4} L {cx + 8} {cy - 6} M {cx - 7} {cy + 2} L {cx + 7} {cy - 2}", stroke=colour, sw=1.4)
     # Panes.
     tree_w, inspector_w = 210, 240
     body += line(x, y + 90, x, y + h - 26, stroke=LINE)
@@ -942,7 +1015,7 @@ def fig_window() -> str:
     # Inspector.
     body += pane_head(splitter_2, y + 90, inspector_w, "Inspector")
     ix, iw = splitter_2 + 14, inspector_w - 28
-    body += txt(ix, y + 132, "Generation mix", size=13, weight="bold")
+    body += txt(ix, y + 132, "Generation mix", size=12, weight="bold")
     body += txt(ix, y + 148, "Table object", size=11, fill=SOFT)
     body += inspector_row(ix, y + 178, iw, "Object", "obj:8f3a")
     body += inspector_row(ix, y + 204, iw, "Provider", "enfilade.table")
@@ -980,8 +1053,8 @@ def fig_menus() -> str:
     body += window_shell(x, y, w, h, "Facet Notes — North Sea transition", ["File", "Edit", "View", "Object", "Tools", "Window", "Help"], active_menu="File", status="North Sea transition · saved 14:02")
     # Open File menu.
     mx, my, mw = x + 8, y + 60, 300
-    body += rect(mx + 4, my + 4, mw, 280, fill="#17201C18", stroke=None)
-    body += rect(mx, my, mw, 280, fill=HIGH, stroke=INK)
+    body += rect(mx + 4, my + 4, mw, 352, fill="#17201C18", stroke=None)
+    body += rect(mx, my, mw, 352, fill=HIGH, stroke=INK)
     items = [
         ("New note", "Ctrl+N", "normal"),
         ("New from template…", "", "normal"),
@@ -998,21 +1071,21 @@ def fig_menus() -> str:
     ]
     row = 0
     for label, shortcut, kind in items:
-        item_y = my + 8 + row * 22
-        if kind == "sep":
-            body += line(mx + 10, item_y + 10, mx + mw - 10, item_y + 10, stroke=LINE)
+        item_y = my + 8 + row * 28
+        if label == "sep" or kind == "sep":
+            body += line(mx + 10, item_y + 14, mx + mw - 10, item_y + 14, stroke=LINE)
             row += 1
             continue
         if kind == "disabled":
-            body += txt(mx + 18, item_y + 15, label, size=12, fill=LINE)
+            body += txt(mx + 18, item_y + 18, label, size=12, fill=LINE)
             row += 1
             continue
-        body += txt(mx + 18, item_y + 15, label, size=12, fill=INK)
+        body += txt(mx + 18, item_y + 18, label, size=12, fill=INK)
         if shortcut:
-            body += txt(mx + mw - 18, item_y + 15, shortcut, size=11, fill=SOFT, family=F_MONO, anchor="end")
+            body += txt(mx + mw - 18, item_y + 18, shortcut, size=11, fill=SOFT, family=F_MONO, anchor="end")
         row += 1
     # Hover highlight on Save.
-    body += rect(mx + 6, my + 8 + 4 * 22, mw - 12, 22, fill=PINE2, stroke=None, opacity=0.12)
+    body += rect(mx + 6, my + 8 + 4 * 28, mw - 12, 28, fill=PINE2, stroke=None, opacity=0.12)
     # Notes.
     nx = 820
     body += txt(nx, 190, "RULES", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
@@ -1022,8 +1095,8 @@ def fig_menus() -> str:
         [
             "Name commands with verbs.",
             "Show the shortcut beside the item.",
-            "Disable, do not hide, an unavailable command.",
-            "Say why it is unavailable in the status line.",
+            "Disable a command that is unavailable for now.",
+            "Omit one that can never apply to the object.",
             "Every menu command is also searchable.",
             "Quit is always Ctrl+Q.",
         ],
@@ -1033,7 +1106,7 @@ def fig_menus() -> str:
     )
     body += line(nx, 414, 1136, 414, stroke=LINE)
     body += para(nx, 440, 316, "Submenus collect variations of one verb. They do not bury unrelated features. A submenu that exists only to shorten a long menu should be removed.", size=11, leading=17)
-    body += para(nx, 522, 316, "Menu bars stay visible. The application does not move its commands into a hamburger because the window became narrow; it reduces the document instead.", size=11, leading=17)
+    body += para(nx, 522, 316, "Menu bars stay visible. When the window is narrow, whole menus move into More; commands do not become a hamburger.", size=11, leading=17)
     return svg_doc(1200, 760, "A menu bar with an open File menu", "A File menu showing commands, shortcuts, a disabled item and separators, with rules for naming and availability.", body)
 
 
@@ -1048,8 +1121,8 @@ def fig_toolbars() -> str:
     for index, glyph in enumerate(["select", "pen", "line", "rect", "ellipse", "text"]):
         bx = x + 12 + index * 38
         active = index == 1
-        body += rect(bx, y + 36, 30, 22, fill=PINE2 if active else HIGH, stroke=LINE)
-        cx, cy = bx + 15, y + 47
+        body += rect(bx, y + 31, 30, 30, fill=PINE2 if active else HIGH, stroke=LINE)
+        cx, cy = bx + 15, y + 46
         colour = WHITE if active else INK
         if glyph == "select":
             body += path(f"M {cx - 5} {cy - 7} L {cx + 3} {cy + 4} L {cx - 1} {cy + 4} L {cx + 1} {cy + 10} L {cx - 3} {cy + 11} L {cx - 5} {cy + 5} L {cx - 8} {cy + 8} Z", stroke=colour, sw=1.4)
@@ -1070,11 +1143,11 @@ def fig_toolbars() -> str:
     body += txt(x + w - 14, y + 50, "Inspector", size=11, fill=SOFT, anchor="end")
     # Status line example.
     sy = 300
-    body += rect(x, sy, w, 40, fill=PAPER, stroke=INK)
-    body += txt(x + 14, sy + 25, "Pen · dragging a 2 px stroke · 14 objects selected", size=12, fill=INK)
-    state_body, _ = state_chip(x + w - 130, sy + 8, "Current")
+    body += rect(x, sy, w, 26, fill=PAPER, stroke=INK)
+    body += txt(x + 14, sy + 17, "Pen · dragging a 2 px stroke · 14 objects selected", size=12, fill=INK)
+    state_body, _ = state_chip(x + w - 130, sy + 3, "Current")
     body += state_body
-    body += txt(x + w - 150, sy + 25, "Saved 14:02", size=10, fill=SOFT, anchor="end", family=F_MONO)
+    body += txt(x + w - 150, sy + 17, "Saved 14:02", size=11, fill=SOFT, anchor="end", family=F_MONO)
     # Target sizes.
     body += txt(64, 404, "TARGET SIZES", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
     sizes = [(28, "minimum", HIGH, INK), (32, "preferred", HIGH, INK), (36, "primary action", PINE, WHITE)]
@@ -1131,7 +1204,7 @@ def fig_panes() -> str:
 
 def fig_inspector() -> str:
     body = title_block(64, 70, "The inspector explains the object", "Identity, presentation, state and authority, in that order. The inspector describes; it does not become a second application.")
-    x, y, w, h = 64, 160, 420, 520
+    x, y, w, h = 64, 160, 420, 580
     body += rect(x + 6, y + 6, w, h, fill="#17201C18", stroke=None)
     body += rect(x, y, w, h, fill=PAPER, stroke=INK)
     body += pane_head(x, y, w, "Inspector", "object")
@@ -1149,16 +1222,22 @@ def fig_inspector() -> str:
     for index, (name, detail) in enumerate([("In note", "12 rows · 4 columns"), ("Dataframe", "focused editor"), ("Print", "facing page")]):
         ry = y + 262 + index * 34
         body += radio(ix, ry, name, index == 0)
-        body += txt(ix + 110, ry, detail, size=10, fill=SOFT, family=F_MONO)
-    body += txt(ix, y + 382, "AUTHORITY", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=0.7)
-    body += txt(ix, y + 406, "Read", size=11, fill=INK)
-    body += txt(ix + iw, y + 406, "granted", size=11, fill=PINE2, anchor="end", family=F_MONO)
-    body += txt(ix, y + 428, "Write", size=11, fill=INK)
-    body += txt(ix + iw, y + 428, "granted", size=11, fill=PINE2, anchor="end", family=F_MONO)
-    body += txt(ix, y + 450, "Share", size=11, fill=INK)
-    body += txt(ix + iw, y + 450, "denied", size=11, fill=OXIDE, anchor="end", family=F_MONO)
-    body += line(ix, y + 472, ix + iw, y + 472, stroke=LINE)
-    body += txt(ix, y + 494, "The last value is kept while the source is refreshed.", size=10, fill=SOFT)
+        body += txt(ix + 110, ry, detail, size=11, fill=SOFT, family=F_MONO)
+    body += txt(ix, y + 356, "STATE", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=0.7)
+    state_body, _ = state_chip(ix, y + 368, "Current")
+    body += state_body
+    body += txt(ix, y + 406, "Last refresh", size=11, fill=INK)
+    body += txt(ix + iw, y + 406, "14:02", size=11, fill=SOFT, anchor="end", family=F_MONO)
+    body += line(ix, y + 424, ix + iw, y + 424, stroke=LINE)
+    body += txt(ix, y + 444, "AUTHORITY", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=0.7)
+    body += txt(ix, y + 468, "Read", size=11, fill=INK)
+    body += txt(ix + iw, y + 468, "granted", size=11, fill=PINE2, anchor="end", family=F_MONO)
+    body += txt(ix, y + 490, "Write", size=11, fill=INK)
+    body += txt(ix + iw, y + 490, "granted", size=11, fill=PINE2, anchor="end", family=F_MONO)
+    body += txt(ix, y + 512, "Share", size=11, fill=INK)
+    body += txt(ix + iw, y + 512, "denied", size=11, fill=OXIDE, anchor="end", family=F_MONO)
+    body += line(ix, y + 530, ix + iw, y + 530, stroke=LINE)
+    body += txt(ix, y + 552, "The last value is kept while the source is refreshed.", size=11, fill=SOFT)
     # Annotations.
     ax = 540
     body += txt(ax, 190, "WHAT BELONGS", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
@@ -1200,7 +1279,7 @@ def fig_controls() -> str:
     # Buttons.
     body += txt(64, 158, "BUTTONS", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
     body += button(64, 174, 124, "Cancel")
-    body += button(200, 170, 140, "Save note", primary=True, height=36)
+    body += button(200, 174, 140, "Save note", primary=True)
     body += button(352, 174, 132, "Delete", destructive=True)
     body += button(496, 174, 124, "Unavailable", disabled=True)
     # Fields.
@@ -1234,10 +1313,11 @@ def fig_controls() -> str:
     body += line(64, 600, 1136, 600, stroke=LINE)
     body += txt(64, 630, "TARGETS AND SPACING", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
     body += rect(64, 650, 28, 28, fill=HIGH, stroke=INK)
-    body += rect(108, 646, 36, 36, fill=HIGH, stroke=INK)
-    body += rect(160, 650, 28, 28, fill=HIGH, stroke=INK)
-    body += line(196, 664, 220, 664, stroke=OXIDE, sw=1, dash="3 3")
-    body += txt(230, 668, "8 px between targets", size=11, fill=SOFT)
+    body += rect(100, 650, 28, 28, fill=HIGH, stroke=INK)
+    body += line(92, 686, 100, 686, stroke=OXIDE, sw=1, dash="3 3")
+    body += txt(96, 700, "8", size=9, fill=OXIDE, family=F_MONO, anchor="middle")
+    body += rect(144, 646, 32, 32, fill=HIGH, stroke=INK)
+    body += rect(188, 644, 36, 36, fill=HIGH, stroke=INK)
     body += txt(64, 712, "28 minimum · 32 preferred · 36 primary", size=10, fill=SOFT, family=F_MONO)
     body += para(440, 640, 700, "Labels sit above fields and beside choices. Units and shortcuts use the metadata voice. A control that needs a paragraph of explanation needs a different control.", size=11, leading=17)
     return svg_doc(1200, 760, "Control gallery", "Buttons, fields, checkboxes, radio buttons, a slider, tabs and target-size examples.", body)
@@ -1277,7 +1357,7 @@ def fig_focus() -> str:
     body += txt(64, 158, "FOCUS RING", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
     body += rect(64, 180, 260, 150, fill=HIGH, stroke=LINE)
     body += button(96, 222, 150, "Open source", primary=True)
-    body += rect(90, 216, 162, 44, fill="none", stroke=OXIDE, sw=3)
+    body += rect(93, 219, 156, 38, fill="none", stroke=OXIDE, sw=3)
     body += line(252, 200, 286, 200, stroke=OXIDE)
     body += txt(292, 204, "3 px oxide", size=10, fill=OXIDE, family=F_MONO)
     body += line(252, 238, 286, 238, stroke=OXIDE)
@@ -1285,14 +1365,22 @@ def fig_focus() -> str:
     body += txt(64, 360, "Only the focused control carries the ring.", size=10, fill=SOFT)
     # Tab order.
     body += txt(420, 158, "TAB ORDER", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
-    steps = [("1", "Navigator tree"), ("2", "Document body"), ("3", "First embed"), ("4", "Inspector fields"), ("5", "Status actions")]
+    steps = [
+        ("1", "Navigator tree"),
+        ("2", "Splitter after the navigator"),
+        ("3", "Document body"),
+        ("4", "First embed or object"),
+        ("5", "Splitter before the inspector"),
+        ("6", "Inspector fields"),
+        ("7", "Status line actions"),
+    ]
     for index, (number, label) in enumerate(steps):
-        sy = 186 + index * 42
-        body += circle(434, sy - 4, 11, fill=PINE2, stroke=None)
+        sy = 180 + index * 32
+        body += circle(434, sy - 4, 10, fill=PINE2, stroke=None)
         body += txt(434, sy, number, size=10, fill=WHITE, anchor="middle", family=F_MONO, weight="bold")
         body += txt(458, sy, label, size=12, fill=INK)
         if index < len(steps) - 1:
-            body += line(434, sy + 10, 434, sy + 28, stroke=LINE)
+            body += line(434, sy + 8, 434, sy + 20, stroke=LINE)
     # Key table.
     body += txt(64, 430, "KEYS THAT MUST WORK", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
     keys = [
@@ -1379,7 +1467,7 @@ def fig_notes() -> str:
     # Embed 1.
     body += rect(ex, y + 224, ew, 86, fill=HIGH, stroke=LINE)
     body += rect(ex, y + 224, 4, 86, fill=PINE2, stroke=None)
-    body += txt(ex + 16, y + 250, "Generation mix", size=13, weight="bold")
+    body += txt(ex + 16, y + 250, "Generation mix", size=12, weight="bold")
     body += txt(ex + 16, y + 268, "Table · 12 rows · 4 columns · obj:8f3a", size=10, fill=SOFT, family=F_MONO)
     state_body, _ = state_chip(ex + ew - 104, y + 242, "Current")
     body += state_body
@@ -1389,7 +1477,7 @@ def fig_notes() -> str:
     # Embed 2.
     body += rect(ex, y + 328, ew, 86, fill=HIGH, stroke=LINE)
     body += rect(ex, y + 328, 4, 86, fill=AMBER, stroke=None)
-    body += txt(ex + 16, y + 354, "Transition pathways", size=13, weight="bold")
+    body += txt(ex + 16, y + 354, "Transition pathways", size=12, weight="bold")
     body += txt(ex + 16, y + 372, "Diagram · Mermaid source · obj:1b90", size=10, fill=SOFT, family=F_MONO)
     state_body, _ = state_chip(ex + ew - 104, y + 346, "Stale")
     body += state_body
@@ -1401,7 +1489,7 @@ def fig_notes() -> str:
     # Embed 3.
     body += rect(ex, y + 432, ew, 74, fill=HIGH, stroke=LINE)
     body += rect(ex, y + 432, 4, 74, fill=TEAL, stroke=None)
-    body += txt(ex + 16, y + 458, "North Sea currency", size=13, weight="bold")
+    body += txt(ex + 16, y + 458, "North Sea currency", size=12, weight="bold")
     body += txt(ex + 16, y + 476, "Currency · GBP · last read 14:02", size=10, fill=SOFT, family=F_MONO)
     state_body, _ = state_chip(ex + ew - 104, y + 450, "Refreshing")
     body += state_body
@@ -1451,14 +1539,14 @@ def fig_draw() -> str:
             body += path(f"M {cx - 6} {cy + 6} V {cy - 8} M {cx - 2} {cy + 6} V {cy - 8} M {cx + 2} {cy + 6} V {cy - 8} M {cx + 6} {cy + 6} V {cy - 8}", stroke=colour, sw=1.4)
     # Canvas.
     cx0, cy0 = x + palette_w + 28, y + 92
-    cw, ch = 700, 470
+    cw, ch = 736, 414
     body += rect(cx0, cy0, cw, ch, fill=WHITE, stroke=INK)
     for index in range(0, cw, 50):
-        body += line(cx0 + index, cy0 - 16, cx0 + index, cy0, stroke=LINE)
-        body += txt(cx0 + index, cy0 - 22, str(index), size=9, fill=SOFT, family=F_MONO, anchor="middle")
+        body += line(cx0 + index, cy0 - 20, cx0 + index, cy0, stroke=LINE)
+        body += txt(cx0 + index, cy0 - 26, str(index), size=9, fill=SOFT, family=F_MONO, anchor="middle")
     for index in range(0, ch, 50):
-        body += line(cx0 - 16, cy0 + index, cx0, cy0 + index, stroke=LINE)
-        body += txt(cx0 - 20, cy0 + index + 3, str(index), size=9, fill=SOFT, family=F_MONO, anchor="end")
+        body += line(cx0 - 20, cy0 + index, cx0, cy0 + index, stroke=LINE)
+        body += txt(cx0 - 24, cy0 + index + 3, str(index), size=9, fill=SOFT, family=F_MONO, anchor="end")
     for gx in (cx0 + 150, cx0 + 400):
         body += line(gx, cy0, gx, cy0 + ch, stroke=TEAL, sw=1, dash="4 5")
     for gy in (cy0 + 120, cy0 + 360):
@@ -1474,11 +1562,11 @@ def fig_draw() -> str:
     # Inspector.
     ix = cx0 + cw + 20
     body += pane_head(ix, y + 60, w - (ix - x), "Inspector")
-    body += txt(ix + 10, y + 108, "Currency plate", size=13, weight="bold")
+    body += txt(ix + 10, y + 108, "Currency plate", size=12, weight="bold")
     body += txt(ix + 10, y + 124, "Group · 14 objects", size=10, fill=SOFT, family=F_MONO)
-    body += inspector_row(ix + 10, y + 152, 236, "Size", "240 × 180 mm")
-    body += inspector_row(ix + 10, y + 176, 236, "Position", "24, 42 mm")
-    body += inspector_row(ix + 10, y + 200, 236, "Rotation", "0°")
+    body += inspector_row(ix + 10, y + 152, 220, "Size", "240 × 180 mm")
+    body += inspector_row(ix + 10, y + 176, 220, "Position", "24, 42 mm")
+    body += inspector_row(ix + 10, y + 200, 220, "Rotation", "0°")
     body += txt(ix + 10, y + 232, "FILL", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=0.6)
     body += rect(ix + 10, y + 244, 24, 24, fill=HIGH, stroke=INK)
     body += txt(ix + 42, y + 261, "Paper", size=11, fill=INK)
@@ -1545,7 +1633,7 @@ def fig_table() -> str:
     body = title_block(64, 70, "Enfilade Table", "Typed cells, a visible formula bar and a selection that states its own extent. The grid is an editor, not a spreadsheet costume.")
     x, y, w, h = 64, 150, 1072, 540
     body += window_shell(x, y, w, h, "Enfilade Table — Generation mix", ["File", "Edit", "View", "Data", "Object", "Window", "Help"], status="Sum 1,284 GWh · 12 rows · 4 columns", state="Current")
-    cat_w = 200
+    cat_w = 210
     body += rect(x, y + 60, cat_w, h - 86, fill=PAPER, stroke=None)
     body += pane_head(x, y + 60, cat_w, "Categories")
     cats = [("All rows", 12), ("Wind", 5), ("Solar", 3), ("Hydro", 2), ("Imported", 2)]
@@ -1562,15 +1650,18 @@ def fig_table() -> str:
     body += line(fx, y + 94, x + w, y + 94, stroke=LINE)
     body += txt(fx + 12, y + 82, "fx", size=12, fill=SOFT, family=F_MONO, weight="bold")
     body += rect(fx + 36, y + 66, w - cat_w - 48, 22, fill=WHITE, stroke=LINE)
-    body += txt(fx + 48, y + 81, "=SUM(B2:B9)", size=11, fill=INK, family=F_MONO)
+    body += txt(fx + 48, y + 81, "11,040", size=11, fill=INK, family=F_MONO)
     # Grid.
     gx, gy = fx + 12, y + 104
     cols = ["Source", "Capacity", "Output", "Share"]
-    widths = [200, 130, 130, 110]
+    widths = [228, 130, 130, 110]
     for c, (name, cw) in enumerate(zip(cols, widths)):
         cx = gx + sum(widths[:c])
         body += rect(cx, gy, cw, 30, fill=PAPER, stroke=LINE)
-        body += txt(cx + 10, gy + 20, name, size=10, fill=SOFT, weight="bold", family=F_MONO, spacing=0.5)
+        if c == 0:
+            body += txt(cx + 10, gy + 20, name, size=11, fill=SOFT, weight="bold", family=F_MONO, spacing=0.5)
+        else:
+            body += txt(cx + cw - 10, gy + 20, name, size=11, fill=SOFT, weight="bold", family=F_MONO, spacing=0.5, anchor="end")
     data = [
         ("Wind · Dogger Bank", "3.6 GW", "14,210", "38%"),
         ("Wind · Hornsea", "2.8 GW", "11,040", "29%"),
@@ -1585,26 +1676,35 @@ def fig_table() -> str:
             selected = r == 1 and c == 2
             fill = PINE2 if selected else (HIGH if r % 2 == 0 else WHITE)
             body += rect(cxx, cyy, cw, 34, fill=fill, stroke=LINE)
-            body += txt(cxx + 10, cyy + 22, value, size=11, fill=WHITE if selected else INK, family=F_MONO if c else F_UI)
-    # Selection range outline.
-    body += rect(gx + widths[0], gy + 30 + 34, widths[1] + widths[2], 34, fill="none", stroke=OXIDE, sw=2)
+            if c == 0:
+                body += txt(cxx + 12, cyy + 22, value, size=11, fill=WHITE if selected else INK)
+            else:
+                body += txt(cxx + cw - 12, cyy + 22, value, size=11, fill=WHITE if selected else INK, family=F_MONO, anchor="end")
+    # Active cell caret and selection range outline.
+    range_x = gx + widths[0]
+    range_y = gy + 30
+    active_x = range_x + widths[1]
+    active_y = range_y + 34
+    body += line(active_x + 7, active_y + 8, active_x + 7, active_y + 26, stroke=WHITE, sw=1)
+    body += rect(range_x, range_y, widths[1] + widths[2], 68, fill="none", stroke=OXIDE, sw=2)
     # Cell inspector.
-    ix = x + w - 250
-    body += rect(ix, y + 60, 250, h - 86, fill=PAPER, stroke=None)
+    ix = x + w - 240
+    body += rect(ix, y + 60, 240, h - 86, fill=PAPER, stroke=None)
     body += line(ix, y + 60, ix, y + h - 26, stroke=INK)
-    body += pane_head(ix, y + 60, 250, "Cell")
-    body += inspector_row(ix + 14, y + 110, 222, "Address", "C3")
-    body += inspector_row(ix + 14, y + 134, 222, "Type", "number · GWh")
-    body += inspector_row(ix + 14, y + 158, 222, "Value", "14,210")
-    body += inspector_row(ix + 14, y + 182, 222, "Format", "0,000")
+    body += pane_head(ix, y + 60, 240, "Cell")
+    body += inspector_row(ix + 14, y + 110, 212, "Address", "C3")
+    body += inspector_row(ix + 14, y + 134, 212, "Type", "number · GWh")
+    body += inspector_row(ix + 14, y + 158, 212, "Value", "11,040")
+    body += inspector_row(ix + 14, y + 182, 212, "Format", "0,000")
     body += txt(ix + 14, y + 216, "VALIDATION", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=0.6)
     body += txt(ix + 14, y + 240, "Number, 0–99,999", size=11, fill=INK)
     body += txt(ix + 14, y + 262, "No empty cells in this column", size=11, fill=INK)
     body += txt(ix + 14, y + 302, "SELECTION", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=0.6)
     body += txt(ix + 14, y + 326, "B2:C3 · 4 cells", size=11, fill=INK, family=F_MONO)
-    body += txt(ix + 14, y + 348, "Sum 25,250", size=11, fill=PINE2, family=F_MONO)
-    body += txt(ix + 14, y + 370, "Average 6,312.5", size=11, fill=PINE2, family=F_MONO)
-    body += para(ix + 14, y + 402, 222, "A typed value stays a number. The displayed format never becomes the stored value.", size=10, leading=16)
+    body += txt(ix + 14, y + 348, "2 numeric · 2 text", size=10, fill=SOFT, family=F_MONO)
+    body += txt(ix + 14, y + 370, "Sum 25,250 GWh", size=11, fill=PINE2, family=F_MONO)
+    body += txt(ix + 14, y + 392, "Average 12,625 GWh", size=11, fill=PINE2, family=F_MONO)
+    body += para(ix + 14, y + 424, 212, "A typed value stays a number. The displayed format never becomes the stored value.", size=10, leading=16)
     return svg_doc(1200, 760, "Enfilade Table with categories, grid and cell inspector", "A data table with category filters, a formula bar, typed numeric cells, a selected range and a cell inspector.", body)
 
 
@@ -1721,9 +1821,9 @@ def fig_project() -> str:
     for index, (name, identity, detail, state) in enumerate(docs):
         dy = y + 120 + index * 92
         body += rect(cx, dy, 520, 76, fill=HIGH, stroke=LINE)
-        body += txt(cx + 16, dy + 26, name, size=13, weight="bold")
-        body += txt(cx + 16, dy + 46, identity, size=10, fill=SOFT, family=F_MONO)
-        body += txt(cx + 16, dy + 64, detail, size=10, fill=SOFT)
+        body += txt(cx + 16, dy + 26, name, size=12, weight="bold")
+        body += txt(cx + 16, dy + 46, identity, size=11, fill=SOFT, family=F_MONO)
+        body += txt(cx + 16, dy + 64, detail, size=11, fill=SOFT)
         state_body, _ = state_chip(cx + 400, dy + 14, state)
         body += state_body
     body += para(cx, y + 430, 520, "A project remembers which views were open, which panes were collapsed and which objects were pinned. It does not own the objects inside it.", size=11, leading=17)
@@ -1754,7 +1854,7 @@ def fig_embed() -> str:
     body += txt(dx + 18, dy + 54, "North Sea transition", size=16, family=F_DISPLAY, style="italic")
     body += para(dx + 18, dy + 82, dw - 36, "The note contains a table. The table is not copied into the note file.", size=11, leading=16)
     body += rect(dx + 18, dy + 150, dw - 36, 120, fill=PAPER, stroke=LINE)
-    body += txt(dx + 32, dy + 176, "Generation mix", size=13, weight="bold")
+    body += txt(dx + 32, dy + 176, "Generation mix", size=12, weight="bold")
     body += txt(dx + 32, dy + 194, "Table · 12 rows", size=10, fill=SOFT, family=F_MONO)
     state_body, _ = state_chip(dx + dw - 122, dy + 166, "Current")
     body += state_body
@@ -1779,13 +1879,14 @@ def fig_embed() -> str:
     body += inspector_row(px + 18, 334, 304, "State", "current")
     body += txt(px + 18, 372, "A second presentation reads the same object.", size=10, fill=SOFT)
     # States.
-    body += txt(64, 612, "WHEN THE PROMISE BREAKS", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
-    states = [("Opaque", "unknown object type"), ("Unavailable", "provider absent"), ("Stale", "source changed"), ("Malformed", "payload unreadable"), ("Denied", "grant refused")]
+    body += txt(64, 612, "HOW RESOLUTION ENDS", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
+    states = [("Resolved", "provider answered"), ("Opaque", "unknown object type"), ("Unavailable", "provider absent"), ("Malformed", "payload unreadable")]
     for index, (name, detail) in enumerate(states):
         sx = 64 + index * 216
-        body += rect(sx, 630, 200, 58, fill=HIGH, stroke=OXIDE if name in {"Denied", "Malformed"} else LINE)
+        body += rect(sx, 630, 200, 58, fill=HIGH, stroke=PINE2 if name == "Resolved" else (OXIDE if name == "Malformed" else LINE))
         body += txt(sx + 12, 652, name, size=12, weight="bold")
         body += txt(sx + 12, 672, detail, size=10, fill=SOFT, family=F_MONO)
+    body += para(944, 638, 192, "Only a resolved embed carries a live state: Current, Refreshing, Stale, Broken or Denied.", size=10, leading=15)
     body += para(64, 710, 1072, "No state deletes the embed or flattens it into pixels. The last readable value remains visible, with its state and the operation that would restore it.", size=11, leading=16)
     return svg_doc(1200, 760, "Embed envelope and provider", "A document embed pointing to a provider-owned object, with the five failure states listed below.", body)
 
@@ -1825,14 +1926,16 @@ def fig_localization() -> str:
     body = title_block(64, 70, "Language is not a later coat of paint", "Pseudo-locales expose hard-coded widths, concatenated strings and left-to-right assumptions before translation begins.")
     # LTR expanded.
     x, y, w, h = 64, 160, 480, 340
-    body += window_shell(x, y, w, h, "Facet Notes — Ŵöŕļď ťŕáńšîťîöń", ["Fîļé", "Édîť", "Vîéŵ", "Héļþ"], status="Ŝávéď · 3 émбédš", state="Current")
-    body += txt(x + 22, y + 96, "Ťŕáńšîťîöń þáťĥŵáýš", size=20, family=F_DISPLAY, style="italic")
-    body += para(x + 22, y + 124, w - 44, "Ťĥé ťŕáńšîťîöń îš ńöť öńé déçîšîöń бůť á šéqůéńçé öf šмáļļ öńéš.", size=11, leading=17)
-    body += button(x + 22, y + 214, 160, "Éхþöŕť áš PDF", primary=True, height=38)
-    body += button(x + 194, y + 214, 130, "Çáńçéļ", height=38)
-    body += txt(x + 22, y + 284, "Strings expand by at least 35%.", size=10, fill=OXIDE, family=F_MONO)
+    body += txt(x, 150, "EN-XA · +35% MINIMUM", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
+    body += window_shell(x, y, w, h, "Facet Notes — ⟦Ŵöŕļď ťŕáńšîťîöń ··⟧", ["⟦Fîļé⟧", "⟦Édîť⟧", "⟦Vîéŵ⟧", "⟦Héļþ⟧"], status="⟦Ŝávéď · 3 émбédš ····⟧", state="Current")
+    body += txt(x + 22, y + 96, "⟦Ťŕáńšîťîöń þáťĥŵáýš ···⟧", size=20, family=F_DISPLAY, style="italic")
+    body += para(x + 22, y + 124, w - 44, "⟦Ťĥé ťŕáńšîťîöń îš ńöť öńé déçîšîöń бůť á šéqůéńçé öf šмáļļ öńéš. ······⟧", size=11, leading=17)
+    body += button(x + 22, y + 216, 190, "⟦Éхþöŕť áš PDF ·⟧", primary=True, height=36)
+    body += button(x + 224, y + 218, 130, "⟦Çáńçéļ ·⟧", height=32)
+    body += txt(x + 22, y + 292, "Controls grow; labels do not clip.", size=10, fill=OXIDE, family=F_MONO)
     # RTL mirrored.
     x2 = 656
+    body += txt(x2, 150, "AR-XB · MIRRORED", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
     body += window_shell(x2, y, 480, h, "مفكرة الأوجه — انتقال بحر الشمال", ["ملف", "تحرير", "عرض", "مساعدة"], status="محفوظ · ٣ كائنات", state="Current", rtl=True)
     body += txt(x2 + w - 22, y + 96, "انتقال بحر الشمال", size=20, family=F_DISPLAY, style="italic", anchor="end")
     body += para(x2 + w - 22, y + 124, w - 44, "الانتقال ليس قراراً واحداً بل سلسلة من القرارات الصغيرة. يبقى كل مصدر قابلاً للتحرير، ويحتفظ كل كائن بهويته.", size=11, leading=17, anchor="end")

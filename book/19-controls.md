@@ -30,8 +30,8 @@ A button performs an action. Its label is a verb phrase in sentence case:
   the default action of a routine form.
 - A disabled button remains visible and explains why it is unavailable in a
   tooltip and to assistive technology.
-- Button heights are 28 pixels minimum, 32 preferred and 36 for a primary
-  action in a dialog.
+- Button heights are 28 pixels minimum and 32 preferred. A dialog button is 32
+  pixels minimum; a primary action in a dialog is 36.
 
 ## Fields
 

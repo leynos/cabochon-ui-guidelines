@@ -33,10 +33,12 @@ direction of the interface.
 A typical document window orders its stops as follows.
 
 1. The navigator tree.
-2. The document body.
-3. The first embed or object in the document.
-4. The inspector fields.
-5. The status line actions.
+2. The splitter after the navigator, where one exists.
+3. The document body.
+4. The first embed or object in the document.
+5. The splitter before the inspector, where one exists.
+6. The inspector fields.
+7. The status line actions.
 
 A composite control is one tab stop. Arrow keys move within it: between the
 items of a list, the cells of a grid, the options of a radio group or the tabs
@@ -92,9 +94,10 @@ Focus and selection are different. Focus says where the keyboard will act;
 selection says what the next command will affect. A focused row is not
 necessarily selected, and a selected row may be outside the focus.
 
-The interface must show both. A selected row in an inactive pane keeps its
-fill; a focused row in an active pane carries the ring. A command that acts on
-the selection must remain enabled while the document has focus, even if the
+The interface must show both. A selected row in an inactive pane becomes a
+pine-2 outline with an ink label; the fill is reserved for the active pane. A
+focused row in an active pane carries the ring. A command that acts on the
+selection must remain enabled while the document has focus, even if the
 selection was made in another pane.
 
 ## Testing

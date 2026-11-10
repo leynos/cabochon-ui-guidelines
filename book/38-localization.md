@@ -49,12 +49,14 @@ user finds them. A missing key must fail the pseudo-locale gate.
 
 Text grows when it is translated. The layout must absorb the growth.
 
-- Labels wrap or truncate with an ellipsis and a tooltip; they do not overlap
-  their neighbours.
+- Menu items and button labels do not truncate; the control grows or the label
+  wraps. Table cells and metadata truncate at the end with an ellipsis and a
+  tooltip. No label may overlap its neighbour.
 - Buttons and fields have a minimum size, not a fixed size derived from
   English text.
-- A toolbar that cannot fit its tools overflows into the **More** menu rather
-  than shrinking the targets below 28 pixels.
+- A menu bar that cannot fit its menus moves whole menus into **More**. A tool
+  strip that cannot fit its commands moves a whole group into its overflow
+  menu. Neither shrinks a target below 28 pixels.
 - A dialog that grows beyond the window reflows or scrolls; it does not clip.
 - A status line may shorten its message but must keep its state and its
   object count.
@@ -74,6 +76,8 @@ Direction is a property of the interface, not of each widget.
   direction of the interface.
 - Hit regions and focus order mirror with the layout.
 - Scrollbars move to the reading edge's far side.
+- Position is described with leading and trailing edges, not left and right,
+  except where a rule is deliberately absolute.
 
 A document's content keeps its own direction. An Arabic note inside an English
 interface is right-to-left; an English quotation inside an Arabic interface is

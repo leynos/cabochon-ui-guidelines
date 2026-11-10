@@ -51,6 +51,7 @@ reduced, not reorganised.
 | Tool strip icon | 28 px   | 30 px     | —              |
 | Menu item       | 28 px   | 30 px     | —              |
 | Dialog button   | 32 px   | 36 px     | 36 px          |
+| Window control  | 28 px   | 28 px     | —              |
 
 The minimum is a floor for dense instruments such as Enfilade Table. A primary
 action in a dialog must use the preferred size even when the rest of the dialog
@@ -99,7 +100,7 @@ window. It uses the vocabulary and colours of
 [Live relationships](08-live-relationships.md): **Current**, **Refreshing**,
 **Stale**, **Broken** or **Denied**.
 
-The chip is 20 pixels high with 10-pixel metadata type and a 6-pixel dot. It
+The chip is 20 pixels high with 11-pixel metadata type and a 6-pixel dot. It
 must never be the only indication of a problem; the affected object also
 carries a mark. The chip is a summary, not a notification.
 

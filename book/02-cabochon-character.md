@@ -7,7 +7,7 @@ summary: The compact, document-centred character that every surface must share.
 
 # Cabochon character
 
-![One small world in three rings.](../figures/fig-02-small-world.svg)
+![The four structural choices of the Cabochon character.](../figures/fig-02-small-world.svg)
 
 A Cabochon surface should feel like a well-made instrument on a quiet desk. The
 screen holds one piece of work, the tools for that work sit close to it, and

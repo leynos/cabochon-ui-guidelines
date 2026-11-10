@@ -100,7 +100,8 @@ The extent must be visible whenever a command could act on more than one thing.
   handles on touch.
 - Cell selection uses the pine-2 fill for the anchor and a 2-pixel oxide
   outline for the range.
-- Object selection uses a 2-pixel oxide outline with 4-pixel corner handles.
+- Object selection uses a 2-pixel oxide outline with 8-pixel square corner
+  handles.
 - A selection that crosses several objects shows one outline around the group
   and a separate outline around each member.
 

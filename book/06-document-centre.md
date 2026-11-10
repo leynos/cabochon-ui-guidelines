@@ -39,15 +39,20 @@ Rules for the plane:
 
 ## Chrome proportions
 
-At a 1280 by 800 window, the chrome should not exceed roughly one fifth of the
-area. The default allocations are:
+At a 1280 by 800 window, the horizontal chrome bands — masthead, title bar,
+menu bar and status line — should not exceed roughly one fifth of the area.
+Those bands total 130 pixels, about 16 per cent, when the optional 44-pixel
+masthead is present.
+
+Side panes are budgeted separately, because they hold working content rather
+than chrome:
 
 - a 126-pixel rail when the instrument has a persistent category list;
-- a 44-pixel masthead carrying the instrument name and its primary command;
-- a 31-pixel title bar;
-- a 29-pixel menu bar;
-- a 26-pixel status line;
 - a 240-pixel inspector when the instrument has one.
+
+With both side panes and the horizontal bands, the document plane still keeps
+at least 55 per cent of the window. That is the binding test, not the one-fifth
+figure in isolation.
 
 An instrument that needs more chrome should first ask whether a pane, a sheet
 or the command palette would serve better. Chrome is persistent; a sheet is not.

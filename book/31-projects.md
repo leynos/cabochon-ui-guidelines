@@ -22,9 +22,11 @@ The project window has three regions.
   with their identities, details and states.
 - A 280-pixel identity panel on the right, explaining the selected document.
 
-The window's status line reports the number of documents, objects and links.
-The identity panel is read-only except for renaming and pinning; editing
-belongs to the document's own instrument.
+The project tree and identity panel use wider defaults than the standard panes
+because they carry identity metadata; both remain above the 210-pixel navigator
+and 240-pixel inspector minimums. The window's status line reports the number
+of documents, objects and links. The identity panel is read-only except for
+renaming and pinning; editing belongs to the document's own instrument.
 
 ## The tree
 
@@ -46,7 +48,7 @@ project is explicitly file-backed.
 
 Each document row shows:
 
-- its name, in 13-pixel interface bold;
+- its name, in 12-pixel interface bold;
 - its identity, in 11-pixel metadata;
 - a short detail, such as "3 embeds · updated 14:02";
 - its live state chip.

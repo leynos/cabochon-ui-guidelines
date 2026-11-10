@@ -27,8 +27,8 @@ The body is divided into four blocks.
 1. **Identity.** Object identity, provider, revision and parent.
 2. **Presentation.** Every presentation of the object, with the current one
    selected.
-3. **Authority.** The capabilities that allow read, write, share and export.
-4. **State.** The live relationship state and its last successful update.
+3. **State.** The live relationship state and its last successful update.
+4. **Authority.** The capabilities that allow read, write, share and export.
 
 A fifth block for instrument-specific properties may follow, but it must not
 push identity below the fold.

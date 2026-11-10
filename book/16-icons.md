@@ -19,11 +19,11 @@ by a label. A disabled icon uses line and is removed from the focus order.
 
 ## Sizes
 
-| Size | Use                                              |
-| ---- | ------------------------------------------------ |
-| 16   | Inline with metadata, table rows and tree leaves |
-| 20   | Menu items and compact controls                  |
-| 24   | Tool strip and primary actions                   |
+| Size | Use                                                       |
+| ---- | --------------------------------------------------------- |
+| 16   | Inline with metadata, table rows, tree leaves, tool strip |
+| 20   | Compact controls and dense pane heads                     |
+| 24   | Primary actions and standalone icon buttons               |
 
 The stroke scales with the size: 1.25 pixels at 16, 1.5 at 20 and 2 at 24, so
 that the optical weight stays constant. Icons are drawn at the target size, not

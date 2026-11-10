@@ -65,7 +65,7 @@ the note and carries:
 
 - a 4-pixel state edge on its leading side, in the colour of its relationship
   state;
-- the object's name in 13-pixel interface bold;
+- the object's name in 12-pixel interface bold;
 - its type, size and identity suffix in 11-pixel metadata;
 - a state chip at the trailing edge;
 - a compact presentation of its content.

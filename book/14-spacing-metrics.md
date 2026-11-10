@@ -14,16 +14,16 @@ rhythm and makes a layout review a matter of arithmetic rather than taste.
 
 ## The scale
 
-| Step | Use                                              |
-| ---- | ------------------------------------------------ |
-| 4    | Icon-to-label gap, hairline breathing room       |
-| 8    | Gap between related controls, chip padding       |
-| 12   | Gap between groups inside a pane                 |
-| 16   | Pane padding, standard block gap                 |
-| 24   | Separation between sections                      |
-| 32   | Separation between major regions                 |
-| 48   | Page margin in a document plane                  |
-| 64   | Outer margin in a studio or presentation surface |
+| Step | Use                                                           |
+| ---- | ------------------------------------------------------------- |
+| 4    | Hairline breathing room                                       |
+| 8    | Icon-to-label gap, gap between related controls, chip padding |
+| 12   | Gap between groups inside a pane                              |
+| 16   | Pane padding, standard block gap                              |
+| 24   | Separation between sections                                   |
+| 32   | Separation between major regions                              |
+| 48   | Page margin in a document plane                               |
+| 64   | Outer margin in a studio or presentation surface              |
 
 Use 4, 8, 12 and 16 for rhythm inside a pane; use 24, 32, 48 and 64 for
 structure between regions. A value outside the scale is a defect unless it is a
@@ -41,17 +41,22 @@ never 10.
 
 The shared dimensions are:
 
+- masthead 44 pixels, on studio surfaces;
 - title bar 31 pixels;
 - menu bar 29 pixels;
 - tool strip 30 pixels;
 - tool button 30 by 30 pixels;
+- window control 28 by 28 pixels with a 16-pixel glyph;
 - pane head 28 pixels;
 - tree and list row 28 pixels;
+- formula bar 34 pixels;
 - status line 26 pixels;
 - inspector 240 pixels;
 - notes tree 210 pixels;
 - rail 126 pixels;
-- dialog button 32 pixels high, 36 for the primary action.
+- splitter 6 pixels visible, 8 pixels hit;
+- selection handle 8 by 8 pixels;
+- dialog button 32 pixels minimum, 36 for the primary action.
 
 An instrument may not redefine these values. It may add a component, and that
 component's dimension belongs in this chapter before it ships.
@@ -60,12 +65,13 @@ component's dimension belongs in this chapter before it ships.
 
 The target is the region that accepts a pointer, not the glyph drawn inside it.
 
-| Target        | Minimum | Preferred | Primary |
-| ------------- | ------- | --------- | ------- |
-| Any control   | 28 px   | 32 px     | 36 px   |
-| Tool strip    | 28 px   | 30 px     | —       |
-| Menu item     | 28 px   | 30 px     | —       |
-| Dialog action | 32 px   | 36 px     | 36 px   |
+| Target         | Minimum | Preferred | Primary |
+| -------------- | ------- | --------- | ------- |
+| Any control    | 28 px   | 32 px     | 36 px   |
+| Tool strip     | 28 px   | 30 px     | —       |
+| Menu item      | 28 px   | 30 px     | —       |
+| Window control | 28 px   | 28 px     | —       |
+| Dialog action  | 32 px   | 36 px     | 36 px   |
 
 A 16-pixel icon may sit inside a 28-pixel target; the target is the contract.
 Hit slop may extend 4 pixels beyond a drawn glyph, but it must not overlap a

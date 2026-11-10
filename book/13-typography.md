@@ -2,7 +2,7 @@
 title: Typography
 part: Visual language
 figure: fig-08-type.svg
-summary: Three voices, seven sizes and the floors that keep interface text readable.
+summary: Three voices, eight sizes and the floors that keep interface text readable.
 ---
 
 # Typography
@@ -17,7 +17,8 @@ metadata accounts. They do not trade places.
 **Display** is Georgia italic, or a compatible serif with a true italic. It
 appears in chapter and cover titles, plate marks, pull quotes and the titles of
 studio documents. It is never used for controls, labels or running interface
-text.
+text. The single **Subtitle** row at 18 pixels uses the same face for an
+object's name at the head of an inspector; that is a title, not running text.
 
 **Interface** is a humanist sans. It carries menus, labels, buttons, pane
 heads, dialog text and short prose in panels. The reference figures use DejaVu
@@ -35,6 +36,7 @@ not a stylistic choice.
 | --------- | ------------------ | ------------------ | ------------------------- |
 | Display   | 42–96 / 0.95       | Georgia italic     | Chapter and cover titles  |
 | Title     | 24–32 / 1.1        | Georgia italic     | Tool and document titles  |
+| Subtitle  | 18 / 1.2           | Georgia italic     | Inspector object names    |
 | Section   | 16–20 / 1.2        | Humanist sans bold | Pane and dialog headings  |
 | Body      | 15–16 / 1.6        | Georgia or sans    | Notes and long-form prose |
 | Interface | 12 / 1.35          | Humanist sans      | Controls, labels, menus   |
@@ -92,7 +94,7 @@ Text that does not fit must be handled deliberately.
 
 ## Localization
 
-The type scale must survive translation. A label that grows by 30 per cent must
+The type scale must survive translation. A label that grows by 35 per cent must
 not break its control; the layout should allow the label to wrap or the control
 to grow. Pseudo-localization is part of the release gate, as described in
 [Localization](38-localization.md).

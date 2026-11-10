@@ -15,7 +15,7 @@ visible.
 
 The dataframe editor uses a categories pane, a grid and a cell inspector.
 
-- Categories pane: 200 pixels, listing saved filters with their row counts.
+- Categories pane: 210 pixels, listing saved filters with their row counts.
 - Formula bar: 34 pixels, directly below the menu bar, showing the selected
   cell's expression or value.
 - Grid: the flexible remainder.
@@ -27,10 +27,10 @@ inspector are not: they are how the instrument explains what a cell is.
 
 ## The grid
 
-- Header row: 30 pixels, with column names in 10-pixel metadata, bold and
+- Header row: 30 pixels, with column names in 11-pixel metadata, bold and
   letter-spaced.
 - Body rows: 28 pixels minimum, 34 preferred.
-- Cell padding: 10 pixels horizontally.
+- Cell padding: 12 pixels horizontally.
 - Grid lines: 1 pixel in line; horizontal lines only when row density
   requires them.
 - Alternating rows use high and white, not a tint.

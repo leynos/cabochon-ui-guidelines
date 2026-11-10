@@ -83,7 +83,7 @@ reviewer has seen the behaviour, not that the code appears to implement it.
 - [ ] Every interactive object is reachable by keyboard in a logical order.
 - [ ] The focus ring is 3 pixels of oxide at 3 pixels offset.
 - [ ] Focus returns to the opener when a dialog closes.
-- [ ] Targets are at least 28 pixels; primary actions are 36.
+- [ ] Targets are at least 28 pixels; a dialog's primary action is 36.
 - [ ] Every icon-only button has an accessible name.
 - [ ] A drag interaction has a keyboard alternative.
 - [ ] The command palette opens with Control+K and announces its results.
