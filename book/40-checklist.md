@@ -20,8 +20,10 @@ reviewer has seen the behaviour, not that the code appears to implement it.
 - [ ] One Lapidary scene describes the document, its controls and its hit
       regions.
 - [ ] The scene is exportable and can be compared with the display.
-- [ ] Export produces the full bundle: PDF, print PDF, raster, thumbnail,
-      accessibility, clipboard, hit map and manifest.
+- [ ] The conformance export produces the full bundle: PDF, print PDF, raster,
+      thumbnail, accessibility, clipboard, hit map and manifest. An ordinary
+      user export produces only the file the user asked for and its manifest
+      entry.
 - [ ] The manifest records identities, revisions, presentations and any
       substitutions, and declares which identity fields apply to the scene.
 - [ ] A substrate-only scene needs no semantic object identity, revision or
@@ -133,12 +135,21 @@ reviewer has seen the behaviour, not that the code appears to implement it.
 ## Output
 
 - [ ] Display, PDF, print, raster, thumbnail, clipboard, accessibility, hit
-      map and manifest agree with the scene within the declared tolerances.
+      map and manifest agree with the scene within the declared tolerances for
+      their declared intent, not across unrelated intents.
+- [ ] Application chrome, guides, grids and selection handles are excluded from
+      document output, while intended state marks remain.
+- [ ] Every artefact and its manifest identify one accepted snapshot.
+- [ ] The bundle is staged and published as a unit; a failure leaves the
+      previous published bundle intact.
 - [ ] Text remains text in PDF and in the accessibility tree.
-- [ ] Guides, grids and selection handles never print.
-- [ ] Fonts are embedded or a substitution is recorded.
+- [ ] Fonts are embedded; a permitted substitution is still embedded where the
+      chosen profile requires it, and is recorded in the manifest.
 - [ ] A colour outside the target's gamut is reported before export.
-- [ ] The hit map describes the objects that were drawn.
+- [ ] The hit map describes the same instances that were drawn.
+- [ ] A preflight override changes only a waivable policy outcome; it never
+      grants authority or makes structurally invalid output conformant.
+- [ ] A PDF/X claim is made only by a profile that validates the chosen level.
 
 ## Localization and access
 

@@ -145,7 +145,9 @@ source exports as text. SVG is a supported vector encoding in the studio
 profile, not a separate Burin target. The export must preserve the drawing's
 geometry and its text as text where the target supports it, and it must
 identify the source revision and presentation intent it rendered. The
-instrument must not flatten the source into the drawing on export.
+instrument must not flatten the source into the drawing on export. These are
+user exports; they do not create the eight-artefact conformance bundle, which
+is a separate review command.
 
 ## What the diagram is not
 

@@ -145,6 +145,9 @@ definition, depending on the selection.
   bundle when the user asks for a type-preserving export.
 - The export manifest records the table's identity, revision, encoding, declared
   losses and any computed columns that were evaluated.
+- The export is a user export, not a conformance bundle: it writes the requested
+  table file and its manifest, not unrelated renderings. A conformance bundle
+  is a separate review command.
 
 ## What Enfilade Table is not
 

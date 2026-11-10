@@ -27,10 +27,13 @@ It is not a demo. It is the program that fails loudly when a contract regresses.
 - The status line reports the document and the last export time.
 
 The document is read-only and there is only one window, so the menu bar omits
-**Edit** and **Window**. It also omits **New**, **Open**, **Save** and
-**Print**, which have nothing to act on. A menu bar shows only menus that
-contain at least one command; the exemption is recorded here so that the
-reference application is not mistaken for a contract violation.
+**Edit** and **Window**. It also omits **New**, **Open** and **Save**, which
+have nothing to act on. It omits **Print** as a deliberate fixture-surface
+exemption: the fixed document is printable, and the print target is still
+proved by the export bundle. The omission is about the reference surface, not
+about printable content. A menu bar shows only menus that contain at least one
+command; the exemption is recorded here so that the reference application is
+not mistaken for a contract violation.
 
 Every menu, string, icon and shortcut is loaded from Escutcheon resources. The
 application must not hard-code a menu or a label. Changing the resource bundle
@@ -73,6 +76,14 @@ All eight come from the same scene. Geometry, text placement, clipping and
 metadata must agree within the tolerances in
 [Output parity](37-output-parity.md). The accessibility and hit-map outputs
 must describe the same nodes that were drawn.
+
+The eight artefacts form a **conformance bundle**, not the shape of every user
+export. They are produced by the review command that proves the contract, and
+they all read one accepted snapshot: the scene revision, the presentation
+intents, the authority decision and the renderer version. A user who exports
+one PNG or one PDF receives that file and its manifest entry, not the other
+seven artefacts. The conformance bundle is staged and published as a unit, so
+an interrupted review never pairs new content with an old manifest.
 
 ## Identity in a substrate-only scene
 

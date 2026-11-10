@@ -91,14 +91,20 @@ stack.
 ## Print and export
 
 Burin Draw submits its scene to the shared Burin output contract. Display, PDF,
-print, raster and clipboard targets all read the same scene.
+print, raster and clipboard targets read the same resolved scene for their
+declared intent.
 
+- The display intent resolves the editing view; the print intent resolves the
+  print presentation at the declared output intent. Geometry is compared only
+  where the participation policy includes the same nodes.
 - A document with a declared physical size prints at that size, with crop
   marks only when the user asks for them.
 - A document without a physical size prints at a declared scale, shown in the
   print surface.
 - Guides, grid and selection handles never print.
 - Text remains selectable in PDF and readable in the accessibility tree.
+- The export reads one accepted snapshot and stages its output before
+  publication, so an interruption never pairs new pages with an old manifest.
 
 ## What Burin Draw is not
 

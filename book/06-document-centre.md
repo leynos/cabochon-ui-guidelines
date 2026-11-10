@@ -72,6 +72,14 @@ suggests otherwise: the interface should say "open the object", not "open a
 copy"; "change the presentation", not "convert"; "insert a reference", not
 "paste the values".
 
+Each presentation is resolved for a declared intent. The same object may have a
+display presentation, a print presentation and a thumbnail presentation, and
+those are not required to be pixel-identical. They are required to describe the
+same object, the same accepted revision and the same state. A change of print
+presentation is a recorded choice, not a conversion of the object, and a
+paginated page layout is not compared with a scrolling editing view as though
+the two were the same projection.
+
 ## Documents and instruments
 
 An instrument is replaceable. A document is not. Facet Notes may be replaced by

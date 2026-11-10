@@ -212,6 +212,12 @@ counts, its search keywords, and its diagnostic entries.
   runtime knows and the user may inspect. The interface discloses that the
   assessment may be incomplete rather than enumerating protected objects.
 
+Publication is a disclosure. Authority is revalidated immediately before an
+artefact leaves the runtime, including a print handoff or an export bundle
+publication. A revocation during rendering prevents the affected artefact from
+being published, and a cached value never becomes publishable merely because it
+is cached. The output chapters define the staging and publication boundary.
+
 ## Aggregating child states
 
 A document, note or project may contain children in different states. Its

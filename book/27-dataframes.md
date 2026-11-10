@@ -167,6 +167,16 @@ fixed and show a row count in the status line. It must not block the interface
 while sorting or filtering; a long operation shows progress and can be
 cancelled.
 
+## Export
+
+A dataframe export is a user export: CSV, TSV, Parquet or a Cabochon table
+bundle. It names its encoding, its declared losses and the snapshot it read. A
+plain delimited file cannot carry declared types, references or live values, so
+the export states those losses rather than implying they survived. A
+type-preserving export uses the table bundle or a sidecar schema. The export
+does not create the eight-artefact conformance bundle, which is a separate
+review command.
+
 ## What the dataframe is not
 
 - A free-form grid where every cell may hold a different type without

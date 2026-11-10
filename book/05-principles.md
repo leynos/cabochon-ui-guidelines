@@ -48,12 +48,20 @@ describe the rules.
 Every object that appears on screen can also be printed, exported to PDF,
 rendered as a raster image, copied with usable geometry and read by an
 accessibility client. Output is not a screenshot of a window; it is a second
-rendering of the same scene through a different Burin target.
+rendering of the same resolved scene through a different Burin target.
+
+Parity is claimed between outputs of the same declared intent, not between every
+visible pixel and every file. A print intent may choose a different presentation
+for a live object, and that choice is recorded. Application chrome, guides,
+grids and selection handles are excluded from document output by the
+participation policy, while state marks that belong to an object remain. A
+diagnostic whole-interface export is a separate operation that declares that it
+includes chrome.
 
 The principle forbids a class of shortcuts: drawing directly to the screen,
 composing a PDF from a separate code path, or treating accessibility as a text
 dump attached after the fact. The [output parity](37-output-parity.md) chapter
-states the tolerances.
+states the intents, the participation policy and the tolerances.
 
 ## State speaks
 

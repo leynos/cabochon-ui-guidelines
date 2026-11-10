@@ -85,7 +85,10 @@ disagree with it.
   <https://www.unicode.org/reports/tr9/>. The basis for the direction rules in
   [Localization](38-localization.md).
 - **PDF 1.7 and PDF/X-4.** The output intents and preflight rules in
-  [Cabochon Press](34-cabochon-press.md) assume these specifications.
+  [Cabochon Press](34-cabochon-press.md) assume these specifications. PDF/X
+  conformance is claimed only by an output profile that validates the chosen
+  level; other output is described as PDF with a declared colour intent and is
+  not called PDF/X.
 
 ## A note on borrowing
 
