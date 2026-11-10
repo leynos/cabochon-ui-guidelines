@@ -2,7 +2,7 @@
 title: Embeds
 part: The workspace
 figure: fig-29-embed.svg
-summary: The envelope, the provider and the five ways a promise can bend without breaking.
+summary: The envelope, the provider and the four ways resolution can end.
 ---
 
 # Embeds
@@ -36,15 +36,23 @@ The interface consequence is that an embed can fail independently of the
 document. The document remains open, printable and exportable while one embed
 is unavailable.
 
-## The five failure states
+## Resolution states
 
-| State       | Meaning                                        | What remains                |
-| ----------- | ---------------------------------------------- | --------------------------- |
-| Opaque      | The bytes are intact; no provider is installed | Export original             |
-| Unavailable | The provider exists but cannot load the object | Name, identity, retry       |
-| Stale       | The source changed; the cached view is older   | Last readable value         |
-| Malformed   | The provider rejected the payload              | Name, identity, diagnosis   |
-| Denied      | The capability to read was refused             | Name and state, never value |
+Resolution asks whether this machine can turn the envelope into a presentation.
+It is separate from the live relationship state.
+
+| Resolution  | Meaning                                        | What remains                        |
+| ----------- | ---------------------------------------------- | ----------------------------------- |
+| Resolved    | A provider loaded the object                   | The presentation and its live state |
+| Opaque      | The bytes are intact; no provider is installed | Export original                     |
+| Unavailable | The provider exists but cannot load the object | Name, identity, retry               |
+| Malformed   | The provider rejected the payload              | Name, identity, diagnosis           |
+
+Only a **Resolved** embed carries one of the five live states from
+[Live relationships](08-live-relationships.md). An Opaque, Unavailable or
+Malformed embed has no live state and shows its resolution state instead. Stale
+and Denied are properties of a resolved relationship, not alternative
+resolution states.
 
 Opaque is not a failure of the document. It is a promise kept: the content is
 preserved even though this machine cannot render it. The placeholder must say
@@ -52,14 +60,15 @@ so and offer **Export original**.
 
 ## Inserting an embed
 
-The insertion flow has four steps.
+Insertion is one action with one undo step. The user chooses an object from the
+project, the clipboard or a provider's picker, chooses one of the available
+presentations in the same surface, and confirms once. The embed appears with
+its resolution state and, once resolved, its live state; the document is marked
+modified.
 
-1. The user chooses an object from the project, the clipboard or a provider's
-   picker.
-2. The document shows the available presentations for that object.
-3. The user chooses one and confirms.
-4. The embed appears with its state edge and chip, and the document is marked
-   modified.
+If the provider cannot resolve the object, the embed is still inserted in its
+resolution state. The reference is never silently discarded because a provider
+is missing.
 
 The flow must not insert a rendered image by default. If the user wants an
 image, **Export** and **Insert image** are separate commands.

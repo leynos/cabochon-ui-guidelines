@@ -34,7 +34,9 @@ A Cabochon dialog has five parts.
 - An identity block naming the affected object, with its type, revision and
   identity suffix.
 - Optional choices, such as **Keep a copy in this note**.
-- Actions at the bottom right: a safe action and the confirming action.
+- Actions at the bottom right: a safe action, an optional alternative such as
+  **Discard**, and the confirming action. Three actions is the practical
+  maximum; a fourth question belongs in a different surface.
 
 The dialog uses the overlay plane and the offset shadow. Its width is between
 420 and 560 pixels; a dialog that needs more should become a sheet or a pane.

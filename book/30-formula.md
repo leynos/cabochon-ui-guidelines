@@ -66,8 +66,14 @@ is granted.
   result.
 - The tool must not request a broader capability than the expression uses.
 
-The grant is scoped to the invocation. The tool does not retain it after the
-popover closes.
+The grant that authorizes the preview is scoped to the invocation. It permits
+the computation the user is about to see and the insertion that follows, and
+the tool does not retain it after the popover closes.
+
+Preview authority and object authority are different. An inserted value
+receives its own delegated grant, recorded with its identity, which the host
+may revoke at any time. The interface must never imply that insertion preserves
+the popover's grant.
 
 ## The result
 
@@ -87,7 +93,11 @@ The result must never be a value that the authority block does not justify.
 **Insert live value** inserts a live value object into the document at the
 selection, or into the focused note at the caret.
 
-- The inserted value keeps the expression, its sources and its capabilities.
+- The inserted value records the expression, its sources and the capabilities
+  it needs.
+- Those capabilities are delegated to the new object, not borrowed from the
+  popover. The object may refresh only while the host grants them; a refusal
+  moves it to **Denied**.
 - It has its own identity and can be inspected, refreshed and exported.
 - It is not a pasted number.
 - It is not a private macro that only this application can evaluate.

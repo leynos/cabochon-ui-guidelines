@@ -30,8 +30,10 @@ reviewer has seen the behaviour, not that the code appears to implement it.
 
 - [ ] Title bar 31, menu bar 29, tool strip 30, status line 26.
 - [ ] The window has one document plane and no decorative gradient.
-- [ ] Menus follow File, Edit, View, instrument, Window, Help.
-- [ ] Ellipses mark commands that open a further surface.
+- [ ] Menus follow File, Edit, View, instrument, Window, Help, omitting any menu
+      with no commands.
+- [ ] Ellipses mark commands that request further information before acting;
+      immediate commands have none.
 - [ ] The status line reports something true; it does not say **Ready**.
 - [ ] Secondary windows are sheets or dialogs, not free-floating copies of the
       main window.
@@ -65,12 +67,16 @@ reviewer has seen the behaviour, not that the code appears to implement it.
 
 - [ ] Every object has a stable, unique, opaque and copyable identity.
 - [ ] Duplicate, derive and export are distinct operations.
-- [ ] Embed states render as **Opaque**, **Unavailable** or **Malformed**.
+- [ ] Embed resolution renders as **Resolved**, **Opaque**, **Unavailable** or
+      **Malformed**, and only a resolved embed carries a live state.
 - [ ] Live relationships render as **Current**, **Refreshing**, **Stale**,
       **Broken** or **Denied**.
+- [ ] Every transition in the state table is witnessed, and no other transition
+      occurs.
 - [ ] A state is visible in the object, the inspector and the status line.
 - [ ] A stale object keeps its last good value and says it is stale.
-- [ ] A broken or denied object does not reveal content it cannot access.
+- [ ] A denied object reveals its value in no text, tooltip, preview, thumbnail,
+      accessibility label or diagnostic.
 
 ## Controls and keyboard
 

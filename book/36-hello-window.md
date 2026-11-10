@@ -17,14 +17,20 @@ It is not a demo. It is the program that fails loudly when a contract regresses.
 
 ## The window
 
-`hello-window` has one window, three menus and one document.
+`hello-window` has one window, three menus and one fixed document.
 
-- **File** contains **New**, **Open**, **Export** and **Quit**.
+- **File** contains **Export** and **Quit**.
 - **View** contains **Zoom** and **Appearance**.
 - **Help** contains **About** and **Diagnostics**.
 - The document plane holds a greeting, a short explanation and two buttons:
   **Export** as the primary action and **About** as the secondary.
 - The status line reports the document and the last export time.
+
+The document is read-only and there is only one window, so the menu bar omits
+**Edit** and **Window**. It also omits **New**, **Open**, **Save** and
+**Print**, which have nothing to act on. A menu bar shows only menus that
+contain at least one command; the exemption is recorded here so that the
+reference application is not mistaken for a contract violation.
 
 Every menu, string, icon and shortcut is loaded from Escutcheon resources. The
 application must not hard-code a menu or a label. Changing the resource bundle
@@ -94,5 +100,8 @@ A negative answer is a contract defect, not a stylistic preference.
 
 `hello-window` follows every rule in this book that applies to it: the window
 bands, the menu order, the control sizes, the focus ring, the state chip and
-the status line. It is the reference for the smallest complete surface, and
-therefore the first place a new developer should look.
+the status line. Where a rule assumes an editable document or several windows,
+this chapter records the exemption: the fixed read-only document and the single
+window are the reason the corresponding commands and menus are absent. It is
+the reference for the smallest complete surface, and therefore the first place
+a new developer should look.

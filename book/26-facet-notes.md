@@ -99,16 +99,21 @@ time. A save failure keeps the document open, marks it modified and offers a
 retry.
 
 The note must never close with unsaved changes without a dialog that names the
-note and offers **Save**, **Discard** and **Cancel**. The safe default is
-**Save**.
+note and offers **Save**, **Discard** and **Cancel**. **Cancel** is the safe
+default, so that an accidental Return keeps the note open; **Save** remains the
+primary action.
+
+If the close follows a failed save, the dialog offers **Keep open**, **Export
+copy** and **Discard**. **Keep open** is the default; **Export copy** is the
+primary action, because it is the only action that both preserves the work and
+lets the user leave. None of the three pretends that the save can succeed.
 
 ## What the note is not
 
 - A file that contains rendered copies of its embeds.
 - A rich-text format that hides its source.
 - A place where an object can be converted to text by a single command.
-- A database view. Queries belong to the project window or the table
-  instrument.
+- A database view. Queries belong to the project window or the Enfilade Table.
 
 ## Testing
 

@@ -26,6 +26,11 @@ Menus appear in a fixed order, with instrument-specific menus inserted before
 5. **Window** — window list, new window, detached panes.
 6. **Help** — documentation, keyboard reference, about, diagnostics.
 
+The list gives each menu's internal order and its usual contents. An
+application omits the items and menus it does not implement: one with no
+editable document omits **Edit**, and one with a single window omits
+**Window**. A menu that would be empty is never drawn.
+
 An instrument must not rename **File** or **Edit**, and must not move **Help**
 away from the end. A user who learns one Cabochon application should find the
 same anchors in the next.
@@ -81,9 +86,15 @@ usual order is: create and open; save and export; share and print; destructive
 items last. A destructive item is separated from the group above it and is
 never placed next to a frequently used command.
 
-Disabled items remain visible with a reason available on hover and to
-accessibility clients. Hiding an unavailable command teaches the user nothing;
-showing it greyed teaches where it lives.
+Disablement is for a command that applies to this object but is temporarily
+unavailable, such as **Paste** with an empty clipboard or **Undo** at the start
+of history. It remains visible with a reason available on hover and to
+accessibility clients.
+
+Absence is for a command that cannot apply to this object at all, such as
+**Format cell** on a note. A command that can never act on the current object
+must not be shown greyed; it is left out of the menu, the tool strip and the
+context menu. The distinction is between "not now" and "not here".
 
 ## Context menus
 
