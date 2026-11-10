@@ -37,10 +37,10 @@ inspector are not: they are how the instrument explains what a cell is.
 - The selected cell uses the pine-2 fill with white text.
 - The selected range uses a 2-pixel oxide outline around its extent.
 
-Numbers are right-aligned and use tabular figures. Text is left-aligned. Dates
-and times follow the locale but keep a stable, sortable underlying value. A
-cell that cannot display its full value truncates at the end and reveals the
-value in the inspector.
+Numbers align to the trailing edge and use tabular figures. Text aligns to the
+leading edge. Dates and times follow the locale but keep a stable, sortable
+underlying value. A cell that cannot display its full value truncates at the
+end and reveals the value in the inspector.
 
 ## Types and formats
 

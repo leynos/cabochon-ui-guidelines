@@ -41,7 +41,7 @@ A command belongs in the tool strip when all three statements hold.
 
 Commands that open a dialog, change a setting or act on the whole project
 belong in menus. A tool strip that has become a second menu bar should be
-reduced, not reorganised.
+reduced, not reorganized.
 
 ### Target sizes
 
@@ -90,7 +90,7 @@ line, and may also show it in the document if the operation blocks editing.
   percentage.
 - Indeterminate progress must not imply completion.
 - A cancellable operation must offer **Cancel** in the status line or the
-  document, and the cancel action must take effect promptly.
+  document, and the cancel action must take effect within 200 milliseconds.
 - A completed operation must remove its progress and leave one message.
 
 ## The state chip

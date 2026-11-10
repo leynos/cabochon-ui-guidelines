@@ -54,7 +54,8 @@ slightly ahead of position, so that the surface is legible before it settles.
 
 A hover transition must not delay the hover state: the control changes
 immediately and the transition only softens the change. A pressed control must
-respond within one frame.
+respond within one frame: one refresh interval, no more than 16.7 milliseconds
+at 60 hertz.
 
 ## Progress
 

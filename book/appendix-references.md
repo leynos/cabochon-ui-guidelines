@@ -19,13 +19,13 @@ disagree with it.
   the starting point for the production values in this book.
 - **Cabochon component documentation.** Clerestory, Lapidary, Burin,
   Escutcheon, Enfilade, Mullion and cabochon-portal. The contracts in
-  [The ecosystem map](03-ecosystem-map.md) summarise them.
+  [The ecosystem map](03-ecosystem-map.md) summarize them.
 
 ## Document-oriented environments
 
 - **Étoilé mockups, Jesse 2007.**
   <https://etoileos.com/etoile/mockups/jesse-2007/>. The clearest demonstration
-  that a desktop can be organised around documents, objects and live
+  that a desktop can be organized around documents, objects and live
   relationships rather than around applications and files. The composure of its
   surfaces and the prominence of the document plane informed
   [The document at the centre](06-document-centre.md).

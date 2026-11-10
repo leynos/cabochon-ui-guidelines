@@ -23,14 +23,14 @@ private renderer or a private object store.
 
 ## The substrate components
 
-| Component  | Responsibility                                                         |
-| ---------- | ---------------------------------------------------------------------- |
-| Clerestory | Application environment: windows, menus, commands, focus, dialogs.     |
-| Escutcheon | Declarative resources: menus, strings, icons, shortcuts, layout.       |
-| Lapidary   | Scene description: rectangles, paths, text, images, clips, transforms. |
-| Burin      | Output: display, PDF, raster, thumbnail, clipboard, print, a11y tree.  |
-| Enfilade   | Object identity, selectors, capabilities, transactions, live links.    |
-| Mullion    | A future compositor and shell, deliberately deferred.                  |
+| Component  | Responsibility                                                                      |
+| ---------- | ----------------------------------------------------------------------------------- |
+| Clerestory | Application environment: windows, menus, commands, focus, dialogs.                  |
+| Escutcheon | Declarative resources: menus, strings, icons, shortcuts, layout.                    |
+| Lapidary   | Scene description: rectangles, paths, text, images, clips, transforms.              |
+| Burin      | Output: display, PDF, print, thumbnail, raster, clipboard, a11y, hit map, manifest. |
+| Enfilade   | Object identity, selectors, capabilities, transactions, live relationships.         |
+| Mullion    | A future compositor and shell, deliberately deferred.                               |
 
 The names come from stonework and from GEM's own vocabulary. They are useful
 because they keep responsibilities distinct: Clerestory is not a renderer,

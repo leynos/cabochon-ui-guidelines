@@ -90,16 +90,18 @@ larger window, a collapsible pane or a zoom control.
   vertical centre.
 - Icons align to the optical centre of their target. A glyph with a heavy
   top, such as a triangle, sits 1 pixel lower than its geometric centre.
-- Numbers in a column share a right edge.
+- Numbers in a column share a trailing edge.
 - Pane heads across a window share a baseline, even when their bands differ in
   height by a pixel.
 
 ## Window sizes
 
 The minimum window size is the sum of the pane minimums plus the chrome. The
-default window is 1280 by 800, with a preferred content area of at least 960 by
-600 after chrome. A window must remain usable at 1024 by 768, which is the
-floor for the first batch.
+default window is 1280 by 800. After the 130-pixel horizontal bands and both
+side panes of 126 and 240 pixels, the document plane is 914 by 670 pixels; a
+preferred document plane is at least 900 by 600. A window must remain usable at
+1024 by 768, the floor for the first batch, where the document plane remains at
+least 420 pixels wide.
 
 ## Checking a layout
 

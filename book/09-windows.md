@@ -31,10 +31,10 @@ window from its work surface and the document plane from the chrome.
 
 ## Title bar
 
-The title bar carries the document's name, left-aligned in the left-to-right
-layout. It may also carry a small state chip when the document has a live
-relationship that is not **Current**. The chip sits to the right of the title
-and must not displace the window controls.
+The title bar carries the document's name at its leading edge. It may also
+carry a small state chip when the document has a live relationship that is not
+**Current**. The chip sits between the title and the window controls and must
+not displace them.
 
 Rules for the title bar:
 
@@ -42,7 +42,7 @@ Rules for the title bar:
   document is open, it may name the instrument.
 - The title must truncate in the middle, preserving the beginning and the
   extension, rather than at the end.
-- Window controls are minimise, maximise and close, in that order, with a
+- Window controls are minimize, maximize and close, in that order, with a
   16-pixel glyph inside a 28-pixel target inset one pixel from the band.
 - A modified document appends a single bullet, not the word "modified".
 - Double-clicking the title bar must perform the host's configured action.
@@ -67,9 +67,9 @@ and that benefit from a visible, one-click target. It is not a place for every
 command, and it must not grow beyond one row.
 
 A tool strip button is 30 pixels square with a 16-pixel glyph. Related buttons
-are grouped with an 8-pixel gap and separated from the next group by a one-pixel
-vertical rule with 8 pixels of space on each side. The strip must carry a text
-label for any command whose icon is not universally understood.
+are grouped with an 8-pixel gap and separated from the next group by a
+one-pixel vertical rule with 8 pixels of space on each side. The strip must
+carry a text label for any command whose icon is not universally understood.
 
 ## Document area
 
@@ -122,5 +122,6 @@ its internal window controls and keeps its title and state chip. Where the host
 provides client-side decorations, the application draws the full title bar
 described above.
 
-The test is simple: the window must look deliberate under both GNOME and KDE
-Plasma, and must never show two sets of close buttons.
+The test is observable: under both GNOME and KDE Plasma the window shows
+exactly one title bar and one set of window controls, and never two close
+buttons.

@@ -31,16 +31,29 @@ claim that they describe the same drawing.
 A target may omit a feature that it cannot represent. It may not invent
 geometry, text or state that the scene does not contain.
 
+## The reference scale
+
+Parity is measured at a reference density of 96 pixels per inch at 100 per cent
+zoom. PDF and raster targets are converted to the reference density before
+comparison, and print output is measured in millimetres at the declared output
+intent. A thumbnail is compared for identity, text and state rather than for
+sub-pixel geometry. Accessibility and clipboard targets carry no pixels; they
+are compared by object identity, text content and bounds in scene units.
+
 ## What must agree
 
-- **Geometry.** Object bounds, clipping and transforms agree within 0.5
-  device pixels at the same scale, and within 0.25 millimetres at print size.
-- **Text.** Text placement agrees within 1 pixel, and text remains text in PDF
-  and in the accessibility tree wherever the format supports it.
+- **Geometry.** Object bounds, clipping and transforms agree within 0.5 device
+  pixels at the reference density, and within 0.25 millimetres at print size.
+- **Text.** Text placement agrees within 1 pixel at the reference density and
+  within 0.25 millimetres at print size, and text remains text in PDF and in
+  the accessibility tree wherever the format supports it.
 - **Clipping.** A clipped object is clipped identically in every raster and
   vector target, and its hit region is clipped to match.
-- **State.** A state mark appears in every target that renders the object,
-  including print and thumbnail.
+- **State.** A state mark appears in every target that renders the object at
+  interface scale, including print. A thumbnail at least 48 pixels on its
+  shorter side carries a shape mark; a smaller thumbnail carries the state in
+  its list row and in the manifest. A downscale must never leave colour as the
+  only carrier of state.
 - **Metadata.** Object identity, revision and presentation appear in the
   manifest for every target that can carry metadata.
 
@@ -95,7 +108,8 @@ Every export writes `export.json`, which records:
 
 - the scene's version and the renderer's version;
 - the target and its options;
-- the declared tolerances;
+- the declared tolerances, which are the values in this chapter and may not be
+  looser;
 - each object's identity, revision and presentation;
 - font substitutions and colour conversions;
 - objects that could not be rendered and why;

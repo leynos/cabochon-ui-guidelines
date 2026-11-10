@@ -83,9 +83,12 @@ reviewer has seen the behaviour, not that the code appears to implement it.
 - [ ] Every interactive object is reachable by keyboard in a logical order.
 - [ ] The focus ring is 3 pixels of oxide at 3 pixels offset.
 - [ ] Focus returns to the opener when a dialog closes.
-- [ ] Targets are at least 28 pixels; a dialog's primary action is 36.
+- [ ] Targets are at least 28 pixels; the splitter's 8-pixel edge is the
+      declared exception, and a dialog's primary action is 36.
 - [ ] Every icon-only button has an accessible name.
 - [ ] A drag interaction has a keyboard alternative.
+- [ ] A pressed control responds within one refresh interval, no more than
+      16.7 milliseconds at 60 hertz.
 - [ ] The command palette opens with Control+K and announces its results.
 
 ## Feedback and failure
@@ -93,6 +96,9 @@ reviewer has seen the behaviour, not that the code appears to implement it.
 - [ ] An error says what happened, what was preserved and what to do next.
 - [ ] A recoverable error is shown inline before it is shown in a dialog.
 - [ ] A destructive action names its object and offers Cancel as the default.
+- [ ] An operation longer than 200 milliseconds announces itself, and one that
+      finishes says so once.
+- [ ] A cancel action takes effect within 200 milliseconds.
 - [ ] Progress is visible and does not block unrelated work.
 - [ ] A failed export leaves the previous output intact.
 - [ ] A partial export is marked as partial.
@@ -100,8 +106,8 @@ reviewer has seen the behaviour, not that the code appears to implement it.
 
 ## Output
 
-- [ ] Display, PDF, print, raster, thumbnail, clipboard, accessibility and hit
-      map agree within the declared tolerances.
+- [ ] Display, PDF, print, raster, thumbnail, clipboard, accessibility, hit
+      map and manifest agree with the scene within the declared tolerances.
 - [ ] Text remains text in PDF and in the accessibility tree.
 - [ ] Guides, grids and selection handles never print.
 - [ ] Fonts are embedded or a substitution is recorded.
@@ -116,7 +122,8 @@ reviewer has seen the behaviour, not that the code appears to implement it.
 - [ ] Numbers, dates and currency use the locale's formats.
 - [ ] The accessibility tree exposes roles, names, states, bounds and order.
 - [ ] A screen-reader user can complete the primary task.
-- [ ] The interface remains usable at 200 per cent zoom.
+- [ ] At 200 per cent zoom, every control is reachable and no control or text
+      overlaps.
 - [ ] Reduced motion collapses animation to 0.01 milliseconds.
 
 ## Documentation and review

@@ -43,10 +43,11 @@ following transitions.
 | Broken         | A retry begins and the source answers        | Refreshing | User         |
 | Denied         | A capability is granted and a refresh begins | Refreshing | User or host |
 
-Every refresh enters **Refreshing** logically, even when it completes too
-quickly to paint the chip. A relationship does not move from **Current**
-straight to **Broken** or **Denied**, and a **Broken** relationship does not
-become **Stale**: without a source there is no newer revision to report.
+Every refresh enters **Refreshing** logically, even when it completes within
+200 milliseconds, too quickly to paint the chip. A relationship does not move
+from **Current** straight to **Broken** or **Denied**, and a **Broken**
+relationship does not become **Stale**: without a source there is no newer
+revision to report.
 
 ## Recoverability is a transition, not a state
 
@@ -69,8 +70,8 @@ context and may destroy work. The correct behaviour is:
 
 A refresh must be visible but quiet. The **Refreshing** state uses the teal
 accent, which is reserved for motion and decoration and never used for
-body-size text. A refresh that completes quickly may skip the chip entirely,
-provided the value updates and the status line records the time.
+body-size text. A refresh that completes within 200 milliseconds may skip the
+chip entirely, provided the value updates and the status line records the time.
 
 Rules for refresh:
 

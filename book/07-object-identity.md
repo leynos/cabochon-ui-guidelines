@@ -28,9 +28,9 @@ objects may share a name without becoming the same object.
 
 ## Revisions
 
-A revision records a change to an object's content. It is not a user-visible
-version number in the manner of a document-management system; it is the basis
-for conflict detection and undo.
+A revision records a change to an object's content. It is not part of the
+identity, and it is not a user-visible version number in the manner of a
+document-management system; it is the basis for conflict detection and undo.
 
 The interface rules are:
 
@@ -81,6 +81,13 @@ Identity should be visible where it matters and absent where it does not.
   objects are open.
 - The document body does not print identity unless the document is a technical
   record that requires it.
+
+A display suffix is a short string derived from the identity, such as `8f3a` in
+`obj:8f3a`, chosen for recognition in status lines, inspector metadata, menus
+and errors. It is display only: it is not the identity, it is never parsed to
+recover one, and it may be regenerated or lengthened when two objects collide.
+Changing or regenerating a suffix must not change the identity or break a link.
+A command that copies identity always copies the full value.
 
 A user should never need to understand identity to use the environment. They
 should be able to rely on it without seeing it.

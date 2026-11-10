@@ -50,9 +50,11 @@ than chrome:
 - a 126-pixel rail when the instrument has a persistent category list;
 - a 240-pixel inspector when the instrument has one.
 
-With both side panes and the horizontal bands, the document plane still keeps
-at least 55 per cent of the window. That is the binding test, not the one-fifth
-figure in isolation.
+At the default 1280 by 800 window with both side panes and the horizontal
+bands, the document plane is 914 by 670 pixels, about 60 per cent of the
+window. The binding test is that the document plane remains the largest region
+and at least 420 pixels wide. When a window cannot hold both panes and that
+width, an instrument collapses a pane rather than shrinking the document.
 
 An instrument that needs more chrome should first ask whether a pane, a sheet
 or the command palette would serve better. Chrome is persistent; a sheet is not.

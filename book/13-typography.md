@@ -73,11 +73,10 @@ floors above preserve the density of the layout without shrinking the words.
 - Long-form prose in a document plane should measure 60 to 75 characters per
   line. A notes pane narrower than 45 characters should reduce its type scale
   rather than its margins.
-- Interface labels are left-aligned in left-to-right layouts and right-aligned
-  in right-to-left layouts. Centred text is reserved for dialogs, empty states
-  and short button labels.
-- Numbers in tables use tabular figures and are right-aligned. Numbers in
-  prose use the family's default figures.
+- Interface labels align to the leading edge of their container. Centred text
+  is reserved for dialogs, empty states and short button labels.
+- Numbers in tables use tabular figures and align to the trailing edge.
+  Numbers in prose use the family's default figures.
 - Hyphenation is permitted in long-form prose and forbidden in interface
   labels, menu items and titles.
 

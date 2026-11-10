@@ -35,7 +35,8 @@ each saved category, with the selected category filled in pine 2.
 - The grid virtualizes rows and columns; a 100,000-row table remains
   scrollable at interactive speed.
 - Frozen columns keep the key column visible while scrolling horizontally.
-- Numbers are right-aligned with tabular figures; text is left-aligned.
+- Numbers align to the trailing edge with tabular figures; text aligns to the
+  leading edge.
 - The selected cell uses pine 2; the selected range uses a 2-pixel oxide
   outline; the active cell keeps a white caret.
 

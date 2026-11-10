@@ -75,6 +75,8 @@ colour-blind user. The state chip, the icon and the text carry it together.
 
 - Pointer targets are at least 28 by 28 pixels and 32 preferred; a dialog's
   primary action is 36.
+- The splitter is the one exception: its 8-pixel hit edge spans the full pane
+  boundary, which is a larger continuous target than a 28-pixel square.
 - A small glyph may sit inside a larger target; the target, not the glyph,
   determines the hit region.
 - Adjacent targets have at least 8 pixels between their hit regions.
@@ -103,13 +105,13 @@ colour-blind user. The state chip, the icon and the text carry it together.
 
 ## Zoom and reflow
 
-- Interface text does not fall below 12 pixels, and the interface remains
-  usable at 200 per cent zoom.
-- At 200 per cent, panes may collapse but controls do not overlap.
+- Interface text does not fall below 12 pixels.
+- At 200 per cent zoom, panes may collapse, but every control remains
+  reachable, no control overlaps another and no text is clipped.
 - Text reflows rather than clipping; horizontal scrolling is acceptable for a
   data grid but not for prose.
-- The layout remains usable at the minimum window size declared by the
-  application.
+- At the minimum window size the application declares, the document plane
+  remains at least 420 pixels wide and every control remains reachable.
 - A high-contrast theme replaces the palette rather than tinting it.
 
 ## The accessibility output

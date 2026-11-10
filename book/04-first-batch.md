@@ -25,9 +25,9 @@ renegotiate.
 - `escutcheon-check` proves the resource format: menus, strings, icons,
   shortcuts, command metadata, dialog layout and localization hooks.
 - The Lapidary fixture proves that one scene renders consistently to display,
-  PDF, raster, thumbnail, clipboard, print and accessibility extraction.
-- The Burin fixture proves the output contract, including failure behaviour
-  and hit-testing geometry.
+  PDF, print, thumbnail, raster, clipboard, accessibility, hit map and manifest.
+- The Burin fixture proves the output contract, including failure behaviour,
+  hit-testing geometry and the manifest.
 
 A contract application is not a demo. It is the smallest program that would
 break loudly if the contract regressed, and it is reviewed with the same care

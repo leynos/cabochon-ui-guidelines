@@ -35,9 +35,9 @@ A button performs an action. Its label is a verb phrase in sentence case:
 
 ## Fields
 
-A field accepts text. Its label sits above the field, left-aligned to the
-field's edge, in 12-pixel interface type. A unit or a format hint sits to the
-right of the field or inside it as placeholder metadata, never as the only
+A field accepts text. Its label sits above the field, aligned to the field's
+leading edge, in 12-pixel interface type. A unit or a format hint sits at the
+field's trailing side or inside it as placeholder metadata, never as the only
 label.
 
 - A field's border is 1 pixel in line. On focus it gains the 3-pixel oxide

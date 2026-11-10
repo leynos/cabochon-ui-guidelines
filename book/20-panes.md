@@ -35,9 +35,9 @@ window.
 ## Pane heads
 
 Every pane carries a 28-pixel head with its name in 12-pixel interface type,
-left-aligned to the 16-pixel content inset. A head may carry one trailing
-action, such as **Add** or **Filter**, drawn as a 20-pixel icon with a 28-pixel
-target.
+aligned to the leading edge at the 16-pixel content inset. A head may carry one
+trailing action, such as **Add** or **Filter**, drawn as a 20-pixel icon with a
+28-pixel target.
 
 A pane head is not a toolbar. If it needs more than one action, those actions
 belong in the pane's context menu or in the main menu bar.

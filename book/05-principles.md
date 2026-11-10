@@ -65,8 +65,8 @@ normal, current, saved state.
 The principle is the basis for the
 [live relationship states](08-live-relationships.md), the status line, the
 state chip and the error vocabulary. It also governs progress: an operation
-that takes longer than a moment must announce itself, and an operation that
-finishes must say so once.
+that takes longer than 200 milliseconds must announce itself, and an operation
+that finishes must say so once.
 
 ## Resolving conflicts
 

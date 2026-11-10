@@ -45,7 +45,7 @@ The reference application exercises five contracts.
 2. **Scene.** One Lapidary scene describes the document, its text, its
    controls and its hit regions.
 3. **Output.** Burin renders that scene to display, PDF, print, raster,
-   thumbnail, clipboard, accessibility and hit-testing targets.
+   thumbnail, clipboard, accessibility, hit-testing and manifest targets.
 4. **Access.** Every control has a role, a name, a state and a position in the
    focus order.
 5. **Locale.** The application runs under `en-XA` and `ar-XB` without layout

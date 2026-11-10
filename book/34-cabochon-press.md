@@ -57,7 +57,7 @@ presentation, and the preflight reports which presentation will be used.
 
 Preflight runs on demand and before every export. It checks:
 
-- fonts embedded;
+- fonts embedded, or a substitution declared in advance;
 - images at the required resolution;
 - colour intent supported by the output;
 - bleed sufficient for the trim;
@@ -95,7 +95,7 @@ and the manifest records it.
 ## Print
 
 Printing uses the host's print portal. Cabochon Press prepares the scene and
-the manifest; the host owns the printer dialogue.
+the manifest; the host owns the printer dialog.
 
 Press must not imitate a printer driver. It may show a preview and a summary,
 but the choice of printer, paper source and host-specific options belongs to
@@ -103,7 +103,9 @@ the portal.
 
 ## Failure
 
-- A missing font blocks export and names the font.
+- A missing font blocks export unless the user chooses a recorded substitution;
+  either way, the message names the missing font and, where one was chosen, the
+  substitute.
 - An image below the required resolution warns and reports its effective
   resolution.
 - An unavailable provider warns, prints the last cached presentation with a
