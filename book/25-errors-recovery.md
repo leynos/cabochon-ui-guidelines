@@ -62,7 +62,9 @@ preservation expressible; redaction takes precedence over preservation.
 - Use the active voice with an explicit actor where known: "Cabochon could not
   refresh the table", not "The table could not be refreshed". The second
   sentence is passive, even though the contrasted "The table refresh failed" is
-  grammatically active; the latter names no actor and is less helpful.
+  grammatically active; the latter names no actor and is less helpful. The
+  active sentence is followed by what survived and what to do next, so the
+  actor is not the whole message.
 - Name the object and, where several similar objects exist and disclosure
   permits, its identity suffix.
 - Avoid internal error codes as the primary message. A code may appear in a

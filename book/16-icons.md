@@ -13,6 +13,10 @@ Cabochon icons are monochrome line drawings. They are drawn on a 24-pixel grid
 with a 2-pixel stroke, square caps and joins, and no fills except where a shape
 must read as solid at small size, such as the selection arrow.
 
+These rules govern interface icons. An image inside a document, a diagram's own
+symbols and a bitmap's content are authored material, not interface icons, and
+the environment does not redraw them in the icon style.
+
 Colour is reserved for state. A default icon inherits the ink of its text. An
 active icon uses oxide. A stale icon uses amber ink and is always accompanied
 by a label. A disabled icon uses line and is removed from the focus order.
@@ -31,9 +35,16 @@ scaled from a single bitmap.
 
 ## The first vocabulary
 
-The first batch uses fourteen glyphs: select, text, rectangle, ellipse, pen,
-line, table, formula, link, lock, warning, check, refresh and gear. Each has
-one meaning across every instrument.
+The first batch uses fourteen core glyphs: select, text, rectangle, ellipse,
+pen, line, table, formula, link, lock, warning, check, refresh and gear. Each
+has one meaning across every instrument.
+
+The fourteen are a core subset, not the whole available vocabulary. The studio
+instruments register further glyphs in the same shared set: hand, brush,
+eraser, eyedropper, crop, zoom and the remaining canvas tools named in
+[Bitmaps](29-bitmaps.md) and [Burin Draw](33-burin-draw.md). A registered glyph
+follows the same grid, stroke and state rules as a core glyph, and it is
+declared once so that two instruments cannot draw the same concept twice.
 
 - **Link** means a live relationship to another object.
 - **Lock** means a denied or protected capability.
@@ -88,13 +99,22 @@ on the reading side.
 In a tool strip, a labelled button widens to fit the label; it does not shrink
 the glyph or truncate the word.
 
+## Mirroring
+
+Each icon declares whether it mirrors in a right-to-left interface. Directional
+icons — arrows, playback controls, indentation marks — mirror. Object icons — a
+document, a pen, a bitmap — do not. The declaration belongs to the icon's
+metadata, not to a global transform, so mirroring the interface never reverses
+a glyph that depicts an object. The metadata is part of the icon resource, and
+[Localization](38-localization.md) states the direction rules it follows.
+
 ## Accessibility
 
 - An icon that carries meaning must have an accessible name.
 - A decorative icon beside a text label is hidden from assistive technology.
 - An icon button must report its state, not only its name, and must be
   operable with Enter and Space.
-- The 28-pixel target requirement applies to every icon button, regardless of
+- The 28-unit target requirement applies to every icon button, regardless of
   glyph size.
 
 ## Testing an icon

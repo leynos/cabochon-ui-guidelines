@@ -20,6 +20,10 @@ document, generous margins, a small set of instruments and a sense that the
 screen is a desk rather than a dashboard. Cabochon adopts the orientation
 without copying the ornament.
 
+The distinction between chrome and document is also a style boundary. The
+interface style in this book governs the chrome. The document keeps its own
+appearance, which the environment preserves rather than restyles.
+
 ## The document plane
 
 The document plane must be visually distinct from the surrounding chrome. In

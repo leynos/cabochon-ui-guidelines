@@ -59,12 +59,15 @@ presentation. It does not ask whether the payload may be disclosed, and it does
 not ask whether an authorised cached value exists. Those are three independent
 facts.
 
-| Resolution  | Meaning                                        | What remains                             |
-| ----------- | ---------------------------------------------- | ---------------------------------------- |
-| Resolved    | A provider loaded the object                   | The presentation and its live state      |
-| Opaque      | The bytes are intact; no provider is installed | An authorised preview or a placeholder   |
-| Unavailable | The provider exists but cannot load the object | Name or placeholder, identity, retry     |
-| Malformed   | The provider rejected the payload              | Name or placeholder, identity, diagnosis |
+| Resolution  | Meaning                                        | What remains                             | Mark           |
+| ----------- | ---------------------------------------------- | ---------------------------------------- | -------------- |
+| Resolved    | A provider loaded the object                   | The presentation and its live state      | Filled dot     |
+| Opaque      | The bytes are intact; no provider is installed | An authorised preview or a placeholder   | Hatched square |
+| Unavailable | The provider exists but cannot load the object | Name or placeholder, identity, retry     | Dashed square  |
+| Malformed   | The provider rejected the payload              | Name or placeholder, identity, diagnosis | Crossed square |
+
+Each resolution state carries its own shape mark as well as its word, so the
+four remain distinguishable without colour.
 
 Only a **Resolved** embed carries one of the five live states from
 [Live relationships](08-live-relationships.md). An Opaque, Unavailable or

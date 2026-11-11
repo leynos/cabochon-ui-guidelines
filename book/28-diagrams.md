@@ -45,6 +45,28 @@ A render must never block the source editor. A large diagram renders in the
 background and shows progress in the status line. A render completion from an
 older source revision cannot replace a newer successful render.
 
+## The rendering boundary
+
+The diagram renderer is an adapter, not a second scene. It converts the
+supported diagram output into the common Lapidary scene, and it attaches the
+semantic annotations that the accessibility tree and the hit map read.
+
+- The adapter emits scene nodes for elements and edges, with stable element
+  identities, geometry, hit regions and accessible roles.
+- It records the source revision it rendered and the source span of each
+  element, so that selection, source navigation and diagnostics refer to the
+  same revision.
+- It does not hand the display or the export an unrelated renderer's bitmap and
+  reconstruct the mapping afterwards. If the adapter cannot produce the scene,
+  the render fails and the last successful drawing remains.
+- A declared theme is authored content and is carried through the adapter; it
+  is not coerced into an interface role.
+
+A dimmed stale drawing is still a drawing. Dimming may reduce its contrast, but
+it must not take text or essential structure below the applicable contrast
+ratio; the state word and the chip carry the staleness, and the drawing remains
+readable.
+
 ## Failure kinds
 
 Four failures are distinct and must not share one label.

@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 780" width="1200" height="780" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 780" width="1200" height="780" role="img" data-figure-class="schematic" data-figure-profile="substrate" aria-labelledby="title desc">
+  <metadata>{&quot;class&quot;: &quot;schematic&quot;, &quot;components&quot;: [], &quot;name&quot;: &quot;fig-30-output&quot;, &quot;profile&quot;: &quot;substrate&quot;, &quot;scale&quot;: null}</metadata>
   <title id="title">Scene to output workstations</title>
   <desc id="desc">A central Lapidary scene connected to display, PDF, print, thumbnail, raster, clipboard, accessibility, hit-map and manifest outputs.</desc>
   <rect width="1200" height="780" fill="#F1EEE5"/>

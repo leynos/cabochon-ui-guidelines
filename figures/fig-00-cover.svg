@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img" data-figure-class="editorial" data-figure-profile="editorial" aria-labelledby="title desc">
+  <metadata>{&quot;class&quot;: &quot;editorial&quot;, &quot;components&quot;: [], &quot;name&quot;: &quot;fig-00-cover&quot;, &quot;profile&quot;: &quot;editorial&quot;, &quot;scale&quot;: null}</metadata>
   <title id="title">Cover plate: a polished cabochon surrounded by four instruments</title>
   <desc id="desc">A green cabochon stone on a warm paper ground, with Facet Notes, Enfilade Table, Burin Draw and Cabochon Press named around it.</desc>
   <rect width="1200" height="800" fill="#F1EEE5"/>

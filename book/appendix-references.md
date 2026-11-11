@@ -21,6 +21,54 @@ disagree with it.
   Escutcheon, Enfilade, Mullion and cabochon-portal. The contracts in
   [The ecosystem map](03-ecosystem-map.md) summarize them.
 
+## Contract basis
+
+Every normative platform dependency in this book names the document and
+revision it was written against. A dependency without a basis is a claim, not a
+contract.
+
+| Repository                      | Revision      | Document and section                                      | Status                         | Conflict owner  |
+| ------------------------------- | ------------- | --------------------------------------------------------- | ------------------------------ | --------------- |
+| `leynos/cabochon`               | `de40019`     | `docs/cabochon-design.md` §§2.2, 7.1, 8.1–8.10, 9.2       | Authoritative platform design  | Platform design |
+| `leynos/cabochon`               | `de40019`     | `docs/execplans/1-0-1-clerestory-application-contract.md` | Approved substrate plan        | Programme       |
+| `leynos/cabochon`               | `de40019`     | `docs/execplans/1-0-2-escutcheon-resource-format.md`      | Approved substrate plan        | Programme       |
+| `leynos/cabochon`               | `de40019`     | `docs/execplans/1-0-3-lapidary-scene-contract.md`         | Approved substrate plan        | Programme       |
+| `leynos/cabochon`               | `de40019`     | `docs/execplans/1-0-4-burin-output-contract.md`           | Approved substrate plan        | Programme       |
+| `leynos/cabochon`               | `de40019`     | `docs/adrs/adr-0001`–`adr-0008`                           | Accepted decisions             | Architecture    |
+| `leynos/cabochon-ui-guidelines` | this revision | `book/`                                                   | Normative for user experience  | This book       |
+| Local visual study              | unversioned   | `cabochon-design-book`                                    | Reference only, not a contract | This book       |
+
+The revision is the commit the book was checked against, not a promise that the
+platform will not move. When a platform document changes, the change is
+reconciled in the authoritative programme documentation first, and this book
+follows. A genuine scope change is never made silently in user-experience prose.
+
+## Conformance profiles and delivery phases
+
+A conformance profile names the capabilities a surface must provide. A delivery
+phase names what the programme is building now. They are different axes, and
+the book keeps them apart.
+
+- **Substrate conformance.** Clerestory, Lapidary, Burin and Escutcheon. A
+  substrate-only surface draws, exports and is accessible without Enfilade,
+  semantic object identity or a capability grant. The
+  [hello-window](36-hello-window.md) fixture is the reference.
+- **Semantic workspace conformance.** Adds Enfilade, live relationships, the
+  capability broker and the workspace instruments. It requires the substrate
+  profile and the semantic contracts in
+  [Live relationships](08-live-relationships.md).
+- **Studio conformance.** Adds Burin Draw, Cabochon Press, Bitmaps, Dataframes,
+  Diagrams and the formula tool. It requires the semantic workspace profile and
+  the studio contracts in [The studio and the contracts](33-burin-draw.md).
+
+The **first batch** is a delivery phase, not a profile. It names the work the
+programme is doing now. The studio guidance in this book is strict and
+prospective: it states what a studio instrument must do when it is built, and
+it does not claim that the first release is a desktop-publishing package. Where
+the platform design's initial proving ground limits document types, that limit
+belongs to the delivery phase and is reconciled in the programme documentation,
+not overridden here.
+
 ## Document-oriented environments
 
 - **Étoilé mockups, Jesse 2007.**

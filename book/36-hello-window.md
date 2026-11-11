@@ -52,6 +52,13 @@ must change the interface without recompiling the application.
 
 ## What it proves
 
+`hello-window` is the substrate conformance reference. It proves the substrate
+profile and nothing above it: it needs no Enfilade object graph, no semantic
+object identity and no capability grant. A semantic workspace or studio
+instrument adds those capabilities; it does not make the substrate fixture
+depend on them. The profiles are defined in
+[References](appendix-references.md).
+
 The reference application exercises five contracts.
 
 1. **Resources.** Menus, strings, icons and shortcuts load from Escutcheon,

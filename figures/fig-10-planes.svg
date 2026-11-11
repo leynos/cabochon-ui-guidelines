@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 740" width="1200" height="740" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 740" width="1200" height="740" role="img" data-figure-class="schematic" data-figure-profile="substrate" aria-labelledby="title desc">
+  <metadata>{&quot;class&quot;: &quot;schematic&quot;, &quot;components&quot;: [], &quot;name&quot;: &quot;fig-10-planes&quot;, &quot;profile&quot;: &quot;substrate&quot;, &quot;scale&quot;: null}</metadata>
   <title id="title">Four interface planes</title>
   <desc id="desc">Paper, pane, control and overlay planes, each with a border and only the overlay with an offset shadow.</desc>
   <rect width="1200" height="740" fill="#F1EEE5"/>

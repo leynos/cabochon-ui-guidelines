@@ -84,6 +84,14 @@ constants. A change to a number should be argued from a user need, applied
 everywhere, and recorded in the figure generator so that the book and the
 software cannot drift apart.
 
+Every figure declares its class in its SVG metadata. A **schematic** is drawn
+at plate scale to explain a relationship; its measurements are not a
+production-size example. An **editorial** image is illustration, such as the
+cover. A **production reference** is drawn at 1:1 logical units and is checked
+against the component catalogue. The machine-readable annotation lives in
+`tools/figure-data.json`, and `tools/check-figures.py` rejects a figure whose
+declared class, scale or component geometry disagrees with what it draws.
+
 ## Relationship to the design book
 
 The Cabochon design book established the visual character: paper and ink, pine
@@ -93,8 +101,17 @@ guidance and corrects the places where a mockup's small type would fail on a
 real display. In particular, body-size interface text is 12 pixels, metadata is
 11 pixels, and 10 pixels is reserved for folios and plate marks.
 
-Where this book and a platform contract disagree, the contract wins. Where this
-book and a figure disagree, the generator is wrong and should be fixed.
+The visual study is a local, unversioned directory rather than a published
+repository. This book therefore does not depend on its path: the values it
+borrows are restated here and in [References](appendix-references.md), which
+also records the contract basis for every platform dependency. Where this book
+and a platform contract disagree, the contract wins. Where this book and a
+figure disagree, the generator is wrong and should be fixed.
+
+[References](appendix-references.md) also separates the conformance profiles
+from the delivery phases. A profile names the capabilities a surface must
+provide; a phase names what the programme is building now. The first batch is a
+delivery phase, not a conformance profile.
 
 ## Building the book
 

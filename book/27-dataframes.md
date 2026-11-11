@@ -45,15 +45,32 @@ end and reveals the value in the inspector.
 
 ## Types and formats
 
-A cell's type is part of the object, not a property of its display.
+A cell's type is part of the object, not a property of its display. Four
+properties are independent and must not be collapsed into one "type" label.
 
-- Supported scalar types in the first batch: text, number, currency, date,
-  boolean and reference.
+- **Scalar type** — text, number, currency, date, time, datetime, boolean or
+  reference.
+- **Nullability** — whether the column admits an absent value, declared
+  separately from the scalar type.
+- **Semantic validation** — a business rule over the value, which may accept a
+  structurally valid value and mark it.
+- **Value-production mode** — stored, computed by a column expression, or
+  supplied by a live reference.
+
 - A format controls how a value is shown: `0,000`, `0.00%`, `14:02`,
   `GBP 0.00`.
 - Changing a format must not change the stored value.
-- A value that does not fit its column's type is a validation error, not a
-  silent conversion.
+- A value that does not fit its column's scalar type is rejected at entry and
+  leaves the previous typed value intact. It is a structural error, not a
+  validation violation.
+- A value that fits its type but violates a business rule is accepted, marked
+  and reported. It remains readable and exportable.
+- A time value carries a time of day; a datetime carries an instant and a
+  declared zone or offset. A datetime without a zone is a local datetime and
+  says so; it is not silently treated as UTC.
+- A computed cell's value is produced by its column definition, not stored per
+  cell. Editing the definition updates the column object and commits a new
+  revision; it does not allocate a fresh identity for each cell result.
 - A reference cell holds another object's identity and shows its name and its
   relationship state. It is **Stale** when the referenced object's source
   revision has advanced, **Broken** when the provider is unavailable and
@@ -193,9 +210,10 @@ A dataframe export is a user export: CSV, TSV, Parquet or a Cabochon table
 bundle. It names its encoding, its declared losses and the snapshot it read. A
 plain delimited file cannot carry declared types, references or live values, so
 the export states those losses rather than implying they survived. A
-type-preserving export uses the table bundle or a sidecar schema. The export
-does not create the eight-artefact conformance bundle, which is a separate
-review command.
+type-preserving export uses the table bundle or a sidecar schema. The
+capability and loss table in [Enfilade Table](35-enfilade-table.md) is the
+authoritative statement of what each target carries. The export does not create
+the eight-artefact conformance bundle, which is a separate review command.
 
 ## What the dataframe is not
 

@@ -14,6 +14,14 @@ environment can support real work, not to compete with an established desktop
 on feature count. Three bands make up the batch, and all three share the
 furniture described in this book.
 
+The batch is a delivery phase, not a conformance profile. The profiles are
+substrate, semantic workspace and studio, as
+[References](appendix-references.md) defines. The studio band is prospective:
+this book states what a studio instrument must do when it is built, and it does
+not claim that the first release is a desktop-publishing package. Where the
+platform design's initial proving ground limits document types, that limit is
+reconciled in the programme documentation rather than overridden here.
+
 ## The contracts band
 
 The contracts band fixes the boundaries that later work would otherwise

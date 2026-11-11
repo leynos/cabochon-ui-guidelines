@@ -13,6 +13,12 @@ Burin Draw is the studio's vector and composition instrument. Its canvas is the
 document, not a preview of one. Rulers, guides and the inspector all speak in
 the document's physical units, so that what is drawn is what will print.
 
+The instrument's chrome follows the interface style in this book. The drawing
+does not. Its fills, strokes, type and effects are authored content, preserved
+across display and export; the interface palette, type scale and border rules
+apply to the tool palette, rulers, inspector and status line, never to the
+objects on the canvas.
+
 ## Layout
 
 - Tool palette: 48 units wide, one column of the **studio tool button** role
@@ -100,8 +106,20 @@ line: the guide is dashed and the drawn line is solid.
   Text remains text in every output that supports it.
 - An object's stroke may be 0, 1, 2, 4 or 8 document units, or a value typed in
   the inspector. It is not an interface measurement.
-- The canvas does not anti-alias a hairline stroke at 100 per cent zoom, so
-  that hairlines remain hairlines.
+- A stroke of **0** means no stroke. A **hairline** is a separate declared
+  choice that resolves to one output-device pixel at the target's resolution;
+  it is not a zero-width stroke and it is not a 1-unit document stroke.
+- Pixel alignment is applied to eligible geometry only: axis-aligned,
+  horizontal and vertical edges whose document position maps to a device-pixel
+  boundary at the current zoom. The alignment adjusts presentation, never the
+  stored geometry, and it is not applied to rotated paths, curves or diagonal
+  edges.
+- Diagonal and curved strokes use the target's declared raster coverage
+  behaviour. They are not forced to behave like axis-aligned integer edges, and
+  the canvas does not move their geometry to make a preview look crisp.
+- Physical print scale is recorded on the document and is separate from the
+  display zoom. Changing the zoom changes neither the physical stroke width nor
+  the document geometry.
 
 ## Layers and grouping
 

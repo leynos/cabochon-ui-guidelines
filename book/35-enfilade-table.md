@@ -143,6 +143,28 @@ definition, depending on the selection.
 - A plain delimited export cannot carry types, references or formulas. It
   declares those losses and may write a sidecar schema or a Cabochon table
   bundle when the user asks for a type-preserving export.
+
+The format capability table states what each target can carry. A cell marked
+**loss** is declared in the manifest, not silently dropped.
+
+| Capability         | CSV / TSV | Parquet | Table bundle |
+| ------------------ | --------- | ------- | ------------ |
+| Scalar type        | loss      | yes     | yes          |
+| Nullability        | loss      | yes     | yes          |
+| Enum constraint    | loss      | loss    | yes          |
+| Reference identity | loss      | loss    | yes          |
+| Formula            | loss      | loss    | yes          |
+| Validation rules   | loss      | loss    | yes          |
+| Blob payload       | loss      | yes     | yes          |
+| Computed column    | loss      | loss    | yes          |
+
+A delimited export may write a sidecar schema that restores the scalar types
+and nullability; it still cannot restore references, formulas or validation
+rules, and the manifest says so. Parquet carries typed columns and blobs but
+not Cabochon reference identity or formulas, so a reference column exported to
+Parquet becomes a declared loss rather than a string that looks like a
+reference.
+
 - The export manifest records the table's identity, revision, encoding, declared
   losses and any computed columns that were evaluated.
 - The export is a user export, not a conformance bundle: it writes the requested

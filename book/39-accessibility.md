@@ -10,26 +10,47 @@ summary: The accessibility tree is another output of the same scene, not a recon
 ![Accessibility tree and focus order.](../figures/fig-32-accessibility.svg)
 
 Accessibility is not a feature added to a finished interface. It is a property
-of the scene. Every object that is drawn has a role, a name, a state and a
-position in the focus order, and the same scene produces the pixels and the
-accessibility tree.
+of the scene. The scene carries semantic annotations, and the same annotations
+produce the accessible tree and the hit map; the pixels are a projection of the
+same scene. If a name is missing from the annotation, it is missing from every
+target that needs it.
 
-If a name is missing from the scene, it is missing from every target.
+## Semantic nodes and drawing primitives
+
+The accessible tree is not a one-to-one copy of the drawing primitives. Four
+kinds of scene content are treated differently.
+
+- **Semantic nodes** carry a role, a name, a state and a position in the
+  logical reading order. A control, a document, a menu and a diagram element
+  are semantic nodes.
+- **Decorative geometry** carries no role and is absent from the tree. A
+  keyline, a background plane and an ornamental rule are decorative.
+- **Static text** is exposed as text content within its parent, not as an
+  independent tab stop.
+- **Composite-managed descendants** belong to one composite node. A tree item,
+  a grid cell or a menu item is exposed through the composite's own navigation,
+  not as a separate top-level stop.
+
+The tree must not omit a control because the control is drawn by a custom
+widget. A custom widget declares its role, its name, its actions, its state and
+its managed descendants like any other composite.
 
 ## The tree
 
-The accessibility tree mirrors the visible structure.
+The accessibility tree mirrors the visible structure's meaning.
 
 - A window has a name and a role.
 - A menu bar has a name and contains menus, which contain items.
 - A tree has a name, an item count and a selected item.
 - A document has a name and contains groups.
-- A control has a role, a name, a state and bounds.
+- A control has a role, a name, a state, its actions and bounds.
 - A status line has a name and its current text.
 
-The tree must not contain decorative objects, and it must not omit a control
-because the control is drawn by a custom widget. A custom widget declares its
-role and its children like any other.
+The tree also exposes actions and relationships, not only text. An icon button
+whose glyph has no text still exposes its action name. A diagram exposes nodes,
+edges and their relationships. An embed exposes its state and its inspection
+action. A static picture that carries meaning is a semantic node with a name
+and a description; a purely decorative picture is absent.
 
 ## Names
 
@@ -154,8 +175,9 @@ dimensions; 32 is preferred, and a dialog's primary action is 36.
   [Spacing and metrics](14-spacing-metrics.md).
 - Narrowing a pane does not undo the user's requested text enlargement. Text
   wraps and rows grow; it is not shrunk to fit.
-- Text reflows rather than clipping; horizontal scrolling is acceptable for a
-  data grid but not for prose.
+- Chrome and prose reflow rather than clipping, and neither scrolls
+  horizontally. A data grid, a canvas, a page and the document plane may scroll
+  horizontally, as [Spacing and metrics](14-spacing-metrics.md) permits.
 - At the supported floor of 512 by 384 logical units, the compact profile
   keeps every control reachable and the document plane scrolls rather than
   shrinking below its declared minimum.
@@ -195,6 +217,32 @@ A test compares the tree with the scene and fails when:
 - the hit map does not equal the declared expansion and clipping of the visual
   target;
 - toggling focus changes the layout bounds or the command target.
+
+## Live assistive technology
+
+The exported `accessibility.json` proves that a snapshot can be described. It
+does not prove that a native assistive-technology client can use the running
+application, and the book does not treat it as such proof.
+
+- The native adapter exposes actions, not only names: activate, focus, set
+  value, expand, collapse, select, scroll and show menu, as the role allows.
+- A logical row that is outside the visible viewport is still reachable. A
+  virtualized grid or tree reports its logical child count and materializes a
+  row when a client asks for it; the client does not have to scroll the visible
+  area to discover content.
+- A meaningful change is announced with a priority: state transitions and
+  errors are polite or assertive according to their urgency, and repeated
+  changes to the same node are coalesced. A repaint, a caret move or a
+  keystroke is not announced as a new event.
+- Focus changes, selection changes, busy state and validation results each
+  produce one event, not one per intermediate frame.
+- A provider that cannot supply a semantic projection does not make content
+  silently inaccessible. The object is presented as **Opaque** with a bounded
+  fallback: its name, identity where disclosure permits, and the action that
+  can restore a provider. The fallback is declared, not improvised.
+
+The exported tree and the live adapter read the same scene-associated
+annotations, so an exported name and a spoken name cannot drift apart.
 
 ## Testing
 

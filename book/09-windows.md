@@ -84,10 +84,10 @@ own margin and shadow.
 
 ## Status line
 
-The status line is always present in a document window. Its left side carries a
-short message about the current operation or selection. Its right side carries
-the document's state chip and, where relevant, a progress indicator. The rules
-are given in [Toolbars and status](11-toolbars-status.md).
+The status line is always present in a document window. Its zones, their
+contents and their rules are owned by
+[Toolbars and status](11-toolbars-status.md); this chapter does not restate
+them. A window that places a status line must use that layout.
 
 ## Four independent properties
 

@@ -8,12 +8,18 @@ are written to ``figures/``.
 
 from __future__ import annotations
 
+import json
 from html import escape
 from pathlib import Path
 from textwrap import dedent
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "figures"
+DATA = json.loads((ROOT / "tools" / "figure-data.json").read_text(encoding="utf-8"))
+
+LIVE_STATES: dict[str, dict[str, str]] = DATA["live_states"]
+RESOLUTION_STATES: dict[str, dict[str, str]] = DATA["resolution_states"]
+FIGURE_SPECS: dict[str, dict[str, object]] = DATA["figures"]
 
 # Material palette, with accessible text variants.
 PAPER = "#F1EEE5"
@@ -109,9 +115,10 @@ def txt(
     style: str = "normal",
     spacing: float | None = None,
     opacity: float | None = None,
+    data_state: str | None = None,
 ) -> str:
     return (
-        f"<text {attrs(x=x, y=y, fill=fill, font_family=family, font_size=size, font_weight=weight, text_anchor=anchor, font_style=style, letter_spacing=spacing, opacity=opacity)}>{escape(value)}</text>"
+        f"<text {attrs(x=x, y=y, fill=fill, font_family=family, font_size=size, font_weight=weight, text_anchor=anchor, font_style=style, letter_spacing=spacing, opacity=opacity, data_state=data_state)}>{escape(value)}</text>"
     )
 
 
@@ -143,25 +150,115 @@ def kicker(x: float, y: float, value: str, colour: str = OXIDE) -> str:
     return txt(x, y, value.upper(), size=10, fill=colour, family=F_MONO, weight="bold", spacing=1.1)
 
 
-def chip(x: float, y: float, label: str, colour: str = PINE2, fill: str = HIGH, size: float = 11) -> tuple[str, float]:
+def state_mark(cx: float, cy: float, kind: str, colour: str) -> str:
+    """Draw the non-colour mark that distinguishes a state chip.
+
+    Colour is never the only carrier of meaning, so every state declares a
+    distinct shape. An unknown mark is a generation failure.
+    """
+    if kind == "dot":
+        return circle(cx, cy, 3, fill=colour, stroke=None)
+    if kind == "arc":
+        return path(
+            f"M {cx + 2.6:.2f} {cy - 1.4:.2f} A 2.9 2.9 0 1 0 {cx + 2.7:.2f} {cy + 1.2:.2f}",
+            stroke=colour,
+            sw=1.5,
+        ) + path(
+            f"M {cx + 3.4:.2f} {cy - 2.6:.2f} L {cx + 2.6:.2f} {cy - 1.4:.2f} L {cx + 1.4:.2f} {cy - 1.8:.2f}",
+            stroke=colour,
+            sw=1.3,
+        )
+    if kind == "triangle":
+        return path(
+            f"M {cx:.2f} {cy - 3.4:.2f} L {cx + 3.4:.2f} {cy + 2.8:.2f} L {cx - 3.4:.2f} {cy + 2.8:.2f} Z",
+            fill=colour,
+            stroke=None,
+        )
+    if kind == "broken":
+        return (
+            line(cx - 3.4, cy, cx - 1.3, cy, stroke=colour, sw=1.8)
+            + line(cx + 1.3, cy, cx + 3.4, cy, stroke=colour, sw=1.8)
+            + line(cx - 2.8, cy - 2.4, cx - 1.8, cy - 1.2, stroke=colour, sw=1)
+            + line(cx + 2.8, cy + 2.4, cx + 1.8, cy + 1.2, stroke=colour, sw=1)
+        )
+    if kind == "lock":
+        return (
+            path(
+                f"M {cx - 1.8:.2f} {cy - 0.6:.2f} L {cx - 1.8:.2f} {cy - 1.8:.2f} "
+                f"A 1.8 1.8 0 0 1 {cx + 1.8:.2f} {cy - 1.8:.2f} L {cx + 1.8:.2f} {cy - 0.6:.2f}",
+                stroke=colour,
+                sw=1.2,
+            )
+            + rect(cx - 2.8, cy - 0.6, 5.6, 4.2, fill=colour, stroke=None, rx=0.6)
+        )
+    if kind == "hatch":
+        return (
+            rect(cx - 3, cy - 3, 6, 6, stroke=colour, sw=1)
+            + line(cx - 2.2, cy + 2.2, cx + 2.2, cy - 2.2, stroke=colour, sw=0.9)
+            + line(cx - 0.4, cy + 2.6, cx + 2.6, cy - 0.4, stroke=colour, sw=0.9)
+            + line(cx - 2.6, cy + 0.4, cx + 0.4, cy - 2.6, stroke=colour, sw=0.9)
+        )
+    if kind == "dashed":
+        return rect(cx - 3, cy - 3, 6, 6, stroke=colour, sw=1.2, dash="1.6 1.4")
+    if kind == "crossed":
+        return (
+            rect(cx - 3, cy - 3, 6, 6, stroke=colour, sw=1)
+            + line(cx - 2, cy - 2, cx + 2, cy + 2, stroke=colour, sw=1.2)
+            + line(cx - 2, cy + 2, cx + 2, cy - 2, stroke=colour, sw=1.2)
+        )
+    raise ValueError(f"unknown state mark {kind!r}")
+
+
+def chip(
+    x: float,
+    y: float,
+    label: str,
+    colour: str = PINE2,
+    fill: str = HIGH,
+    size: float = 11,
+    state: str | None = None,
+    mark: str = "dot",
+) -> tuple[str, float]:
     width = max(58.0, len(label) * size * 0.62 + 18)
-    body = rect(x, y, width, 20, fill=fill, stroke=colour, sw=1)
-    body += circle(x + 10, y + 10, 3, fill=colour, stroke=None)
-    body += txt(x + 18, y + 14, label, size=size, fill=colour, family=F_MONO, weight="bold")
+    body = f'<g data-mark="{mark}">'
+    body += rect(x, y, width, 20, fill=fill, stroke=colour, sw=1)
+    body += state_mark(x + 10, y + 10, mark, colour)
+    body += txt(
+        x + 18,
+        y + 14,
+        label,
+        size=size,
+        fill=colour,
+        family=F_MONO,
+        weight="bold",
+        data_state=state,
+    )
+    body += "</g>"
     return body, width
 
 
 def state_chip(x: float, y: float, name: str) -> tuple[str, float]:
-    colours = {
-        "Current": PINE2,
-        "Refreshing": TEAL_INK,
-        "Stale": AMBER_INK,
-        "Broken": OXIDE,
-        "Denied": OXIDE,
-        "Opaque": SOFT,
-    }
-    colour = colours.get(name, PINE2)
-    return chip(x, y, name.upper(), colour=colour)
+    """Draw a live or resolution state chip.
+
+    Every supported state has one declared word, cue and colour role. An
+    unknown state is a generation failure, not a silent fallback to a plausible
+    colour.
+    """
+    state = LIVE_STATES.get(name) or RESOLUTION_STATES.get(name)
+    if state is None:
+        known = sorted({*LIVE_STATES, *RESOLUTION_STATES})
+        raise ValueError(f"unknown figure state {name!r}; known states are {known}")
+    mark = state.get("mark")
+    if not mark:
+        raise ValueError(f"figure state {name!r} declares no non-colour mark")
+    return chip(
+        x,
+        y,
+        state["word"].upper(),
+        colour=str(state["colour"]),
+        state=name,
+        mark=str(mark),
+    )
 
 
 def title_block(x: float, y: float, heading: str, deck: str | None = None, width: int = 520) -> str:
@@ -514,12 +611,15 @@ def fig_state() -> str:
     ]
     for index, (name, colour, text, action) in enumerate(states):
         x = 64 + index * 220
+        mark = str(LIVE_STATES[name]["mark"])
+        body += f'<g data-mark="{mark}">'
         body += rect(x, 166, 204, 190, fill=HIGH, stroke=colour, sw=2 if name in {"Stale", "Denied"} else 1)
-        body += circle(x + 22, 194, 7, fill=colour, stroke=None)
-        body += txt(x + 38, 200, name.upper(), size=12, fill=colour, family=F_MONO, weight="bold", spacing=0.6)
+        body += state_mark(x + 22, 194, mark, colour)
+        body += txt(x + 38, 200, name.upper(), size=12, fill=colour, family=F_MONO, weight="bold", spacing=0.6, data_state=name)
         body += para(x + 18, 226, 168, text, size=11, leading=16)
         body += line(x + 18, 300, x + 186, 300, stroke=LINE)
         body += txt(x + 18, 326, action, size=11, fill=INK, weight="bold")
+        body += "</g>"
 
     # Legal transitions, taken from the state table in chapter 8.
     body += txt(64, 400, "LEGAL TRANSITIONS", size=10, fill=OXIDE, family=F_MONO, weight="bold", spacing=1)
@@ -1883,9 +1983,15 @@ def fig_embed() -> str:
     states = [("Resolved", "provider answered"), ("Opaque", "unknown object type"), ("Unavailable", "provider absent"), ("Malformed", "payload unreadable")]
     for index, (name, detail) in enumerate(states):
         sx = 64 + index * 216
-        body += rect(sx, 630, 200, 58, fill=HIGH, stroke=PINE2 if name == "Resolved" else (OXIDE if name == "Malformed" else LINE))
-        body += txt(sx + 12, 652, name, size=12, weight="bold")
+        state = RESOLUTION_STATES[name]
+        colour = str(state["colour"])
+        mark = str(state["mark"])
+        body += f'<g data-mark="{mark}">'
+        body += rect(sx, 630, 200, 58, fill=HIGH, stroke=colour)
+        body += state_mark(sx + 18, 652, mark, colour)
+        body += txt(sx + 32, 652, name, size=12, fill=colour, weight="bold", data_state=name)
         body += txt(sx + 12, 672, detail, size=10, fill=SOFT, family=F_MONO)
+        body += "</g>"
     body += para(944, 638, 192, "Only a resolved embed carries a live state: Current, Refreshing, Stale, Broken or Denied.", size=10, leading=15)
     body += para(64, 710, 1072, "No state deletes the embed or flattens it into pixels. The last readable value remains visible, with its state and the operation that would restore it.", size=11, leading=16)
     return svg_doc(1200, 760, "Embed envelope and provider", "A document embed pointing to a provider-owned object, with the five failure states listed below.", body)
@@ -2005,6 +2111,41 @@ def fig_accessibility() -> str:
     return svg_doc(1200, 760, "Accessibility tree and focus order", "A document window with numbered focus order and an accessibility tree listing roles and names, plus target-size and contrast rules.", body)
 
 
+def annotate(name: str, svg: str) -> str:
+    """Attach the figure's declared class, scale, profile and components.
+
+    The annotation is machine-readable so that a checker can compare it with
+    the rendered geometry instead of trusting a caption.
+    """
+    spec = FIGURE_SPECS.get(name)
+    if spec is None:
+        raise ValueError(f"figure {name!r} has no entry in tools/figure-data.json")
+    figure_class = str(spec["class"])
+    if figure_class not in {"schematic", "editorial", "production"}:
+        raise ValueError(f"figure {name!r} has unknown class {figure_class!r}")
+    scale = spec["scale"]
+    components = spec["components"]
+    profile = str(spec["profile"])
+    metadata = {
+        "name": name,
+        "class": figure_class,
+        "scale": scale,
+        "profile": profile,
+        "components": components,
+    }
+    payload = escape(json.dumps(metadata, sort_keys=True))
+    scale_attr = "" if scale is None else f' data-figure-scale="{scale}"'
+    attrs_text = (
+        f' data-figure-class="{figure_class}"'
+        f"{scale_attr}"
+        f' data-figure-profile="{profile}"'
+    )
+    svg = svg.replace('role="img"', f'role="img"{attrs_text}', 1)
+    marker = ">\n"
+    index = svg.index(marker) + len(marker)
+    return svg[:index] + f"  <metadata>{payload}</metadata>\n" + svg[index:]
+
+
 def main() -> int:
     OUT.mkdir(exist_ok=True)
     figures = {
@@ -2042,8 +2183,15 @@ def main() -> int:
         "fig-31-localization": fig_localization,
         "fig-32-accessibility": fig_accessibility,
     }
+    missing = sorted(set(figures) - set(FIGURE_SPECS))
+    extra = sorted(set(FIGURE_SPECS) - set(figures))
+    if missing or extra:
+        raise SystemExit(
+            f"figure-data.json does not match the generator: "
+            f"missing={missing} extra={extra}"
+        )
     for name, draw in figures.items():
-        (OUT / f"{name}.svg").write_text(draw() + "\n", encoding="utf-8")
+        (OUT / f"{name}.svg").write_text(annotate(name, draw()) + "\n", encoding="utf-8")
     print(f"wrote {len(figures)} figures to {OUT}")
     return 0
 

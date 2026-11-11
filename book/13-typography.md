@@ -47,6 +47,15 @@ Sizes are logical units at the baseline text scale. The user's text scale
 multiplies them; the floors below are floors at the user's chosen scale, not
 ceilings that override it.
 
+The scale governs Cabochon chrome and the furniture the environment draws
+around a document. It does not govern the document itself. A document's own
+type settings, a diagram's declared theme and a bitmap editor's text are
+authored content: the environment preserves them and does not impose its three
+voices on them. A studio instrument that edits a document uses the interface
+and metadata voices for its own chrome and leaves the document's type alone.
+The book's editorial artwork may use type freely, because it is illustration
+rather than a production interface example.
+
 ## Voice and essentiality
 
 Voice and essentiality are different questions. Voice says which face and
@@ -77,8 +86,13 @@ The floors are binding.
 - A control's label must never use metadata type merely to fit.
 
 The design book's mockups used 9- and 10-unit labels to suggest density. At
-production size those labels fail both legibility and contrast. The corrected
-floors above preserve the density of the layout without shrinking the words.
+production size those labels are hard to read at ordinary viewing distance, and
+that is a legibility failure independent of colour. Contrast is a separate
+test: a colour pair either meets its ratio or does not, whatever the type size.
+Small type does not acquire a lower contrast requirement by being small, and a
+pair that passes contrast can still be illegible because the glyphs are too
+small to resolve. The corrected floors above preserve the density of the layout
+without shrinking the words.
 
 ## Pane and dialog headings
 

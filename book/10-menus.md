@@ -78,11 +78,16 @@ Rules for wording:
 
 - Use the same verb everywhere for the same operation. If the toolbar says
   **Export**, the menu says **Export**.
+- A menu label and its accelerator are resources, keyed by meaning and
+  translated as [Localization](38-localization.md) requires. The menu never
+  hard-codes an English string.
 - Use an ellipsis when the command requires further input before it can act.
   The requirement is the test, not the shape of the surface that collects it.
 - Do not use an ellipsis for a command that acts immediately.
 - A command that opens a cancelable sheet still takes an ellipsis when it
-  requires input. Cancellability is not the test.
+  requires input. Cancellability is not the test, and neither is the
+  presentation: a sheet, a modal dialog, a non-modal panel and an inline editor
+  all take the ellipsis when they require input before acting.
 - Prefer the specific verb to the generic one: **Insert reference** beats
   **Insert**, and **Export plate** beats **Export**.
 - Do not use an ambiguous verb for a live object. **Save a copy** could mean

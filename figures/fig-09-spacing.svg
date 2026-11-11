@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720" role="img" data-figure-class="schematic" data-figure-profile="substrate" aria-labelledby="title desc">
+  <metadata>{&quot;class&quot;: &quot;schematic&quot;, &quot;components&quot;: [], &quot;name&quot;: &quot;fig-09-spacing&quot;, &quot;profile&quot;: &quot;substrate&quot;, &quot;scale&quot;: null}</metadata>
   <title id="title">Spacing scale and measured tool strip</title>
   <desc id="desc">Eight spacing steps and an annotated toolbar with target and padding measurements.</desc>
   <rect width="1200" height="720" fill="#F1EEE5"/>

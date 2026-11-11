@@ -11,7 +11,9 @@ summary: Tool strip geometry, target sizes and the status line's division of lab
 
 The tool strip and the status line bracket the document. One holds the commands
 a user reaches for repeatedly; the other holds the truth about what just
-happened.
+happened. A tool strip button is a view of a command record, not a separate
+command: its label, shortcut, availability and reason come from the record
+defined in [Menus](10-menus.md).
 
 ## The tool strip
 
@@ -75,7 +77,8 @@ by the band. It has three zones.
 Rules for messages:
 
 - The status line must not show "Ready". Silence is the normal state.
-- A message must be a complete sentence fragment, not an error code.
+- A message is a short, meaningful status phrase, or a complete sentence when
+  it reports an error. It is never an error code.
 - A message that reports success must disappear after a few seconds; a message
   that reports a problem must remain until the problem is resolved or dismissed.
 - The status line must not be the only place a destructive or failed operation

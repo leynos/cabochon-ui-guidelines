@@ -32,22 +32,37 @@ a localization test.
 
 ## Resources
 
-- Every user-visible string is a resource keyed by meaning, not by its English
-  text.
+Resources cover application-authored interface text. They do not cover
+user-authored content, and they do not silently own provider-supplied text.
+
+- Every user-visible string the application itself authors is a resource keyed
+  by meaning, not by its English text.
 - A resource is a complete sentence or a complete label, never a fragment that
   is concatenated at run time.
-- Placeholders are named and typed, and a translation may reorder them.
+- Placeholders are named and typed, and a translation may reorder them. An
+  inserted object name, identity or path keeps its own direction through bidi
+  isolation; the surrounding sentence does not reverse it.
 - Plural forms use the locale's plural rules, not an `if` on the count.
 - Accelerator keys are declared separately from the label, so that a
   translation can choose a different letter.
 - A missing resource is a build failure, not a fallback to English.
+
+A diagnostic supplied by a provider is a different class. It is displayed as
+the provider's text with the provider named, it is not rewritten into an
+application resource, and it is not required to exist in every locale. If no
+translation is available, the interface says that the message is in the
+provider's language rather than pretending it is localized.
+Application-authored labels around it remain resources.
 
 The last rule matters. A silent fallback hides untranslated surfaces until a
 user finds them. A missing key must fail the pseudo-locale gate.
 
 ## Expansion and layout
 
-Text grows when it is translated. The layout must absorb the growth.
+Text grows when it is translated. The layout must absorb the growth. Shared
+bands are **baseline heights**, not immutable boxes: a band grows when its
+content's line boxes and padding require it, while its component minima still
+hold.
 
 - Menu items and button labels do not truncate; the control grows or the label
   wraps. Table cells and metadata truncate at the end with an ellipsis and a
@@ -72,16 +87,27 @@ exceed it; the pseudo-locale is designed to fail early.
 
 Direction is a property of the interface, not of each widget.
 
-- Panes mirror: the navigator moves to the right, the inspector to the left.
+- Panes mirror: the navigator moves to the trailing side, the inspector to the
+  leading side.
 - Menu bars mirror, and menu items align to the reading edge.
 - Icons that depict direction, such as arrows and playback controls, mirror.
-  Icons that depict objects, such as a document or a pen, do not.
+  Icons that depict objects, such as a document or a pen, do not. Mirroring is
+  declared per icon in its metadata; the interface does not apply a global flip
+  to an icon set, because that also reverses non-directional glyphs.
 - Text alignment follows the direction of the text, which may differ from the
   direction of the interface.
 - Hit regions and focus order mirror with the layout.
 - Scrollbars move to the reading edge's far side.
 - Position is described with leading and trailing edges, not left and right,
   except where a rule is deliberately absolute.
+
+Component definitions mark which placements are logical and which are
+deliberately physical. A physical placement is a stated exception, such as a
+canvas ruler whose origin is fixed by the document, and it keeps its meaning in
+every direction. The navigator's "left" pane and the inspector's "right" pane
+are logical leading and trailing positions and mirror. A ruler's zero mark, a
+page's binding edge and a document's own coordinate origin are physical and do
+not mirror.
 
 A document's content keeps its own direction. An Arabic note inside an English
 interface is right-to-left; an English quotation inside an Arabic interface is
@@ -125,6 +151,11 @@ A localization gate passes when:
 The gate runs in continuous integration and produces a report naming the
 window, the widget and the overflowing string. A screenshot is evidence, not
 the gate.
+
+The two pseudo-locales are stress fixtures. Passing them shows that the layout
+absorbs expansion and mirrors; it does not prove that a script renders, that a
+font covers the language, or that a translation is correct. Those are tested
+separately for each shipped locale, with real text in the real font.
 
 ## What localization is not
 

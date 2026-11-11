@@ -1,0 +1,68 @@
+{
+  "navigation": "README.md",
+  "chapters": [
+    {"file": "01-purpose.md", "part": "Orientation"},
+    {"file": "02-cabochon-character.md", "part": "Orientation"},
+    {"file": "03-ecosystem-map.md", "part": "Orientation"},
+    {"file": "04-first-batch.md", "part": "Orientation"},
+    {"file": "05-principles.md", "part": "Orientation"},
+    {"file": "06-document-centre.md", "part": "The document world"},
+    {"file": "07-object-identity.md", "part": "The document world"},
+    {"file": "08-live-relationships.md", "part": "The document world"},
+    {"file": "09-windows.md", "part": "Structure"},
+    {"file": "10-menus.md", "part": "Structure"},
+    {"file": "11-toolbars-status.md", "part": "Structure"},
+    {"file": "12-palette.md", "part": "Visual language"},
+    {"file": "13-typography.md", "part": "Visual language"},
+    {"file": "14-spacing-metrics.md", "part": "Visual language"},
+    {"file": "15-planes-borders.md", "part": "Visual language"},
+    {"file": "16-icons.md", "part": "Visual language"},
+    {"file": "17-motion.md", "part": "Visual language"},
+    {"file": "18-focus-keyboard.md", "part": "Interaction"},
+    {"file": "19-controls.md", "part": "Interaction"},
+    {"file": "20-panes.md", "part": "Interaction"},
+    {"file": "21-inspector.md", "part": "Interaction"},
+    {"file": "22-dialogs.md", "part": "Interaction"},
+    {"file": "23-command-palette.md", "part": "Interaction"},
+    {"file": "24-selection-tools.md", "part": "Interaction"},
+    {"file": "25-errors-recovery.md", "part": "Interaction"},
+    {"file": "26-facet-notes.md", "part": "The workspace"},
+    {"file": "27-dataframes.md", "part": "The workspace"},
+    {"file": "28-diagrams.md", "part": "The workspace"},
+    {"file": "29-bitmaps.md", "part": "The workspace"},
+    {"file": "30-formula.md", "part": "The workspace"},
+    {"file": "31-projects.md", "part": "The workspace"},
+    {"file": "32-embeds.md", "part": "The workspace"},
+    {"file": "33-burin-draw.md", "part": "The studio and the contracts"},
+    {"file": "34-cabochon-press.md", "part": "The studio and the contracts"},
+    {"file": "35-enfilade-table.md", "part": "The studio and the contracts"},
+    {"file": "36-hello-window.md", "part": "The studio and the contracts"},
+    {"file": "37-output-parity.md", "part": "The studio and the contracts"},
+    {"file": "38-localization.md", "part": "Breadth"},
+    {"file": "39-accessibility.md", "part": "Breadth"},
+    {"file": "40-checklist.md", "part": "Breadth"},
+    {"file": "appendix-references.md", "part": "Appendices"}
+  ],
+  "requirements": {
+    "checklist": "40-checklist.md",
+    "id_pattern": "^(CON|WIN|LAY|TYP|OBJ|CTL|FBK|OUT|LOC|DOC)-[0-9]{2}$"
+  },
+  "states": {
+    "live": ["Current", "Refreshing", "Stale", "Broken", "Denied"],
+    "live_owner": "08-live-relationships.md",
+    "resolution": ["Resolved", "Opaque", "Unavailable", "Malformed"],
+    "resolution_owner": "32-embeds.md"
+  },
+  "profiles": {
+    "names": ["substrate", "semantic", "studio"],
+    "owner": "appendix-references.md"
+  },
+  "commands": {
+    "record_owner": "10-menus.md",
+    "views": ["23-command-palette.md", "11-toolbars-status.md"]
+  },
+  "resources": {
+    "owner": "38-localization.md",
+    "consumers": ["10-menus.md", "16-icons.md"]
+  }
+}

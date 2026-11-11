@@ -81,6 +81,14 @@ them easy.
 - Toolbars that grow with every new feature instead of yielding to menus,
   the inspector or the command palette.
 
+These are rules about interface style, and they are scoped accordingly. They
+govern Cabochon chrome and the furniture the environment draws over a document.
+They do not govern user-authored content: a document may contain gradients,
+rounded shapes, photographic colour or any other material its author chose, and
+the environment preserves it. They do not govern the book's editorial artwork
+either, which is illustration rather than a production interface example.
+[Palette](12-palette.md) states the four scopes in full.
+
 ## A test for new surfaces
 
 Before adding a surface, the designer should answer four questions.

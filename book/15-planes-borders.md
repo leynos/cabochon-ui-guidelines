@@ -13,6 +13,13 @@ Cabochon is made of flat planes with exact edges. Depth is a border and an
 offset, not a glow. The discipline keeps a dense window legible and prevents
 the interface from turning into a stack of floating cards.
 
+The rules in this chapter govern Cabochon chrome and the furniture the
+environment draws over a document. They do not govern user-authored content: a
+document may contain its own borders, radii, fills and shadows, and the
+environment preserves them. A page-proof surface is the one place where a
+document's physical edge is drawn as interface furniture, and it is declared as
+an exception below.
+
 ## The four planes
 
 | Plane   | Fill    | Role                                    |
@@ -61,7 +68,11 @@ document plane, a pane, a window and a dialog are square. A radius larger than
 
 ## Shadow
 
-Cabochon permits exactly one shadow: an offset beneath an overlay.
+Cabochon permits exactly one shadow per application-owned overlay: an offset
+beneath a menu, popover, sheet, dialog or tooltip. The rule is per overlay, not
+per scene. A scene that contains a host-decorated window, a menu and a popover
+may therefore show three shadows, each belonging to a different overlay and
+each owned by whoever decorates that overlay.
 
 - Offset: 12 pixels right and 14 pixels down for a menu or popover; 6 pixels
   for a small tooltip.
@@ -70,7 +81,14 @@ Cabochon permits exactly one shadow: an offset beneath an overlay.
 - The overlay itself sits above the shadow with its 1.5-pixel border.
 
 A window may also cast the host's shadow in hosted mode. The application must
-not add a second one.
+not add a second one: the host owns that shadow and the application adds none
+of its own for the same window.
+
+A printed page presented as a physical sheet is the one declared exception. A
+page-proof surface may draw a page shadow to show the paper edge, because the
+shadow describes the page as an object rather than claiming a software layer.
+It is drawn in the page-proof presentation, never on a document plane, and it
+does not print. No other non-overlay surface gains a shadow.
 
 ## Elevation is not decoration
 

@@ -1,0 +1,130 @@
+{
+  "palette_roles": {
+    "paper": "#F1EEE5",
+    "high": "#FAF8F2",
+    "ink": "#17201C",
+    "soft": "#59625D",
+    "pine": "#173F35",
+    "pine2": "#285E50",
+    "teal": "#678E86",
+    "teal_ink": "#456A62",
+    "oxide": "#8A302F",
+    "amber": "#B8792E",
+    "amber_ink": "#8A5B24",
+    "line": "#AAA99F"
+  },
+  "live_states": {
+    "Current": {
+      "word": "Current",
+      "cue": "filled dot and word",
+      "mark": "dot",
+      "role": "pine2",
+      "colour": "#285E50"
+    },
+    "Refreshing": {
+      "word": "Refreshing",
+      "cue": "rotation arc and word",
+      "mark": "arc",
+      "role": "teal_ink",
+      "colour": "#456A62"
+    },
+    "Stale": {
+      "word": "Stale",
+      "cue": "warning triangle and word",
+      "mark": "triangle",
+      "role": "amber_ink",
+      "colour": "#8A5B24"
+    },
+    "Broken": {
+      "word": "Broken",
+      "cue": "broken link and word",
+      "mark": "broken",
+      "role": "oxide",
+      "colour": "#8A302F"
+    },
+    "Denied": {
+      "word": "Denied",
+      "cue": "padlock and word",
+      "mark": "lock",
+      "role": "oxide",
+      "colour": "#8A302F"
+    }
+  },
+  "resolution_states": {
+    "Resolved": {
+      "word": "Resolved",
+      "cue": "filled dot and word",
+      "mark": "dot",
+      "role": "pine2",
+      "colour": "#285E50"
+    },
+    "Opaque": {
+      "word": "Opaque",
+      "cue": "hatched square and word",
+      "mark": "hatch",
+      "role": "soft",
+      "colour": "#59625D"
+    },
+    "Unavailable": {
+      "word": "Unavailable",
+      "cue": "dashed square and word",
+      "mark": "dashed",
+      "role": "oxide",
+      "colour": "#8A302F"
+    },
+    "Malformed": {
+      "word": "Malformed",
+      "cue": "crossed square and word",
+      "mark": "crossed",
+      "role": "oxide",
+      "colour": "#8A302F"
+    }
+  },
+  "component_catalogue": {
+    "title_bar": {"height": 31, "min_height": 31},
+    "menu_bar": {"height": 29, "min_height": 29},
+    "tool_button": {"height": 30, "min_height": 28},
+    "studio_tool_button": {"height": 32, "min_height": 28},
+    "tree_row": {"height": 28, "min_height": 28},
+    "status_line": {"height": 26, "min_height": 26},
+    "splitter": {"height": 6, "min_height": 6},
+    "scrollbar": {"height": 12, "min_height": 12},
+    "primary_action": {"height": 36, "min_height": 36},
+    "target_minimum": {"height": 28, "min_height": 28}
+  },
+  "figures": {
+    "fig-00-cover": {"class": "editorial", "scale": null, "components": [], "profile": "editorial"},
+    "fig-01-map": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-02-small-world": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-03-first-batch": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-04-principles": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-05-document-centre": {"class": "schematic", "scale": null, "components": [], "profile": "semantic"},
+    "fig-06-state": {"class": "schematic", "scale": null, "components": [], "profile": "semantic"},
+    "fig-07-palette": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-08-type": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-09-spacing": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-10-planes": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-11-icons": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-12-motion": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-13-window": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-14-menus": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-15-toolbars": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-16-panes": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-17-inspector": {"class": "schematic", "scale": null, "components": [], "profile": "semantic"},
+    "fig-18-controls": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-19-dialog": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-20-focus": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-21-command-palette": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-22-notes": {"class": "schematic", "scale": null, "components": [], "profile": "semantic"},
+    "fig-23-draw": {"class": "schematic", "scale": null, "components": [], "profile": "studio"},
+    "fig-24-press": {"class": "schematic", "scale": null, "components": [], "profile": "studio"},
+    "fig-25-table": {"class": "schematic", "scale": null, "components": [], "profile": "studio"},
+    "fig-26-formula": {"class": "schematic", "scale": null, "components": [], "profile": "semantic"},
+    "fig-27-hello-window": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-28-project": {"class": "schematic", "scale": null, "components": [], "profile": "semantic"},
+    "fig-29-embed": {"class": "schematic", "scale": null, "components": [], "profile": "semantic"},
+    "fig-30-output": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-31-localization": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"},
+    "fig-32-accessibility": {"class": "schematic", "scale": null, "components": [], "profile": "substrate"}
+  }
+}

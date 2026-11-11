@@ -13,6 +13,11 @@ Facet Notes is the workspace's writing instrument. Its document is a note: a
 sequence of prose blocks, embedded objects and links. The note is the
 workspace, and the objects inside it remain themselves.
 
+The note's own text and the content of its embeds are authored material. The
+interface style governs the note tree, the inspector, the state edge and the
+chip, which are Cabochon-authored furniture; it does not restyle the prose or
+the embedded objects.
+
 ## Layout
 
 Facet Notes uses a three-pane window.

@@ -13,6 +13,9 @@ STAMP="$(date +%s)"
 
 mkdir -p "${SHOTS}"
 
+python3 -I "${ROOT}/tools/check-figures.py"
+python3 -I "${ROOT}/tools/check-figures.py" --self-test
+
 shopt -s nullglob
 figures=("${ROOT}"/figures/*.svg)
 if (( ${#figures[@]} == 0 )); then

@@ -101,9 +101,21 @@ carries the same meaning at every size.
 
 ## Selection
 
-Selection uses pine 2 as a fill with white text. A selected row in a tree, a
-selected cell in a table and a selected object in a canvas all use the same
-fill, so that selection reads as one idea across instruments.
+Selection is one idea with three representations, because the thing selected
+differs. The vocabulary is fixed; the representation follows the object.
+
+| Selected thing | Representation                                     |
+| -------------- | -------------------------------------------------- |
+| Text           | The system text-selection colour behind the glyphs |
+| Cell or row    | Selected fill with selected text                   |
+| Canvas object  | A non-destructive outline and handles              |
+
+A selected row in a tree and a selected cell in a table use the selected fill
+with selected text. A selected canvas object is marked by an outline and
+handles in interface space, as [Selection and tools](24-selection-tools.md)
+specifies; selection never changes the object's own fill, stroke or colour. The
+outline is interaction decoration, not saved appearance, so it is absent from
+every export.
 
 A secondary selection, such as an inactive pane's remembered selection, uses a
 pine-2 outline with an ink label. It must remain visible without competing with
@@ -175,13 +187,25 @@ A tint must never be the only indication of a state, and a tinted region must
 still meet text contrast against its own background. Contrast is computed for
 the composited pair, not for the accent in isolation.
 
-## Content colours
+## Scope of the palette
 
-Interface roles and content colours are separate scopes. A document's authored
-colours, a diagram's declared theme and a bitmap's samples are content. They
-are preserved within the target's gamut and are not coerced into an interface
-role. An interface role is never used to recolour authored content, and a
-content colour never becomes a state signal.
+The palette governs four scopes, and a rule states which one it addresses.
+
+- **Cabochon chrome.** Window frames, panes, controls, menus, status lines and
+  overlays. The closed role set in this chapter applies without exception.
+- **Cabochon-authored document furniture.** Rulers, guides, selection handles,
+  grid lines and other aids the environment draws over a document. These use
+  interface roles, are drawn in interface space and never print.
+- **User-authored content.** A document's own colours, a diagram's declared
+  theme and a bitmap's samples. These are preserved within the target's gamut
+  and are not coerced into an interface role.
+- **Editorial artwork.** The book's own cover and illustrative figures. These
+  are not production interface examples and are labelled as such where they
+  appear.
+
+An interface role is never used to recolour authored content, and a content
+colour never becomes a state signal. A rule that does not name its scope is a
+chrome rule by default.
 
 ## Choosing a new colour
 

@@ -10,6 +10,11 @@ A bitmap in Cabochon is an object with pixels, a resolution, a colour intent
 and an identity. The editor is deliberately bounded: it provides the operations
 needed to prove editable embedding, not a full paint package.
 
+The editor's chrome follows the interface style in this book. The image does
+not. Its colours, its sample values and its own metadata are authored content:
+they are preserved across display, scaling and export, and the interface
+palette is never imposed on them.
+
 ## The object
 
 A bitmap object declares:
@@ -88,6 +93,20 @@ factor, including 25 per cent, uses the declared filtered sampling. Neither
 changes the stored pixels. The editor does not force an integer factor to
 obtain a sharp preview.
 
+Three scales are separate and must be named.
+
+| Scale             | What it governs                                   |
+| ----------------- | ------------------------------------------------- |
+| Stored samples    | The image's pixel grid and bit depth              |
+| Display transform | How samples become device pixels on this display  |
+| Interface scale   | The size of the editor's chrome, not of the image |
+
+At 100 per cent, the image is shown at its stored sample density, mapped
+through the declared device transform; on a display with a fractional scale
+factor, several device pixels may represent one stored sample. Changing the
+display transform, the zoom or the theme never changes the stored pixels,
+physical resolution or identity.
+
 ## Colour
 
 - The foreground and background colours are shown as two 24-unit swatches at
@@ -103,7 +122,13 @@ obtain a sharp preview.
   includes the checkerboard and display transform, is a separately labelled
   choice.
 - A sampled colour is converted explicitly before it is written back when the
-  document's colour space differs from the sampled colour's space.
+  document's colour space differs from the sampled colour's space. The
+  conversion names its source and destination profiles and is recorded in the
+  document's history.
+- A colour that falls outside the document's gamut is marked in the inspector
+  before it is written back. The user chooses between clipping, a perceptual
+  conversion and cancelling; the editor does not silently substitute a nearest
+  colour.
 - A colour that cannot be represented in the document's intent is marked in
   the inspector, not silently converted.
 

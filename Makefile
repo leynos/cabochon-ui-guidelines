@@ -27,8 +27,9 @@ markdownlint: ## Lint Markdown
 spelling: ## Check spelling with typos
 	$(TYPOS)
 
-links: ## Check relative links and figure references
+links: ## Check links, anchors and the structural contract
 	$(PYTHON) -I tools/check-links.py
+	$(PYTHON) -I tools/check-links.py --self-test
 
 check: check-fmt markdownlint spelling links validate-svg ## Run every gate
 	@echo "All gates passed."

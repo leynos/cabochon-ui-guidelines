@@ -111,6 +111,16 @@ The default action is scoped to the purpose and the destructive risk.
 The focus ring is drawn on the focused button, as described in
 [Focus and keyboard](18-focus-keyboard.md).
 
+Four properties are commonly conflated and are kept apart here. The **default
+action** is what Return invokes. The **initially focused control** is where the
+focus ring starts. The **presentation** is whether the surface is a sheet, a
+modal dialog or a non-modal panel. **Cancellability** is whether Escape can
+abandon the transaction. A destructive confirmation may be a cancellable sheet
+that starts focus on its safe action while making the destructive action
+reachable but not the Return default. Changing one property never implies
+another, and the invocation context — which command opened the surface and on
+what selection — decides all four together.
+
 ## Behaviour
 
 - Escape follows the surface's declared safe exit. It cancels without

@@ -24,17 +24,19 @@ unresolved and still denied, or resolved and still denied.
 
 ## The five states
 
-| State      | Meaning                                                        | Appearance            |
-| ---------- | -------------------------------------------------------------- | --------------------- |
-| Current    | An accepted value matches the source at its known revision.    | Pine text or chip.    |
-| Refreshing | A refresh is in flight; an accepted value may still be shown.  | Teal chip, no alarm.  |
-| Stale      | The source is known to have advanced past the accepted value.  | Amber ink chip.       |
-| Broken     | The source cannot be reached, or no accepted value exists yet. | Oxide chip.           |
-| Denied     | Current authority does not permit the read.                    | Oxide chip, no value. |
+| State      | Meaning                                                        | Colour role        | Mark          |
+| ---------- | -------------------------------------------------------------- | ------------------ | ------------- |
+| Current    | An accepted value matches the source at its known revision.    | Pine text or chip. | Filled dot.   |
+| Refreshing | A refresh is in flight; an accepted value may still be shown.  | Refresh text chip. | Rotation arc. |
+| Stale      | The source is known to have advanced past the accepted value.  | Amber ink chip.    | Triangle.     |
+| Broken     | The source cannot be reached, or no accepted value exists yet. | Oxide chip.        | Broken link.  |
+| Denied     | Current authority does not permit the read.                    | Oxide chip.        | Padlock.      |
 
 The states are exhaustive for the first batch. An application must not invent a
 sixth state, and must not use colour alone to distinguish them. Every chip
-carries a word.
+carries a word and the state's own shape mark. The mark is drawn in the state's
+colour role, but its form is what survives a monochrome display, a
+colour-vision difference or a screenshot reproduced without colour.
 
 **Precedence.** When several facts hold at once, the visible state is chosen in
 this order: Denied, Broken, Refreshing, Stale, Current. Denial is not a variety
@@ -143,8 +145,8 @@ context and may destroy work. The correct behaviour is:
 ## Refresh
 
 A refresh must be visible but quiet. The **Refreshing** state uses the refresh
-mark role for its dot and rule, and the refresh text role for any word. The
-decorative teal role is never used for text, and the refresh text role is a
+mark role for its rotation arc and rule, and the refresh text role for any
+word. Decorative teal is never used for text. The refresh text role is a
 separate, darker tint that meets contrast at body size. A refresh that
 completes within 200 milliseconds may skip the chip entirely, provided the
 value updates and the status line records the time.

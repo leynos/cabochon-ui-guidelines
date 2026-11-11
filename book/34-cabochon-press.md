@@ -13,6 +13,12 @@ Cabochon Press is the studio's page-layout instrument. It arranges pages,
 places live objects and prepares print-bound output. Its defining promise is
 that it reports what it will do before it does it.
 
+Its chrome follows the interface style in this book. The pages it arranges do
+not: placed documents, their colours, their type and their own shadows are
+authored content, preserved into the print output. The page-proof surface may
+draw a page shadow to show the paper edge, as the declared exception in
+[Planes and borders](15-planes-borders.md) allows; that shadow does not print.
+
 ## Layout
 
 - Pages panel: 150 logical units, listing every page with a thumbnail, a number

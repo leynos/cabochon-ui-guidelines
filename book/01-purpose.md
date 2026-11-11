@@ -43,12 +43,19 @@ Three sources govern a Cabochon interface, in descending order.
 
 1. **Platform contracts.** Clerestory, Lapidary, Burin and Escutcheon define
    what an application can rely on. A guideline cannot require behaviour that a
-   contract does not provide.
+   contract does not provide. Each dependency names its document and revision
+   in the contract-basis table in [References](appendix-references.md).
 2. **This book.** It interprets the contracts for the first batch and fixes
    the shared visual and interaction language.
 3. **Local judgement.** An application may add a control or a panel that its
    own work requires, provided the addition uses the shared furniture and does
    not contradict a rule.
+
+The first batch is a delivery phase, not a conformance profile. A surface is
+judged against the profile it claims — substrate, semantic workspace or studio
+— as [References](appendix-references.md) defines. A studio instrument is held
+to the studio profile when it is built, whether or not it ships in the first
+release.
 
 Guidance marked **must** is a release condition. Guidance marked **should** is
 the expected choice, open to a documented exception. Guidance marked **may** is
