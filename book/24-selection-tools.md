@@ -146,8 +146,8 @@ becomes an outline, as described in [Palette](12-palette.md).
 
 - Shift-click extends a selection; Control-click toggles an item.
 - A drag on empty canvas draws a marquee; a drag on an object moves it.
-- A multi-selection shows its count in the status line and its shared
-  properties in the inspector.
+- A multi-selection shows its count in the status line when the disclosure
+  policy permits that class, and its shared properties in the inspector.
 - A command that applies to only some selected objects offers a compatible
   subset only as an explicit pre-invocation choice, with the chosen subset
   listed. Once invoked, the edit commits for that whole subset or for none of

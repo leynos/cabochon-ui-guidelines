@@ -17,12 +17,14 @@ is examined and maintained.
 
 ## Layout
 
-- Categories panel: 210 logical units, listing saved filters with row counts.
+- Categories panel: 210 logical units, listing saved filters with row counts
+  where the disclosure policy permits them.
 - Formula bar: 34 logical units, showing the selected cell's expression.
 - Grid: the flexible remainder.
 - Cell inspector: 240 logical units, showing address, type, value, format,
   validation and selection aggregates.
-- Status line: aggregate, row count and column count.
+- Status line: aggregate and, when the disclosure policy permits those counts,
+  the row and column counts.
 
 The categories panel is the instrument's navigator. It lists **All rows** and
 each saved category, with the selected category drawn in the selected-fill role.

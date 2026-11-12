@@ -1,4 +1,4 @@
-.PHONY: help figures validate-svg check-fmt fmt markdownlint spelling links check all
+.PHONY: help figures validate-svg check-fmt fmt markdownlint spelling links states check all
 
 SHELL := bash
 PYTHON ?= python3
@@ -31,7 +31,11 @@ links: ## Check links, anchors and the structural contract
 	$(PYTHON) -I tools/check-links.py
 	$(PYTHON) -I tools/check-links.py --self-test
 
-check: check-fmt markdownlint spelling links validate-svg ## Run every gate
+states: ## Check the live-state projection, transitions and event fixtures
+	$(PYTHON) -I tools/check-states.py
+	$(PYTHON) -I tools/check-states.py --self-test
+
+check: check-fmt markdownlint spelling links states validate-svg ## Run every gate
 	@echo "All gates passed."
 
 all: check ## Compatibility alias for check

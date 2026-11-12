@@ -41,7 +41,8 @@ The accessibility tree mirrors the visible structure's meaning.
 
 - A window has a name and a role.
 - A menu bar has a name and contains menus, which contain items.
-- A tree has a name, an item count and a selected item.
+- A tree has a name, a selected item and an item count when the disclosure
+  policy permits that class.
 - A document has a name and contains groups.
 - A control has a role, a name, a state, its actions and bounds.
 - A status line has a name and its current text.
@@ -227,9 +228,10 @@ application, and the book does not treat it as such proof.
 - The native adapter exposes actions, not only names: activate, focus, set
   value, expand, collapse, select, scroll and show menu, as the role allows.
 - A logical row that is outside the visible viewport is still reachable. A
-  virtualized grid or tree reports its logical child count and materializes a
-  row when a client asks for it; the client does not have to scroll the visible
-  area to discover content.
+  virtualized grid or tree reports its logical child count where the disclosure
+  policy permits that class, and materializes a row when a client asks for it;
+  the client does not have to scroll the visible area to discover content. When
+  the count is withheld, it reports that further items exist without a number.
 - A meaningful change is announced with a priority: state transitions and
   errors are polite or assertive according to their urgency, and repeated
   changes to the same node are coalesced. A repaint, a caret move or a

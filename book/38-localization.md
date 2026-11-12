@@ -77,8 +77,9 @@ hold.
   that no longer fits wraps onto a second row rather than shrinking its
   buttons. A dialog never grows wider than the window's feasible width, and it
   never hides its primary action below the fold.
-- A status line may shorten its message but must keep its state and its
-  object count.
+- A status line may shorten its message but must keep its state. It keeps its
+  object count only when the disclosure policy permits that class; otherwise it
+  uses the non-count alternative that the state carrier defines.
 
 The 35 per cent expansion is a floor, not a target. German and Finnish often
 exceed it; the pseudo-locale is designed to fail early.

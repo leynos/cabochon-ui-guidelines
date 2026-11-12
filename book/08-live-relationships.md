@@ -15,22 +15,29 @@ relationship can be current, refreshing, stale, broken or denied. Each state
 has a distinct appearance and a distinct promise.
 
 The five labels are a projection. They are computed from independent facts:
-whether the runtime's capability broker currently authorises the read, whether
-a provider can resolve the object, whether an authorised cached value exists,
-which source revision that value was validated against, and whether a refresh
-request is in flight. No single fact is allowed to stand in for another. In
-particular, resolution and authorisation are independent: an object can be
-unresolved and still denied, or resolved and still denied.
+whether the runtime's capability broker currently authorises the read; whether
+a provider is present; whether an accepted value exists; which source revisions
+that value was validated against; the latest source revision the provider has
+reported; whether an interruption has invalidated an earlier validation; and
+whether an authorised request generation is in flight. No single fact is
+allowed to stand in for another. In particular, resolution and authorisation
+are independent: an object can be unresolved and still denied, or resolved and
+still denied.
+
+The release has one typed transition source, `live_transitions` in
+`tools/figure-data.json`. The table below, the state plate and the event
+fixtures in `tools/state-fixtures.json` are all checked against it, so an edge
+cannot be changed in one place and left stale in another.
 
 ## The five states
 
-| State      | Meaning                                                        | Colour role        | Mark          |
-| ---------- | -------------------------------------------------------------- | ------------------ | ------------- |
-| Current    | An accepted value matches the source at its known revision.    | Pine text or chip. | Filled dot.   |
-| Refreshing | A refresh is in flight; an accepted value may still be shown.  | Refresh text chip. | Rotation arc. |
-| Stale      | The source is known to have advanced past the accepted value.  | Amber ink chip.    | Triangle.     |
-| Broken     | The source cannot be reached, or no accepted value exists yet. | Oxide chip.        | Broken link.  |
-| Denied     | Current authority does not permit the read.                    | Oxide chip.        | Padlock.      |
+| State      | Meaning                                                                           | Colour role        | Mark          |
+| ---------- | --------------------------------------------------------------------------------- | ------------------ | ------------- |
+| Current    | An accepted value satisfies the freshness condition.                              | Pine text or chip. | Filled dot.   |
+| Refreshing | An authorised request is in flight; an accepted value may show.                   | Refresh text chip. | Rotation arc. |
+| Stale      | The source is ahead of the accepted value, or validation lapsed.                  | Amber ink chip.    | Triangle.     |
+| Broken     | No request is in flight and the provider is absent or no value has been accepted. | Oxide chip.        | Broken link.  |
+| Denied     | Current authority does not permit the read.                                       | Oxide chip.        | Padlock.      |
 
 The states are exhaustive for the first batch. An application must not invent a
 sixth state, and must not use colour alone to distinguish them. Every chip
@@ -38,10 +45,37 @@ carries a word and the state's own shape mark. The mark is drawn in the state's
 colour role, but its form is what survives a monochrome display, a
 colour-vision difference or a screenshot reproduced without colour.
 
-**Precedence.** When several facts hold at once, the visible state is chosen in
-this order: Denied, Broken, Refreshing, Stale, Current. Denial is not a variety
-of failure and never renders as Broken. A refresh in flight does not mask a
-denial that arrived after the request started.
+**Projection.** When several facts hold at once, the visible state is computed
+in this order. The order is exhaustive and total; it is not a severity ranking.
+
+1. **Denied** if current authority does not permit the read. A request in
+   flight does not mask a denial. Denial is not a variety of failure and never
+   renders as Broken.
+2. **Refreshing** if an authorised request generation is in flight. This holds
+   even when no accepted value exists yet, so first load is Refreshing and not
+   Broken. Revocation and provider loss terminate the request before the
+   projection runs.
+3. **Broken** if no request is in flight and either the provider is not
+   present or no value has been accepted.
+4. **Stale** if an accepted value exists, the provider is present, and the
+   value does not satisfy the freshness condition below.
+5. **Current** if an accepted value satisfies the freshness condition.
+
+The freshness condition treats two independent records. The *known-source
+vector* is the latest revision the provider has reported for each source. The
+*invalidation epoch* is a counter advanced whenever authority is revoked or the
+provider is lost, because either event breaks the chain of observation. An
+accepted value records both the vector it was validated against and the epoch
+at validation. It satisfies the freshness condition only when its validated
+vector covers every component of the current known-source vector, its
+validation epoch is the current epoch, no request is in flight, and current
+authority still permits the read.
+
+The order above is the projection. The separate order used to summarise
+children in [Aggregating child states](#aggregating-child-states) is a severity
+ranking: Denied, Broken, Refreshing, Stale, Current. A summary may therefore be
+more severe than any individual projection rule would suggest for one child,
+but it never invents a state.
 
 ## Authority and availability are events in their own right
 
@@ -50,12 +84,20 @@ requests, and they do not wait for one.
 
 - A grant is revoked or expires. Every affected relationship moves to
   **Denied** immediately, from every state, including **Current**,
-  **Refreshing** and **Broken**.
+  **Refreshing** and **Broken**. Any request generation in flight is terminated
+  and its replies are discarded. The invalidation epoch advances.
 - A provider crashes, is uninstalled or loses its transport. Every affected
-  relationship that is not **Denied** moves to **Broken** immediately.
-- A source reports a newer revision. Every affected relationship that is
-  **Current** moves to **Stale**; a relationship already **Stale** stays
-  **Stale**.
+  relationship that is not **Denied** moves to **Broken** immediately. Any
+  request generation in flight is terminated and its replies are discarded. The
+  invalidation epoch advances, so a later recovery cannot assert **Current**
+  from a value validated before the gap.
+- A source reports a newer revision. The known-source vector advances. A
+  **Current** relationship moves to **Stale**; a relationship already **Stale**
+  stays **Stale**. If **Refreshing**, the in-flight generation is superseded by
+  a new request and the relationship stays **Refreshing**. A **Broken**
+  relationship with no provider receives no notification, because no provider
+  is present to send one. A **Broken** relationship that has a provider but no
+  accepted value is still notified and schedules a refresh.
 
 The runtime's capability broker owns the authority decision. A host-resource
 decision enters through the broker's adapter; it does not bypass the broker.
@@ -66,34 +108,52 @@ permits.
 
 The reverse direction is deliberately not automatic. A new grant, a restarted
 provider or a recovered transport makes recovery possible but does not by
-itself assert **Current**. Recovery requires a refresh whose result is
-validated against current authority and the accepted source revisions, as
-described under [Refresh](#refresh).
+itself assert **Current**. When an accepted value exists, the relationship
+projects as **Stale**, because the revocation or loss advanced the invalidation
+epoch. With no accepted value it projects as **Broken**. Recovery requires a
+dispatched refresh, whose result must satisfy the freshness condition, as
+described under [The logical refresh lifecycle](#the-logical-refresh-lifecycle).
 
 ## Transitions
 
 A state change names its event and its owner. The first batch permits only the
 following transitions.
 
-| From                    | Event                                                       | To          | Owner             |
-| ----------------------- | ----------------------------------------------------------- | ----------- | ----------------- |
-| Any state               | The grant is revoked or expires                             | Denied      | Capability broker |
-| Any state except Denied | The provider or transport is lost                           | Broken      | Runtime           |
-| Current                 | The source reports a newer revision                         | Stale       | Provider          |
-| Current, Stale, Broken  | A refresh request starts                                    | Refreshing  | Application       |
-| Denied                  | A new grant is issued and a refresh request starts          | Refreshing  | User or host      |
-| Refreshing              | An accepted result validates against authority and revision | Current     | Application       |
-| Refreshing              | The source is unreachable or the request times out          | Broken      | Application       |
-| Refreshing              | The read is refused or authority is withdrawn               | Denied      | Capability broker |
-| Refreshing              | The request is cancelled                                    | Prior state | Application       |
-| Refreshing              | A reply from an older request generation arrives            | No change   | Application       |
+| From                    | Event                                                                      | To         | Owner                                   |
+| ----------------------- | -------------------------------------------------------------------------- | ---------- | --------------------------------------- |
+| Any state               | The grant is revoked or expires                                            | Denied     | Capability broker                       |
+| Any state except Denied | The provider or transport is lost                                          | Broken     | Runtime                                 |
+| Current                 | The source reports a newer revision                                        | Stale      | Provider                                |
+| Refreshing              | The source reports a newer revision                                        | Refreshing | Provider                                |
+| Broken                  | The provider returns; an accepted value exists                             | Stale      | Runtime                                 |
+| Denied                  | A grant is issued; an accepted value exists                                | Stale      | Capability broker                       |
+| Denied                  | A grant is issued; no value has been accepted                              | Broken     | Capability broker                       |
+| Current, Stale, Broken  | A refresh request is dispatched while authorised and a provider is present | Refreshing | Application                             |
+| Denied                  | A grant is issued, then a refresh is dispatched with a provider present    | Refreshing | Application after the Capability broker |
+| Refreshing              | A validated result satisfies the freshness condition                       | Current    | Application                             |
+| Refreshing              | The transport fails or the request times out                               | Broken     | Application                             |
+| Refreshing              | The read is refused or authority is withdrawn                              | Denied     | Capability broker                       |
+| Refreshing              | The request is cancelled                                                   | Recomputed | Application                             |
+| Refreshing              | A superseded reply arrives                                                 | No change  | Application                             |
 
-A refresh enters **Refreshing** logically when the request starts, even when it
-completes within 200 milliseconds, too quickly to paint the chip. A
-relationship does not move from **Current** to **Broken** by inventing a
-refresh first: the availability event moves it directly. A **Broken**
-relationship does not become **Stale**, because without a source there is no
-newer revision to report.
+A refresh enters **Refreshing** logically when an authorised request is
+dispatched, even when it completes within 200 milliseconds, too quickly to
+paint the chip. A relationship does not move from **Current** to **Broken** by
+inventing a refresh first: the availability event moves it directly. A
+**Broken** relationship does not become **Stale** through a notification,
+because no provider is present to report a newer revision.
+
+**Recomputed** and **No change** are outcomes, not sixth states. **Recomputed**
+means the request ends and the projection is evaluated again from the current
+facts; a cancellation never restores the label that preceded the request. **No
+change** means the reply belongs to a superseded generation and is discarded.
+
+A source notification is itself a scheduling event. When it arrives with no
+request in flight, the default is to dispatch a refresh. The relationship then
+moves to **Refreshing**, and the freshest accepted value remains visible. An
+instrument may instead expose **Stale** and wait for an explicit refresh, but
+only when its own chapter declares that policy and records it in the
+instrument's contract.
 
 ## The logical refresh lifecycle
 
@@ -101,27 +161,35 @@ The visible chip is the last step of a lifecycle that exists even when nothing
 paints.
 
 1. **Request.** The application allocates a monotonically increasing request
-   generation and records the identity, the accepted source-revision vector and
-   the authority decision at invocation. No accepted value is discarded.
+   generation and records the identity, the known-source vector at dispatch and
+   the authority decision. No accepted value is discarded. A dispatch is
+   refused while authority or a provider is absent; the relationship then stays
+   **Denied** or **Broken**.
 2. **In flight.** The relationship is **Refreshing**. If an authorised cached
    value exists, it remains visible and selectable. If none exists, the object
    shows a non-disclosing loading placeholder, not an empty value and not a
-   zero.
+   zero. A first load with no cached value is therefore **Refreshing**, not
+   **Broken**.
 3. **Completion.** A result is accepted only when its generation is the current
-   generation, its authority is still valid and it was produced from revisions
-   at least as new as the accepted vector. Acceptance replaces the vector and
-   moves the relationship to **Current**.
-4. **Rejection.** A transport failure or timeout moves the relationship to
-   **Broken** and records the reason. A refusal or an authority withdrawal
-   moves it to **Denied**. A cancellation returns the relationship to the state
-   it had before the request and publishes nothing.
+   generation, authority is still valid, the provider is still present and its
+   validated vector covers the known-source vector at completion. Acceptance
+   replaces the accepted value and vector, records the current invalidation
+   epoch, and projects as **Current**. A result that is behind the known source
+   is superseded: it is not accepted and does not publish.
+4. **Rejection.** A transport failure or timeout ends the request, records the
+   reason and marks availability uncertain, so the projection is **Broken**. A
+   refusal or an authority withdrawal moves the relationship to **Denied**. A
+   cancellation ends the request and recomputes the projection from the facts;
+   if the source advanced during the request, the result is **Stale**, not the
+   label that preceded it.
 5. **Obsolete replies.** A reply from an older generation than the current one
-   is discarded. It cannot overwrite a newer result and cannot revive a denial.
+   is discarded. It cannot overwrite a newer result, cannot revive a denial and
+   cannot settle a superseded request.
 
-A source notification schedules an automatic refresh by default. An instrument
-may instead mark the relationship **Stale** and wait for an explicit refresh,
-provided its own chapter declares that policy. The choice is recorded in the
-instrument's contract, not left to the implementation.
+A source notification advances the known-source vector before any refresh is
+scheduled. If it arrives during a request, that generation is superseded and a
+new generation is dispatched, because the older request may have read the
+previous revision. Only the newest generation may complete.
 
 ## Recoverability is a transition, not a state
 
@@ -164,10 +232,12 @@ Rules for refresh:
 
 ## Stale
 
-Stale is the most commonly misunderstood state. It means the source is known to
-have advanced, the cached value is still readable, and the user should decide
-whether to refresh. Stale is not an error, and it is not the same as a source
-becoming unavailable: a missing provider is **Broken**, not **Stale**.
+Stale is the most commonly misunderstood state. It means the cached value is
+still readable, but it is not known to be current: either the source reports a
+newer revision, or a revocation or provider gap has invalidated an earlier
+validation. The user should decide whether to refresh. Stale is not an error,
+and it is not the same as a source becoming unavailable: a missing provider is
+**Broken**, not **Stale**.
 
 - Use the stale role for the chip and its label at body size; it is the
   readable amber tint, not the decorative amber accent.
@@ -211,6 +281,11 @@ counts, its search keywords, and its diagnostic entries.
 - A denial count or aggregate is disclosed only when the policy permits that
   class. Otherwise the summary says that some content is unavailable, with no
   count and no names.
+- Count disclosure binds every consumer: a visible status string, an accessible
+  name or description, a shortened or localized status line, a fallback
+  placeholder, an error message and a manifest. A consumer that loses the count
+  keeps a meaningful non-count form, such as the worst state and a generic
+  phrase, rather than dropping the status or inventing a number.
 - An opt-in diagnostic-content setting cannot override a denial. It can widen
   what is recorded for public metadata only.
 - Deletion impact and referential completeness are scoped to references the
@@ -226,10 +301,12 @@ is cached. The output chapters define the staging and publication boundary.
 ## Aggregating child states
 
 A document, note or project may contain children in different states. Its
-single summary chip uses the precedence order already stated: any **Denied**
-child makes the summary **Denied**; otherwise any **Broken** child makes it
-**Broken**; otherwise any **Refreshing** child makes it **Refreshing**;
-otherwise any **Stale** child makes it **Stale**; otherwise it is **Current**.
+single summary chip uses the severity order: any **Denied** child makes the
+summary **Denied**; otherwise any **Broken** child makes it **Broken**;
+otherwise any **Refreshing** child makes it **Refreshing**; otherwise any
+**Stale** child makes it **Stale**; otherwise it is **Current**. Severity ranks
+the children's visible states; it does not replace the projection that computes
+each child's state.
 
 The summary is invariant under the order of the children. It reports the
 classes that the disclosure policy permits, and it does not let a less severe
@@ -291,5 +368,10 @@ discloses the canary. Crash a provider without starting a refresh and confirm
 that the relationship leaves **Current**. Deliver a late successful reply after
 a denial and confirm that it does not publish.
 
-Exercise every transition in the table above. The [checklist](40-checklist.md)
-lists the transitions that must be witnessed before release.
+Exercise every transition in the table above. The fixture set in
+`tools/state-fixtures.json` covers first load without a cached value, a source
+advance during a refresh, cancellation after that advance, supersession, a
+timeout, a grant change during a request and a late completion after denial.
+`make states` runs the fixtures and compares the chapter and figure with the
+typed transition source. The [checklist](40-checklist.md) lists the transitions
+that must be witnessed before release.

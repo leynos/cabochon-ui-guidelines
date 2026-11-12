@@ -50,6 +50,129 @@
       "colour": "#8A302F"
     }
   },
+  "live_projection": [
+    {
+      "state": "Denied",
+      "when": "current authority does not permit the read"
+    },
+    {
+      "state": "Refreshing",
+      "when": "an authorised request generation is in flight"
+    },
+    {
+      "state": "Broken",
+      "when": "no request is in flight and the provider is not present or no value has been accepted"
+    },
+    {
+      "state": "Stale",
+      "when": "an accepted value exists but is behind the known source or an invalidation epoch"
+    },
+    {
+      "state": "Current",
+      "when": "an accepted value satisfies the freshness condition"
+    }
+  ],
+  "live_transitions": [
+    {
+      "id": "authority-revoked",
+      "from": ["Any state"],
+      "event": "The grant is revoked or expires",
+      "to": "Denied",
+      "owner": "Capability broker"
+    },
+    {
+      "id": "provider-lost",
+      "from": ["Any state except Denied"],
+      "event": "The provider or transport is lost",
+      "to": "Broken",
+      "owner": "Runtime"
+    },
+    {
+      "id": "source-advanced",
+      "from": ["Current"],
+      "event": "The source reports a newer revision",
+      "to": "Stale",
+      "owner": "Provider"
+    },
+    {
+      "id": "source-advanced-refreshing",
+      "from": ["Refreshing"],
+      "event": "The source reports a newer revision",
+      "to": "Refreshing",
+      "owner": "Provider",
+      "note": "The in-flight request is superseded."
+    },
+    {
+      "id": "provider-recovered-with-value",
+      "from": ["Broken"],
+      "event": "The provider returns; an accepted value exists",
+      "to": "Stale",
+      "owner": "Runtime"
+    },
+    {
+      "id": "grant-issued-with-value",
+      "from": ["Denied"],
+      "event": "A grant is issued; an accepted value exists",
+      "to": "Stale",
+      "owner": "Capability broker"
+    },
+    {
+      "id": "grant-issued-without-value",
+      "from": ["Denied"],
+      "event": "A grant is issued; no value has been accepted",
+      "to": "Broken",
+      "owner": "Capability broker"
+    },
+    {
+      "id": "refresh-dispatched",
+      "from": ["Current", "Stale", "Broken"],
+      "event": "A refresh request is dispatched while authorised and a provider is present",
+      "to": "Refreshing",
+      "owner": "Application"
+    },
+    {
+      "id": "grant-and-refresh",
+      "from": ["Denied"],
+      "event": "A grant is issued, then a refresh is dispatched with a provider present",
+      "to": "Refreshing",
+      "owner": "Application after the Capability broker"
+    },
+    {
+      "id": "refresh-current",
+      "from": ["Refreshing"],
+      "event": "A validated result satisfies the freshness condition",
+      "to": "Current",
+      "owner": "Application"
+    },
+    {
+      "id": "refresh-broken",
+      "from": ["Refreshing"],
+      "event": "The transport fails or the request times out",
+      "to": "Broken",
+      "owner": "Application"
+    },
+    {
+      "id": "refresh-denied",
+      "from": ["Refreshing"],
+      "event": "The read is refused or authority is withdrawn",
+      "to": "Denied",
+      "owner": "Capability broker"
+    },
+    {
+      "id": "refresh-cancelled",
+      "from": ["Refreshing"],
+      "event": "The request is cancelled",
+      "to": "Recomputed",
+      "owner": "Application"
+    },
+    {
+      "id": "superseded-reply",
+      "from": ["Refreshing"],
+      "event": "A superseded reply arrives",
+      "to": "No change",
+      "owner": "Application"
+    }
+  ],
   "resolution_states": {
     "Resolved": {
       "word": "Resolved",

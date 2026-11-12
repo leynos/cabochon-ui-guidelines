@@ -71,8 +71,10 @@ by the band. It has three zones.
 - **Centre.** Optional progress for a bounded operation, drawn as a 3-pixel
   rule that fills from left to right. Indeterminate progress uses a moving
   segment, not a spinner.
-- **Right.** The document's live state chip and, when relevant, a count such
-  as "12 rows selected".
+- **Right.** The document's live state chip and, when relevant and the
+  disclosure policy permits that class, a count such as "12 rows selected".
+  When the count is withheld, the zone omits it rather than showing a
+  placeholder number.
 
 Rules for messages:
 
@@ -122,10 +124,13 @@ summary. It takes the first state that applies, in this order:
 
 The order is fixed so that a summary does not depend on the order in which
 children were created or displayed. A mixed document must not hide a denied
-child behind a milder summary. The chip's accessible name names the worst state
-and the number of children in it, and each child keeps its own mark in the
-document. The chip is a summary, not a notification, and never replaces the
-per-object marks.
+child behind a milder summary. The chip's accessible name always names the
+worst state. It adds the number of children in that state only when the
+disclosure policy permits the count class; otherwise it pairs the state with a
+non-count phrase such as "some content unavailable". It never leaks a count,
+identity or revision that the policy withholds. Each child keeps its own mark
+in the document. The chip is a summary, not a notification, and never replaces
+the per-object marks.
 
 The chip is 20 units high with 12-unit operational type and a 6-unit dot. The
 state word is essential, so it uses the operational floor even though it sits

@@ -90,17 +90,40 @@ shown.
 
 ## Inserting an embed
 
-Insertion is one atomic action with one undo step. The user chooses an object
-from the project, the clipboard or a provider's picker, chooses one of the
-available presentations in the same surface, and confirms once. The runtime
-creates the reference record, resolves the presentation and establishes the
-delegated grant, or none of these happens. The embed appears with its
-resolution state and, once resolved, its live state; the document is marked
-modified.
+Insertion commits a reference. Presentation resolution is a separate, optional
+step, because a reference can be valid while this machine cannot render it.
 
-If the provider cannot resolve the object, the embed is still inserted in its
-resolution state. The reference is never silently discarded because a provider
-is missing.
+The user chooses an object from the project, the clipboard or a provider's
+picker, chooses one of the available presentations in the same surface, and
+confirms once. The runtime asks the capability broker for the delegated grant
+before it writes anything. A refusal is reported as a denial; no reference is
+committed, the document is unchanged and a grant failure never becomes a
+successful authorised insertion.
+
+Once authority is settled, the reference record and its document-owned
+placement, revision and presentation commit together in one transaction and
+with one undo step. Where the same action also creates a new object, the object
+envelope's authorised metadata commits in that transaction too. A failure in
+any required semantic write leaves no half-reference and no orphan placement.
+The atomic unit is always the document-owned records; the provider's resolution
+is not part of it.
+
+Resolution is attempted after the commit. If the provider cannot resolve the
+object, the committed reference records **Opaque**, **Unavailable** or
+**Malformed** and the embed shows that resolution state. The reference is never
+silently discarded because a provider is missing, and the failed resolution
+does not roll back the insertion.
+
+| Outcome                             | Committed records                         | Document history |
+| ----------------------------------- | ----------------------------------------- | ---------------- |
+| Authority refused before the commit | None                                      | Unchanged        |
+| Resolved                            | Reference, placement and any new envelope | One undo step    |
+| Opaque, Unavailable or Malformed    | Reference, placement and any new envelope | One undo step    |
+| A required semantic write fails     | None                                      | Unchanged        |
+
+Undoing the insertion removes the reference and its placement. It removes an
+object envelope created by the same action only when no other reference to that
+object exists, and it never deletes an object that existed before the action.
 
 The flow must not insert a rendered image by default. If the user wants an
 image, **Export** and **Insert image** are separate commands.

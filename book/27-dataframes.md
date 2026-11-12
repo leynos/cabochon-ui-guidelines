@@ -15,7 +15,8 @@ visible.
 
 The dataframe editor uses a categories pane, a grid and a cell inspector.
 
-- Categories pane: 210 units, listing saved filters with their row counts.
+- Categories pane: 210 units, listing saved filters with their row counts
+  where the disclosure policy permits them.
 - Formula bar: 34 units, directly below the menu bar, showing the selected
   cell's expression or value.
 - Grid: the flexible remainder.
@@ -101,9 +102,11 @@ The selection is a range of cells with an anchor and an extent.
 - Shift-click extends the range from the anchor.
 - Arrow keys move the active cell; Shift with an arrow extends the range.
 - Control+A selects the used range, not the entire grid.
-- The status line reports the count and the aggregate of numeric cells.
+- The status line reports the count and the aggregate of numeric cells when the
+  disclosure policy permits those classes; otherwise it reports the selection
+  without a count or aggregate.
 - The inspector reports the range in A1 notation, the cell count and the sum
-  or average where meaningful.
+  or average where meaningful and permitted.
 
 A selection must remain visible when the grid loses focus, drawn as an outline
 rather than a fill.
@@ -199,10 +202,10 @@ reference columns has no relationship state to summarise.
 
 ## Large tables
 
-A table with more than 10,000 rows must virtualize its rows, keep the header
-fixed and show a row count in the status line. It must not block the interface
-while sorting or filtering; a long operation shows progress and can be
-cancelled.
+A table with more than 10,000 rows must virtualize its rows and keep the header
+fixed. It shows a row count in the status line only when the disclosure policy
+permits that class. It must not block the interface while sorting or filtering;
+a long operation shows progress and can be cancelled.
 
 ## Export
 
