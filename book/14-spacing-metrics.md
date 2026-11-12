@@ -23,29 +23,32 @@ Five scales compose, and they are named separately.
 
 | Scale           | What it changes                             | Who owns it              |
 | --------------- | ------------------------------------------- | ------------------------ |
-| Device scale    | logical units to physical pixels            | the host and the display |
-| Interface scale | chrome, spacing and pointer targets         | the user's UI scale      |
+| Device scale    | device pixels to physical pixels            | the host and the display |
+| Interface scale | logical units to device pixels              | the user's UI scale      |
 | Text scale      | type size and line height                   | the user's font scale    |
-| Document zoom   | the document plane's projection             | the instrument's view    |
+| Document zoom   | document-space projection                   | the instrument's view    |
 | Sample scale    | raster resolution and bitmap sample mapping | the export or the object |
 
 The rules that follow from the distinction are binding.
 
 - Interface geometry in this book is expressed in logical units. A rule that
-  says 28 units means 28 logical units before device scale, not 28 physical
-  pixels on every display.
-- Interface scale multiplies chrome, spacing and target minima. It does not
-  change a document's physical size.
+  says 28 units means 28 logical units before interface and device scale, not
+  28 physical pixels on every display.
+- Interface scale maps logical units to device pixels for chrome and document
+  content alike. It changes their physical size together. It does not change
+  document coordinates or a document's zoom percentage.
 - Text scale multiplies type size and line height. It never reduces a target
   below its minimum; the control grows or the layout reflows.
 - Document zoom multiplies document-space geometry inside the document plane.
   It never changes chrome, target minima or hit slop.
 - Raster sampling is an output transform. A thumbnail or a bitmap's stored
   samples are not an interface scale.
-- A bitmap at 100 per cent document zoom maps one stored sample to one logical
-  unit at the current interface scale. That is the sample-exact mapping; every
-  other zoom uses the declared filtered or nearest-neighbour sampling in
-  [Bitmaps](29-bitmaps.md).
+- A bitmap at 100 per cent document zoom maps one stored sample to one document
+  unit, and one document unit is one logical unit. The logical unit then maps
+  to device pixels through interface and device scale, so the bitmap and the
+  chrome grow together when interface scale changes. That is the sample-exact
+  mapping; every other zoom uses the declared filtered or nearest-neighbour
+  sampling in [Bitmaps](29-bitmaps.md).
 - Parity tolerances in [Output parity](37-output-parity.md) are logical units
   converted through the declared transforms, never hard-coded device pixels.
 
@@ -169,14 +172,20 @@ Compact components declare their strategy rather than an unstated exception.
   and its effective target is a continuous drag surface whose length is the
   pane's height. It is a declared essential-geometry exception, valid only
   because a wheel, keyboard and drag-anywhere alternative is always available.
-- **Selection and path handles.** The visible mark is 8 units. Its hit region
-  expands to 20 units within the object's bounds, and overlapping handles are
-  resolved by the priority order and modifier or keyboard alternative declared
-  in [Selection and tools](24-selection-tools.md).
+- **Selection and path handles.** This is a named compact-target exception. The
+  visible mark is 8 units and its hit region is 20 units, clipped to the
+  object's bounds rather than the viewport. An object smaller than 20 units
+  uses its own bounds as the effective target, however small, and the keyboard
+  and property route in [Selection and tools](24-selection-tools.md) is then
+  the compliance route. The same chapter fixes the picking order for
+  overlapping handles; no instrument chooses its own.
 - **Slider thumb.** The visible thumb is 8 units. Its effective target is
   28 units around the thumb, clipped to the slider's container.
-- **Swatches.** A 24-unit swatch has a 28-unit effective target and a 4-unit
-  gap from its neighbours.
+- **Swatches.** A swatch palette is one composite. Its swatches are 24 units,
+  with a 4-unit internal gap and a 28-unit effective cell: the swatch plus two
+  units of the gap on each side, clipped to the palette. The composite owns its
+  internal gaps and boundary ownership; the 8-unit independent-control rule
+  applies around the palette as a whole, not between its swatches.
 - **Status-line actions.** An action region is 28 units high. A status line that
   carries an action grows to 28 units; otherwise it is 26. A cancel action is
   never clipped to the 26-unit band.
@@ -250,9 +259,12 @@ The band totals follow from the table, not from a remembered number.
 The studio figure of 130 units is the four bands without a tool strip. Adding a
 tool strip adds exactly 30 units, and removing the masthead removes exactly 44.
 
-A vertical budget is the sum of the bands present plus the document plane's
-minimum height of 320 units. A horizontal budget is the document minimum or the
-sum of the expanded panes and splitter columns, whichever is greater.
+A vertical budget is the sum of the bands present plus the document viewport
+minimum. The document **content extent** is 320 units: an instrument must be
+able to lay out that much content without clipping it. The **viewport minimum**
+is 320 units in the document, studio and page profiles, and 240 units in the
+compact profile, where the content scrolls. A band's height includes the
+separator rule it owns, so a separator consumes no additional allocation.
 
 | Configuration                    | Width                         |
 | -------------------------------- | ----------------------------- |
@@ -260,10 +272,27 @@ sum of the expanded panes and splitter columns, whichever is greater.
 | Inspector collapsed              | 210 + 6 + 420 + 6 + 42 = 684  |
 | Both side panes collapsed        | 42 + 6 + 420 + 6 + 42 = 516   |
 
-At the default 1280 by 800 window with both side panes and the studio bands,
-the document plane is 914 by 640 units before any optional tool strip, about 57
-per cent of the window. The binding test is that the document plane remains the
-largest region and at least 420 units wide.
+Those totals are minimum budgets, not the allocation at a particular window.
+The document plane receives the remaining width after the panes and splitters,
+provided that remainder is at least 420 units.
+
+| Window and profile                          | Bands | Side allocation         | Document plane                 |
+| ------------------------------------------- | ----- | ----------------------- | ------------------------------ |
+| 1280 × 800, studio + strip, 210 / 240       | 160   | 210 + 6 + 6 + 240 = 462 | 818 × 640                      |
+| 1280 × 800, studio, no strip, 210 / 240     | 130   | 462                     | 818 × 670                      |
+| 1280 × 800, studio, no strip, 126 / 240     | 130   | 126 + 6 + 6 + 240 = 378 | 902 × 670                      |
+| 512 × 384, compact, two 28-unit edge strips | 86    | 28 + 28 = 56            | 456 × 298, content 320 scrolls |
+
+At the default 1280 by 800 window with the studio bands, the tool strip and the
+standard 210/240 panes, the document plane is 818 by 640 units, about 51 per
+cent of the window. Without the tool strip it is 818 by 670, and the 126-unit
+rail variant is 902 by 670. In every case the document plane remains the
+largest region and at least 420 units wide and 320 units high, except in
+compact mode, where its viewport may be shorter and its content scrolls.
+
+`tools/layout-budgets.json` holds the tokens and configurations above.
+`make layout` derives every total from those tokens and fails if a worked value
+in the table disagrees, so a changed band or pane cannot leave the prose stale.
 
 ### Requested and feasible width
 
@@ -278,11 +307,16 @@ to its requested width; it does not inherit the temporary clamp.
 Below the computed minimum, the instrument enters a declared compact profile
 rather than clipping a control.
 
-- Both side panes collapse to 28-unit edge strips.
-- The tool strip and the masthead are hidden; the menu bar and status line
-  remain.
+- Both side panes collapse to 28-unit edge strips. A strip includes its
+  splitter; only expanded panes carry a separate 6-unit splitter column.
+- The tool strip and the masthead are hidden; the title bar, menu bar and
+  status line remain, totalling 86 units.
 - The document plane keeps a 420-unit width and may scroll horizontally. Prose
   reflows instead of scrolling; a grid, a canvas and a page may scroll.
+- The vertical rule is explicit: 86 units of bands plus a 240-unit document
+  viewport minimum, or 326 units, fits inside the 384-unit floor. At the floor
+  the viewport is 384 − 86 = 298 units, and the 320-unit content extent scrolls
+  vertically by 22 units.
 - The supported logical viewport floor is 512 by 384 units. A narrower or
   shorter window is outside the supported set, and the application must still
   keep every control reachable by scrolling rather than clipping it.

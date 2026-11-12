@@ -108,24 +108,38 @@ An instrument has at most one active canvas tool at a time. The active tool is
 shown in the tool strip, named in the status line and reflected in the pointer
 cursor.
 
-Each canvas tool declares its commit boundary in the instrument contract. The
-boundary is deterministic and identical whether the tool is switched by
-pointer, shortcut or focus change.
+Each canvas tool class declares its outcome for every interruption route in one
+table. The route never changes the content or history result for that class.
 
-- A **selection or pan** tool creates no content mutation when its gesture
-  ends. It may update the selection or view state.
-- A **drawing or painting** tool commits its stroke or shape as one undoable
-  transaction when the gesture ends, or cancels it when the gesture is
-  abandoned.
-- Switching away from a tool with an uncommitted operation applies that tool's
-  declared boundary: it commits, cancels or asks, and the rule is the same in
-  every case.
-- Escape cancels the active tool's pending operation and returns to the select
-  tool.
-- A tool that cannot complete because the object changed must say so and keep
-  the object's last committed state.
+| Tool class           | Pointer release           | Escape                       | Focus loss                   | Pointer-capture loss         | Switch by button or menu                    | Switch by shortcut |
+| -------------------- | ------------------------- | ---------------------------- | ---------------------------- | ---------------------------- | ------------------------------------------- | ------------------ |
+| Selection or pan     | Ends; no content revision | Cancels; no content revision | Cancels; no content revision | Cancels; no content revision | Cancels pending, then switches; no revision | Same as button     |
+| Read-only inspection | Samples once; no revision | Closes; no revision          | Stays open; no pending state | Not applicable               | Closes, then switches; no revision          | Same as button     |
+| Content tool         | Commits one transaction   | Cancels and restores         | Cancels and restores         | Cancels and restores         | Cancels pending, then switches              | Same as button     |
+
+The rules that follow are binding.
+
+- Selection, pan and read-only inspection are non-mutating classes. No route
+  creates a content revision or an undo entry for them.
+- A content tool commits only on pointer release. Every other route cancels an
+  incomplete gesture and restores the content from before it. No route asks a
+  question, because an interruption must not become a modal decision.
+- Focus loss and pointer-capture loss are the same event for this purpose:
+  the gesture cannot continue. A gesture that has already committed on pointer
+  release is not split, repeated or retroactively cancelled by either event.
+- Explicit switching and shortcut switching invoke the same command record and
+  produce the same outcome. Both end the pending gesture before the new tool
+  becomes active.
+- A tool that cannot complete because the object changed says so and keeps the
+  object's last committed state. That report is not an undo entry.
+- Escape cancels the pending operation and returns to the select tool.
 - A committed tool session is undoable as one transaction, not as a series of
   invisible steps.
+
+The transactional contextual operation is not a canvas tool and does not appear
+in this table. The formula tool commits only through its primary action and
+cancels through **Cancel** or Escape, keeping its captured destination frozen as
+[The formula tool](30-formula.md) requires.
 
 ## Selection and document focus
 
@@ -172,11 +186,21 @@ handles, never the saved appearance of the object.
 - A selection that crosses several objects shows one outline around the group
   and a separate outline around each member.
 
-A compact handle's visible mark may be smaller than the minimum pointer target.
-Its effective hit region is expanded within the object's bounds, and where
-handles would overlap, the instrument declares a deterministic resolution: a
-priority order plus a modifier or keyboard alternative. The final clipped hit
-region, not the glyph, is the target that must satisfy the applicable policy.
+A compact handle is a named exception to the 28-unit pointer minimum. Its
+visible mark is 8 units. Its hit region is 20 units centred on the mark and
+clipped to the object's bounds; it never expands into the viewport or a
+neighbouring object. The final clipped hit region, not the glyph, is the
+target. An object smaller than 20 units uses its own bounds as the effective
+target, however small, and the keyboard and property routes below are then the
+compliance route.
+
+Overlapping handles resolve in one fixed order. A corner handle beats an edge
+handle. Among corners the order is top-left, top-right, bottom-right,
+bottom-left. Among edge handles the order is top, right, bottom, left. The
+first handle in that order owns the shared point. The others remain reachable
+by Tab and Shift+Tab cycling in the same order, by the arrow keys, and by the
+numeric position and size fields in the inspector. An instrument does not
+declare a different priority order, and a modifier does not change the winner.
 
 ## Denied selections
 

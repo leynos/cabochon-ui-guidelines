@@ -124,9 +124,12 @@ what selection — decides all four together.
 ## Behaviour
 
 - Escape follows the surface's declared safe exit. It cancels without
-  committing a draft change.
-- Return activates the default action, except while focus is in a text field or
-  an input-method composition is active.
+  committing a draft change and returns focus through the focus-return chain.
+- Enter and Return are the same activation event. It activates the focused
+  control when that control is activatable, including a deliberately focused
+  destructive button. It activates the default action only when focus is not on
+  an activatable control and not in a text field or composition. The routing
+  table in [Focus and keyboard](18-focus-keyboard.md) is authoritative.
 - Tab cycles within a modal surface; focus does not escape to the document
   behind.
 - The document behind a document-modal surface is inert and visibly dimmed, but

@@ -88,8 +88,10 @@ exceed it; the pseudo-locale is designed to fail early.
 
 Direction is a property of the interface, not of each widget.
 
-- Panes mirror: the navigator moves to the trailing side, the inspector to the
-  leading side.
+- Pane roles do not reverse. The navigator is the logical leading pane and the
+  inspector the logical trailing pane in both directions. Their physical
+  positions mirror: in a right-to-left interface the navigator appears on the
+  right and the inspector on the left.
 - Menu bars mirror, and menu items align to the reading edge.
 - Icons that depict direction, such as arrows and playback controls, mirror.
   Icons that depict objects, such as a document or a pen, do not. Mirroring is

@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """Check the book's links and its structural contract.
 
-The mechanical checks cover relative paths, real heading anchors and the
-relationship between a chapter's declared figure and the figure it embeds. The
-semantic checks cover the contents graph, requirement identifiers, state and
-profile ownership, and the command and resource relationships. They are
-structural: they do not parse prose or assert whole paragraphs.
+Links, images and headings are parsed from Markdown after HTML comments, fenced
+code blocks and inline code spans have been removed. Local fragments are checked
+against the current file as well as other files, and duplicate headings receive
+the same numeric suffixes a Markdown renderer assigns. The semantic checks cover
+the contents graph, requirement identifiers, state and profile ownership, and
+the command and resource relationships. They are structural: they do not parse
+prose or assert whole paragraphs.
 
 Run from the repository root with ``python3 -I tools/check-links.py``. Pass
-``--self-test`` to apply negative mutations to a temporary copy and confirm
-that each check detects the defect it claims to prevent.
+``--self-test`` to require a clean baseline, prove each mutation actually
+changed its target, and assert the expected diagnostic for every defect.
 """
 
 from __future__ import annotations
@@ -27,13 +29,15 @@ BOOK = ROOT / "book"
 FIGURES = ROOT / "figures"
 CONTRACT = json.loads((ROOT / "tools" / "book-contract.json").read_text(encoding="utf-8"))
 
-LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
+LINK_RE = re.compile(r"!?\[[^\]]*\]\(\s*([^)\s]+)(?:\s+[\"'][^\"']*[\"'])?\s*\)")
 FRONT_FIGURE_RE = re.compile(r"^figure:\s*[\"']?([^\"'\n]+)[\"']?\s*$", re.MULTILINE)
 FRONT_PART_RE = re.compile(r"^part:\s*[\"']?([^\"'\n]+)[\"']?\s*$", re.MULTILINE)
 HEADING_RE = re.compile(r"^#{1,6}\s+(.+?)\s*#*\s*$", re.MULTILINE)
 EXPLICIT_ANCHOR_RE = re.compile(r"<a\s+id=[\"']([^\"']+)[\"']")
 REQUIREMENT_RE = re.compile(r"\*\*([A-Z]{3}-[0-9]{2})\*\*")
 OWNER_RE = re.compile(r"Owner:\s*\[[^\]]*\]\(([^)]+)\)")
+COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
+INLINE_CODE_RE = re.compile(r"`[^`\n]*`")
 
 
 def slug(text: str) -> str:
@@ -42,18 +46,41 @@ def slug(text: str) -> str:
     return re.sub(r"\s+", "-", text)
 
 
+def strip_code_and_comments(text: str) -> str:
+    """Remove HTML comments, fenced blocks and inline code spans."""
+    kept: list[str] = []
+    fence: str | None = None
+    for line in text.splitlines():
+        stripped = line.lstrip()
+        marker = stripped[:3]
+        if marker in {"```", "~~~"}:
+            if fence is None:
+                fence = marker
+            elif fence == marker:
+                fence = None
+            continue
+        if fence is None:
+            kept.append(line)
+    return INLINE_CODE_RE.sub("", COMMENT_RE.sub("", "\n".join(kept)))
+
+
 def anchors(path: Path) -> set[str]:
     text = path.read_text(encoding="utf-8")
-    found = {slug(heading) for heading in HEADING_RE.findall(text)}
+    found: set[str] = set()
+    seen: dict[str, int] = {}
+    for heading in HEADING_RE.findall(text):
+        base = slug(heading)
+        count = seen.get(base, 0)
+        found.add(base if count == 0 else f"{base}-{count}")
+        seen[base] = count + 1
     found.update(EXPLICIT_ANCHOR_RE.findall(text))
     return found
 
 
 def link_targets(text: str) -> list[str]:
     targets: list[str] = []
-    for raw in LINK_RE.findall(text):
-        target = raw.strip().split(" ", 1)[0]
-        targets.append(target)
+    for raw in LINK_RE.findall(strip_code_and_comments(text)):
+        targets.append(raw.strip().split(" ", 1)[0])
     return targets
 
 
@@ -61,15 +88,19 @@ def check_links(chapters: list[Path], problems: list[str]) -> None:
     for chapter in chapters:
         text = chapter.read_text(encoding="utf-8")
         for target in link_targets(text):
-            if target.startswith(("http://", "https://", "mailto:", "#")):
+            if target.startswith(("http://", "https://", "mailto:")):
                 continue
-            path_part, _, fragment = target.partition("#")
-            path = (chapter.parent / path_part).resolve()
-            if not path.exists():
-                problems.append(
-                    f"{chapter.relative_to(ROOT)}: missing link target {target}"
-                )
-                continue
+            if target.startswith("#"):
+                path = chapter
+                fragment = target[1:]
+            else:
+                path_part, _, fragment = target.partition("#")
+                path = (chapter.parent / path_part).resolve()
+                if not path.exists():
+                    problems.append(
+                        f"{chapter.relative_to(ROOT)}: missing link target {target}"
+                    )
+                    continue
             if fragment and path.suffix == ".md":
                 if fragment not in anchors(path):
                     problems.append(
@@ -87,7 +118,7 @@ def check_front_figure(chapters: list[Path], problems: list[str]) -> None:
         figure = declared[0]
         if not (FIGURES / figure).exists():
             problems.append(f"{chapter.relative_to(ROOT)}: missing figure {figure}")
-        if f"../figures/{figure}" not in text:
+        if f"../figures/{figure}" not in link_targets(text):
             problems.append(
                 f"{chapter.relative_to(ROOT)}: declared figure {figure} "
                 "is not embedded in the body"
@@ -135,7 +166,7 @@ def check_requirements(problems: list[str]) -> None:
             problems.append("checklist item has no requirement identifier")
             continue
         identifier = ids[0]
-        if not pattern.match(identifier):
+        if not pattern.fullmatch(identifier):
             problems.append(f"requirement {identifier} does not match the pattern")
         if identifier in seen:
             problems.append(f"duplicate requirement identifier {identifier}")
@@ -156,25 +187,53 @@ def check_requirements(problems: list[str]) -> None:
                 )
 
 
+def first_cells(text: str) -> set[str]:
+    cells: set[str] = set()
+    for line in strip_code_and_comments(text).splitlines():
+        if line.startswith("|"):
+            parts = [part.strip().strip("*").strip() for part in line.strip("|").split("|")]
+            if parts and parts[0] and not set(parts[0]) <= {"-", ":"}:
+                cells.add(parts[0])
+    return cells
+
+
+def section(text: str, heading: str) -> str:
+    kept: list[str] = []
+    active = False
+    for line in text.splitlines():
+        if line.startswith("## "):
+            active = slug(line[3:]) == heading
+            continue
+        if active:
+            kept.append(line)
+    return "\n".join(kept)
+
+
 def check_states(problems: list[str]) -> None:
     spec = CONTRACT["states"]
-    for group, owner_key in (
-        ("live", "live_owner"),
-        ("resolution", "resolution_owner"),
+    for group, owner_key, heading in (
+        ("live", "live_owner", "the-five-states"),
+        (
+            "resolution",
+            "resolution_owner",
+            "resolution-authority-and-cache-are-independent",
+        ),
     ):
         owner = BOOK / spec[owner_key]
         text = owner.read_text(encoding="utf-8")
+        cells = first_cells(section(text, heading))
         for state in spec[group]:
-            if state not in text:
+            if state not in cells:
                 problems.append(
-                    f"{owner.name}: {group} state {state!r} is not declared"
+                    f"{owner.name}: {group} state {state!r} is not declared "
+                    "in its state table"
                 )
 
 
 def check_profiles(problems: list[str]) -> None:
     spec = CONTRACT["profiles"]
     owner = BOOK / spec["owner"]
-    text = owner.read_text(encoding="utf-8")
+    text = strip_code_and_comments(owner.read_text(encoding="utf-8"))
     for name in spec["names"]:
         if name not in text:
             problems.append(f"{owner.name}: profile {name!r} is not declared")
@@ -227,73 +286,239 @@ def run_checks() -> list[str]:
     return problems
 
 
+def run_checker(root: Path) -> tuple[int, str]:
+    script = root / "tools" / "check-links.py"
+    result = subprocess.run(
+        [sys.executable, "-I", str(script)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return result.returncode, result.stdout + result.stderr
+
+
+def fresh_copy(tmp: str) -> Path:
+    copy = Path(tmp) / "repo"
+    shutil.copytree(ROOT, copy, ignore=shutil.ignore_patterns(".git", "build"))
+    return copy
+
+
+def replace(path: Path, old: str, new: str, count: int = -1) -> bool:
+    text = path.read_text(encoding="utf-8")
+    changed = text.replace(old, new, count)
+    if changed == text:
+        return False
+    path.write_text(changed, encoding="utf-8")
+    return True
+
+
+def append(path: Path, addition: str) -> bool:
+    text = path.read_text(encoding="utf-8")
+    path.write_text(text + addition, encoding="utf-8")
+    return True
+
+
 def self_test() -> int:
-    """Apply one mutation per check and confirm the checker rejects it."""
-    mutations = {
-        "orphan chapter": lambda book: (book / "99-orphan.md").write_text(
-            "---\ntitle: Orphan\npart: Breadth\n---\n\n# Orphan\n", encoding="utf-8"
-        ),
-        "broken anchor": lambda book: (book / "01-purpose.md").write_text(
-            (book / "01-purpose.md").read_text(encoding="utf-8")
-            + "\n[broken](02-cabochon-character.md#no-such-heading)\n",
-            encoding="utf-8",
-        ),
-        "mismatched figure": lambda book: (book / "02-cabochon-character.md").write_text(
-            (book / "02-cabochon-character.md")
-            .read_text(encoding="utf-8")
-            .replace("fig-02-small-world.svg", "fig-01-map.svg", 1),
-            encoding="utf-8",
-        ),
-        "missing requirement owner": lambda book: (book / "40-checklist.md").write_text(
-            (book / "40-checklist.md")
-            .read_text(encoding="utf-8")
-            .replace("Owner: [Ecosystem map](03-ecosystem-map.md).", "", 1),
-            encoding="utf-8",
-        ),
-        "missing state": lambda book: (book / "08-live-relationships.md").write_text(
-            (book / "08-live-relationships.md")
-            .read_text(encoding="utf-8")
-            .replace("Refreshing", "Updating"),
-            encoding="utf-8",
-        ),
-        "missing profile": lambda book: (book / "appendix-references.md").write_text(
-            (book / "appendix-references.md")
-            .read_text(encoding="utf-8")
-            .replace("substrate", "foundation"),
-            encoding="utf-8",
-        ),
-        "missing command relation": lambda book: (book / "23-command-palette.md").write_text(
-            (book / "23-command-palette.md")
-            .read_text(encoding="utf-8")
-            .replace("](10-menus.md)", "](11-toolbars-status.md)"),
-            encoding="utf-8",
-        ),
-        "missing resource relation": lambda book: (book / "16-icons.md").write_text(
-            (book / "16-icons.md")
-            .read_text(encoding="utf-8")
-            .replace("](38-localization.md)", "](13-typography.md)"),
-            encoding="utf-8",
-        ),
-    }
+    """Require a clean baseline and the expected diagnostic per mutation."""
     failures: list[str] = []
-    for label, mutate in mutations.items():
+    counts = {"detecting": 0, "passing": 0}
+
+    with tempfile.TemporaryDirectory() as tmp:
+        baseline_root = fresh_copy(tmp)
+        code, output = run_checker(baseline_root)
+        if code != 0:
+            failures.append(f"baseline is not clean: {output.strip()[:300]}")
+
+    def mutate(
+        label: str,
+        edit,
+        expected: str | None,
+    ) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            copy = Path(tmp) / "repo"
-            shutil.copytree(ROOT, copy, ignore=shutil.ignore_patterns(".git", "build"))
-            mutate(copy / "book")
-            result = subprocess.run(
-                [sys.executable, "-I", str(copy / "tools" / "check-links.py")],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-            if result.returncode == 0:
+            root = fresh_copy(tmp)
+            if not edit(root):
+                failures.append(f"self-test: {label} mutation did not apply")
+                return
+            code, output = run_checker(root)
+            if "Traceback" in output:
+                failures.append(f"self-test: {label} crashed: {output.strip()[:300]}")
+                return
+            if expected is None:
+                if code != 0:
+                    failures.append(
+                        f"self-test: {label} should pass, got {output.strip()[:300]}"
+                    )
+                else:
+                    counts["passing"] += 1
+                return
+            if code == 0:
                 failures.append(f"self-test: {label} was not detected")
+            elif expected not in output:
+                failures.append(
+                    f"self-test: {label} expected {expected!r}, "
+                    f"got {output.strip()[:300]}"
+                )
+            else:
+                counts["detecting"] += 1
+
+    mutate(
+        "orphan chapter",
+        lambda root: (
+            root / "book" / "99-orphan.md"
+        ).write_text(
+            "---\ntitle: Orphan\npart: Breadth\n---\n\n# Orphan\n",
+            encoding="utf-8",
+        )
+        or True,
+        "chapter 99-orphan.md is absent from the manifest",
+    )
+    mutate(
+        "broken cross-file anchor",
+        lambda root: append(
+            root / "book" / "01-purpose.md",
+            "\n[broken](02-cabochon-character.md#no-such-heading)\n",
+        ),
+        "missing anchor #no-such-heading",
+    )
+    mutate(
+        "broken same-file anchor",
+        lambda root: append(
+            root / "book" / "01-purpose.md",
+            "\n[broken](#no-such-local-anchor)\n",
+        ),
+        "missing anchor #no-such-local-anchor in book/01-purpose.md",
+    )
+    mutate(
+        "anchor in a comment",
+        lambda root: append(
+            root / "book" / "01-purpose.md",
+            "\n<!-- [ignored](01-purpose.md#no-such-heading) -->\n",
+        ),
+        None,
+    )
+    mutate(
+        "duplicate heading suffix",
+        lambda root: append(
+            root / "book" / "01-purpose.md",
+            "\n## Scope\n\n[duplicate](#scope-1)\n",
+        ),
+        None,
+    )
+    mutate(
+        "mismatched figure",
+        lambda root: replace(
+            root / "book" / "02-cabochon-character.md",
+            "fig-02-small-world.svg",
+            "fig-01-map.svg",
+            1,
+        ),
+        "declared figure fig-01-map.svg is not embedded in the body",
+    )
+    mutate(
+        "figure mentioned only in a comment",
+        lambda root: (
+            replace(
+                root / "book" / "02-cabochon-character.md",
+                "![",
+                "<!-- ![",
+                1,
+            )
+            and append(
+                root / "book" / "02-cabochon-character.md",
+                "\n-->\n",
+            )
+        ),
+        "is not embedded in the body",
+    )
+    mutate(
+        "missing requirement owner",
+        lambda root: replace(
+            root / "book" / "40-checklist.md",
+            "Owner: [Ecosystem map](03-ecosystem-map.md#the-substrate-components).",
+            "",
+            1,
+        ),
+        "requirement CON-01 names no owner",
+    )
+    mutate(
+        "missing state",
+        lambda root: replace(
+            root / "book" / "08-live-relationships.md",
+            "| Refreshing |",
+            "| Updating   |",
+            1,
+        ),
+        "state 'Refreshing' is not declared",
+    )
+    mutate(
+        "state mentioned only in a comment",
+        lambda root: (
+            replace(
+                root / "book" / "08-live-relationships.md",
+                "| Refreshing |",
+                "| Updating   |",
+                1,
+            )
+            and append(
+                root / "book" / "08-live-relationships.md",
+                "\n<!-- Refreshing -->\n",
+            )
+        ),
+        "state 'Refreshing' is not declared",
+    )
+    mutate(
+        "missing profile",
+        lambda root: replace(
+            root / "book" / "appendix-references.md",
+            "substrate",
+            "foundation",
+        ),
+        "profile 'substrate' is not declared",
+    )
+    mutate(
+        "missing command relation",
+        lambda root: replace(
+            root / "book" / "23-command-palette.md",
+            "](10-menus.md)",
+            "](11-toolbars-status.md)",
+            1,
+        ),
+        "does not reference the command record owner",
+    )
+    mutate(
+        "missing resource relation",
+        lambda root: replace(
+            root / "book" / "16-icons.md",
+            "](38-localization.md)",
+            "](13-typography.md)",
+            1,
+        ),
+        "does not reference the resource owner",
+    )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = fresh_copy(tmp)
+        append(root / "book" / "01-purpose.md", "\n[broken](#no-such-heading)\n")
+        no_op = replace(
+            root / "book" / "01-purpose.md",
+            "text that is not present",
+            "replacement",
+        )
+        if no_op:
+            failures.append("self-test: no-op mutation was reported as applied")
+        code, output = run_checker(root)
+        if code == 0 or "missing anchor #no-such-heading" not in output:
+            failures.append("self-test: unrelated failing baseline was not reported")
+
     if failures:
         for failure in failures:
             print(failure, file=sys.stderr)
         return 1
-    print(f"links: self-test detected all {len(mutations)} mutations")
+    print(
+        "links: self-test passed a clean baseline, "
+        f"{counts['detecting']} detecting mutations and "
+        f"{counts['passing']} passing mutations"
+    )
     return 0
 
 

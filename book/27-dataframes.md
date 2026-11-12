@@ -35,7 +35,9 @@ inspector are not: they are how the instrument explains what a cell is.
 - Cell padding: 12 units horizontally.
 - Grid lines: 1 unit in the decorative line role; horizontal lines only when
   row density requires them.
-- Alternating rows use high and white, not a tint.
+- Alternating rows use the row-fill and alternate-row-fill roles, not a tint.
+  Each theme resolves both roles; pure white is a light-theme value, never a
+  requirement in the dark theme.
 - The selected cell uses the selected-fill and selected-text roles.
 - The selected range uses a 2-unit oxide outline around its extent.
 
@@ -81,8 +83,18 @@ properties are independent and must not be collapsed into one "type" label.
 ## Formula bar
 
 The formula bar shows the selected cell's expression, prefixed with `fx` in
-metadata type. It is editable, and committing an expression creates a live
-value with its own identity.
+metadata type. What an edit changes depends on what is selected.
+
+| Selection                   | Edited record and owner        | Identity effect      | Revision and history                      | Dependency effect                          |
+| --------------------------- | ------------------------------ | -------------------- | ----------------------------------------- | ------------------------------------------ |
+| Literal or stored cell      | The table's cell               | Cell identity kept   | New table content revision; one undo step | Dependent columns re-evaluate              |
+| Cell backed by a live value | The existing live-value object | Same identity        | New revision of that object               | Its sources refresh; readers see its state |
+| Cell in a computed column   | The computed-column definition | Column identity kept | New revision of the column object         | Every cell result recomputes               |
+
+A new live value identity is allocated only by **Insert live value** in
+[The formula tool](30-formula.md), at creation. Editing an existing live value,
+a computed-column definition or a stored cell never allocates a new identity
+and never creates a second owner for the same value.
 
 The formula bar must:
 

@@ -57,9 +57,40 @@ the book keeps them apart.
   capability broker and the workspace instruments. It requires the substrate
   profile and the semantic contracts in
   [Live relationships](08-live-relationships.md).
-- **Studio conformance.** Adds Burin Draw, Cabochon Press, Bitmaps, Dataframes,
-  Diagrams and the formula tool. It requires the semantic workspace profile and
-  the studio contracts in [The studio and the contracts](33-burin-draw.md).
+- **Studio conformance.** Adds the studio tools and their heavier output
+  requirements. It requires the semantic workspace profile and the studio
+  contracts in [The studio and the contracts](33-burin-draw.md).
+
+Membership is cumulative, and the table below is the single declaration of it.
+An "Adds" entry is required by that profile; an "Inherits" entry is required
+because the profile it inherits from already requires it.
+
+| Capability or instrument                | Substrate | Semantic workspace | Studio   |
+| --------------------------------------- | --------- | ------------------ | -------- |
+| Clerestory, Lapidary, Burin, Escutcheon | Adds      | Inherits           | Inherits |
+| Enfilade, capability broker             | —         | Adds               | Inherits |
+| Live relationships                      | —         | Adds               | Inherits |
+| Facet Notes                             | —         | Adds               | Inherits |
+| Dataframe editor                        | —         | Adds               | Inherits |
+| Diagram editor                          | —         | Adds               | Inherits |
+| Bitmap editor                           | —         | Adds               | Inherits |
+| Formula tool                            | —         | Adds               | Inherits |
+| Inspector and project window            | —         | Adds               | Inherits |
+| Burin Draw                              | —         | —                  | Adds     |
+| Cabochon Press                          | —         | —                  | Adds     |
+| Enfilade Table                          | —         | —                  | Adds     |
+| SVG vector encoding for diagram export  | —         | Adds               | Inherits |
+| PDF/X and print production profiles     | —         | —                  | Adds     |
+
+The studio profile does not repeat the workspace instruments. They remain
+required because studio conformance requires semantic workspace conformance.
+Enfilade Table is a studio tool, so it appears only in the studio row.
+
+An instrument's required export encodings must be a subset of its resolved
+profile's capabilities. The diagram editor claims semantic workspace
+conformance, so SVG is a semantic workspace capability; the studio profile
+inherits it rather than owning it. PDF/X is a studio production capability
+because it depends on the print profiles that only the studio tools claim.
 
 The **first batch** is a delivery phase, not a profile. It names the work the
 programme is doing now. The studio guidance in this book is strict and

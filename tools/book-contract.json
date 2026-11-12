@@ -45,6 +45,7 @@
   ],
   "requirements": {
     "checklist": "40-checklist.md",
+    "registry": "requirements.json",
     "id_pattern": "^(CON|WIN|LAY|TYP|OBJ|CTL|FBK|OUT|LOC|DOC)-[0-9]{2}$"
   },
   "states": {

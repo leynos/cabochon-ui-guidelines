@@ -81,9 +81,10 @@ pixels.
 
 - Zoom range: 10 to 1600 per cent.
 - Zoom steps: 10, 25, 50, 100, 200, 400, 800, 1600.
-- At 100 per cent, one image pixel maps to one logical unit at the interface
-  scale, and the logical unit maps to device pixels through the declared device
-  transform.
+- At 100 per cent, one stored sample maps to one document unit, and one
+  document unit is one logical unit. The logical unit then maps to device
+  pixels through interface and device scale. The zoom percentage is independent
+  of interface scale.
 - Space-drag pans; the scroll wheel scrolls; Control with the wheel zooms.
 - The zoom level is remembered per bitmap, not per application.
 
@@ -93,18 +94,22 @@ factor, including 25 per cent, uses the declared filtered sampling. Neither
 changes the stored pixels. The editor does not force an integer factor to
 obtain a sharp preview.
 
-Three scales are separate and must be named.
+Four quantities form the display transform and must be named separately.
 
-| Scale             | What it governs                                   |
-| ----------------- | ------------------------------------------------- |
-| Stored samples    | The image's pixel grid and bit depth              |
-| Display transform | How samples become device pixels on this display  |
-| Interface scale   | The size of the editor's chrome, not of the image |
+| Quantity                   | What it governs                                           |
+| -------------------------- | --------------------------------------------------------- |
+| Stored samples             | The image's pixel grid and bit depth                      |
+| Document zoom              | Stored sample → document unit; 100 per cent is one to one |
+| Logical mapping            | One document unit = one logical unit                      |
+| Interface and device scale | Logical unit → device pixel → physical pixel              |
 
-At 100 per cent, the image is shown at its stored sample density, mapped
-through the declared device transform; on a display with a fractional scale
-factor, several device pixels may represent one stored sample. Changing the
-display transform, the zoom or the theme never changes the stored pixels,
+At 100 per cent, one stored sample becomes one document unit, which is one
+logical unit, which interface scale turns into device pixels and device scale
+turns into physical pixels. On a display with a fractional factor, several
+device pixels may represent one stored sample. Interface scale therefore sizes
+the image and the chrome together; it does not change the zoom percentage,
+document coordinates or the stored sample density. Changing interface scale,
+the device transform, the zoom or the theme never changes the stored pixels,
 physical resolution or identity.
 
 ## Colour

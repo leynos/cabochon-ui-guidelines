@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" width="1200" height="760" role="img" data-figure-class="schematic" data-figure-profile="substrate" aria-labelledby="title desc">
-  <metadata>{&quot;class&quot;: &quot;schematic&quot;, &quot;components&quot;: [], &quot;name&quot;: &quot;fig-19-dialog&quot;, &quot;profile&quot;: &quot;substrate&quot;, &quot;scale&quot;: null}</metadata>
+  <metadata>{&quot;class&quot;: &quot;schematic&quot;, &quot;components&quot;: [], &quot;name&quot;: &quot;fig-19-dialog&quot;, &quot;profile&quot;: &quot;substrate&quot;, &quot;scale&quot;: null, &quot;states&quot;: {}}</metadata>
   <title id="title">Destructive confirmation dialog</title>
   <desc id="desc">A modal dialog asking whether to replace an embedded table, with object identity, a keep-a-copy choice and a destructive Replace button.</desc>
   <rect width="1200" height="760" fill="#F1EEE5"/>

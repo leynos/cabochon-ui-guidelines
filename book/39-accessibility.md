@@ -124,12 +124,21 @@ dimensions; 32 is preferred, and a dialog's primary action is 36.
 - Adjacent targets have at least 8 units between their effective hit regions.
 - A composite control's internal geometry is declared, as in
   [Spacing and metrics](14-spacing-metrics.md); its parts are not independent
-  targets, and the composite as a whole is one stop.
+  targets, and the composite as a whole is one stop. A swatch palette is such a
+  composite: 24-unit swatches, a 4-unit internal gap and a 28-unit effective
+  cell, with the palette keeping the 8-unit independent-control gap around it.
 - The splitter's 8-unit hit edge spans the full pane boundary, which is a
   larger continuous target than a 28-unit square. It is a declared exception
   and it is not the only way to resize.
 - The scrollbar is a declared exception only where a wheel, keyboard and
   drag-anywhere alternative is always present.
+- Selection and path handles are a declared compact-target exception. Their
+  visible mark is 8 units, their hit region is 20 units clipped to the object's
+  bounds, and an object smaller than 20 units uses its own bounds. The fixed
+  picking order, Tab cycling and numeric inspector fields in
+  [Selection and tools](24-selection-tools.md) are the alternative route; a
+  handle that cannot meet the pointer minimum is still reachable and operable
+  from the keyboard and from the property fields.
 - A drag interaction has a keyboard alternative.
 - A context menu is reachable from the keyboard.
 - Clipping is declared. When an expanded hit region is clipped by its
@@ -140,9 +149,12 @@ dimensions; 32 is preferred, and a dialog's primary action is 36.
 ## Contrast and colour
 
 - Body text meets 4.5:1 against its background.
-- Large text is text at 18 points or 14 points bold, which at the baseline
-  scale is 24 units or 18 units bold. An 18-unit regular label is not large
-  text and is held to 4.5:1.
+- Large text is text at 18 points or 14 points bold. At the baseline scale of
+  96 dots per inch, one point is exactly 4/3 logical units, so 18 points is 24
+  units and 14 points bold is 18⅔ units. The conversion is applied before the
+  threshold, with no downward rounding: an 18-unit bold label is 13.5 points
+  and is not large text, and a 19-unit bold label clears the threshold. An
+  18-unit regular label is not large text and is held to 4.5:1.
 - Essential icons and boundaries that identify a control meet 3:1.
 - Focus indicators meet 3:1 against each adjacent surface.
 - The semantic roles are the ones in [Palette](12-palette.md): text, muted
@@ -225,6 +237,21 @@ The exported `accessibility.json` proves that a snapshot can be described. It
 does not prove that a native assistive-technology client can use the running
 application, and the book does not treat it as such proof.
 
+Three dimensions of an object are independent, and a test must name the one it
+asserts.
+
+| Dimension           | Question                                      | Values                                   |
+| ------------------- | --------------------------------------------- | ---------------------------------------- |
+| Resolution          | Did a provider load the bytes?                | Resolved, Opaque, Unavailable, Malformed |
+| Semantic projection | Can the loaded provider describe the content? | Full, bounded fallback, not declared     |
+| Authorization       | May this client read the content now?         | Permitted, Denied                        |
+
+They vary independently. A **Resolved** object can use the bounded fallback
+without becoming Opaque. An **Opaque** object has no provider at all, so its
+semantic projection is absent by definition. A **Denied** object keeps whatever
+resolution and projection it already had, and reports the denial as its live
+state.
+
 - The native adapter exposes actions, not only names: activate, focus, set
   value, expand, collapse, select, scroll and show menu, as the role allows.
 - A logical row that is outside the visible viewport is still reachable. A
@@ -232,16 +259,29 @@ application, and the book does not treat it as such proof.
   policy permits that class, and materializes a row when a client asks for it;
   the client does not have to scroll the visible area to discover content. When
   the count is withheld, it reports that further items exist without a number.
-- A meaningful change is announced with a priority: state transitions and
-  errors are polite or assertive according to their urgency, and repeated
-  changes to the same node are coalesced. A repaint, a caret move or a
-  keystroke is not announced as a new event.
+- Coalescing applies to redundant application announcements and intermediate
+  frames. Typing, caret movement and selection changes remain observable
+  through the adapter's native text, caret and selection notifications, which
+  the application must not suppress. Duplicate application-level announcements
+  for the same settled change are removed; the required native notification is
+  not.
 - Focus changes, selection changes, busy state and validation results each
-  produce one event, not one per intermediate frame.
-- A provider that cannot supply a semantic projection does not make content
-  silently inaccessible. The object is presented as **Opaque** with a bounded
-  fallback: its name, identity where disclosure permits, and the action that
-  can restore a provider. The fallback is declared, not improvised.
+  produce one application announcement per settled change, not one per
+  intermediate frame. A selection change still reaches the native selection
+  notification even when its application announcement is coalesced.
+- Semantic projection is a provider contract, not a condition of resolution. An
+  installed provider must declare whether it supplies the projection. A
+  provider that declares it and then fails at run time uses the bounded
+  fallback: the object's name, identity where disclosure permits, its role, the
+  actions the provider can still support and the action that retries or
+  configures it. The tree labels the description as bounded; it does not
+  present it as the provider's full semantics. The object stays **Resolved**,
+  remains drawable and exportable, and the failure is written to diagnostics.
+- A provider that supplies no projection, or a fallback that is only partial,
+  is never relabelled **Opaque**. Opaque stays reserved for intact bytes with
+  no installed provider, as [Embeds](32-embeds.md) defines it.
+- Authorization is checked separately. A denied read never changes resolution,
+  identity or the underlying bytes.
 
 The exported tree and the live adapter read the same scene-associated
 annotations, so an exported name and a spoken name cannot drift apart.
@@ -260,6 +300,12 @@ Accessibility is tested at four levels.
 
 A pass at the first level does not imply a pass at the others. The automated
 check proves the tree exists; the manual checks prove it is usable.
+
+At the native-adapter level, typing, caret movement and selection changes must
+remain observable while duplicate application-level announcements are
+suppressed. A resolved provider whose semantic adapter fails must use the
+declared bounded fallback without changing the object's identity, its
+resolution state or its eligibility for export.
 
 ## What accessibility is not
 

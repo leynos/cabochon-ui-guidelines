@@ -47,7 +47,9 @@ each role to a value. The light theme resolves them as follows.
 | Decorative line    | #AAA99F     | 2.04 paper, 2.23 surface    |
 | Selected fill      | #285E50     | —                           |
 | Selected text      | #FFFFFF     | 7.48 on selected fill       |
-| Inactive selection | #285E50     | outline, with ink text      |
+| Row fill           | #FAF8F2     | —                           |
+| Alternate row fill | #FFFFFF     | —                           |
+| Inactive selection | #285E50     | outline, with text primary  |
 | Primary fill       | #285E50     | —                           |
 | Primary text       | #FFFFFF     | 7.48 on primary fill        |
 | Destructive fill   | #8A302F     | —                           |
@@ -117,10 +119,11 @@ specifies; selection never changes the object's own fill, stroke or colour. The
 outline is interaction decoration, not saved appearance, so it is absent from
 every export.
 
-A secondary selection, such as an inactive pane's remembered selection, uses a
-pine-2 outline with an ink label. It must remain visible without competing with
-the active selection. The outline is the inactive-selection role; it is not a
-tint, and it is not the active fill at reduced opacity.
+A secondary selection, such as an inactive pane's remembered selection, uses
+the inactive-selection role: an outline with a text-primary label. It must
+remain visible without competing with the active selection. The outline is the
+inactive-selection role; it is never a tint, and it is never the active fill at
+reduced opacity. There is no second policy for this state.
 
 ## Focus
 
@@ -151,6 +154,8 @@ The dark theme is a translation, not an inversion. It resolves the same roles.
 | Decorative line    | #3A453F    | 1.59 surface, non-text only |
 | Selected fill      | #7FB3A3    | —                           |
 | Selected text      | #121816    | 7.60 on selected fill       |
+| Row fill           | #1B2420    | —                           |
+| Alternate row fill | #202A25    | —                           |
 | Inactive selection | #7FB3A3    | outline, with text primary  |
 | Primary fill       | #7FB3A3    | —                           |
 | Primary text       | #121816    | 7.60 on primary fill        |
@@ -176,12 +181,13 @@ essential border is a separate role with its own value.
 
 ## Tints and washes
 
-A tint is a colour at low opacity over paper or high. Cabochon permits four.
+A tint is a colour at low opacity over paper or high. Cabochon permits three.
 
-- Pine 2 at 8 per cent for a selected-but-inactive row.
 - Oxide at 6 per cent for an error region behind a message.
 - Amber at 8 per cent for a stale region.
 - Teal at 8 per cent for a refreshing region.
+
+An inactive selection is an outline, not a tint, so no tint is declared for it.
 
 A tint must never be the only indication of a state, and a tinted region must
 still meet text contrast against its own background. Contrast is computed for

@@ -27,9 +27,14 @@ Menus appear in a fixed order, with instrument-specific menus inserted before
 6. **Help** — documentation, keyboard reference, about, diagnostics.
 
 The list gives each menu's internal order and its usual contents. An
-application omits the items and menus it does not implement: one with no
-editable document omits **Edit**, and one with a single window omits
-**Window**. A menu that would be empty is never drawn.
+application omits a menu only when it has no applicable command for that menu.
+A non-editable document therefore omits **Edit**'s editing commands, but it
+keeps the menu while **Inspect**, **Copy identity** or any other applicable
+command lives there. It omits **Edit** altogether only when no command in it
+can act. An application with a single window omits **Window**. A menu that
+would be empty is never drawn. The [hello-window](36-hello-window.md) fixture
+is the worked example of a read-only surface whose **Edit** menu has no
+applicable command at all.
 
 Two commands have a fixed home even in a small application. **Command palette**
 lives in the **View** menu and is never palette-only, because a shortcut that
@@ -181,7 +186,9 @@ can still reach them.
 - Pressing Alt focuses the menu bar. Arrow keys move between menus; Down opens
   one.
 - Typing a letter jumps to the next item beginning with that letter.
-- Escape closes the open menu and returns focus to the document.
+- Escape closes the open menu and returns focus through the focus-return chain
+  in [Focus and keyboard](18-focus-keyboard.md), normally to the menu button
+  that opened it and then to the invoking context.
 - Opening a menu must not change the selection.
 - A menu that would extend beyond the window flips or scrolls rather than
   clipping its last items.
@@ -191,11 +198,14 @@ can still reach them.
 ## The More menu
 
 When the window is too narrow for the full menu bar, whole menus move into a
-final **More** menu in their original order. Individual items must not be
-plucked out of their menus, because a menu's grouping carries meaning. The
-**More** menu uses the same typography and marks as the menu bar.
+**More** menu in their original order. Individual items must not be plucked out
+of their menus, because a menu's grouping carries meaning. The **More** menu
+uses the same typography and marks as the menu bar.
 
-**Help** remains last. If **Help** itself moves into **More**, it is the last
-entry inside **More**, and the **More** label does not take Help's place at the
-end of the visible menu bar. A user who looks for Help at the end of the bar
-finds it in the overflow, not in a different position.
+**Help** stays logically last. If **Help** remains on the bar while other menus
+overflow, **More** is inserted immediately before **Help**, so **Help** is
+still the last visible menu. If **Help** itself overflows, it is the last entry
+inside **More**, and **More** carries the trailing position that **Help** would
+have had. The **More** label never takes Help's logical place: a user who looks
+for Help at the end of the bar finds it either at the end of the bar or at the
+end of the overflow, never in the middle.

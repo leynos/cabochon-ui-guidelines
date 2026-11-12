@@ -21,21 +21,29 @@ A **target** is a renderer's purpose. An **artefact** is a file that is
 published. An **encoding** is the format of that file. The three are not
 interchangeable.
 
-| Target        | Purpose                                          | Artefact                                  |
-| ------------- | ------------------------------------------------ | ----------------------------------------- |
-| Display       | Interactive pixels at the current zoom and scale | None; the display is not an exported file |
-| PDF           | Vector pages with selectable text                | Yes                                       |
-| Print         | Printer-bound output at a declared intent        | Yes                                       |
-| Thumbnail     | Small raster for lists and previews              | Yes                                       |
-| Raster        | PNG or equivalent at a declared scale            | Yes                                       |
-| Clipboard     | Text plus geometry for other applications        | No; a transfer                            |
-| Accessibility | Roles, names, states and bounds                  | Yes, as a diagnostic projection           |
-| Hit map       | Regions keyed by presentation instance           | Yes                                       |
-| Manifest      | Intents, snapshots, tolerances and substitutions | Yes                                       |
+| Target        | Purpose                                          | Artefact                                                                     |
+| ------------- | ------------------------------------------------ | ---------------------------------------------------------------------------- |
+| Display       | Interactive pixels at the current zoom and scale | None; the display is not an exported file                                    |
+| PDF           | Vector pages with selectable text                | Yes                                                                          |
+| Print         | Printer-bound output at a declared intent        | Yes                                                                          |
+| Thumbnail     | Small raster for lists and previews              | Yes                                                                          |
+| Raster        | PNG or equivalent at a declared scale            | Yes                                                                          |
+| Clipboard     | Text plus geometry for other applications        | No live file; a transfer. Serialised as `clipboard/` in a conformance bundle |
+| Accessibility | Roles, names, states and bounds                  | Yes, as a diagnostic projection                                              |
+| Hit map       | Regions keyed by presentation instance           | Yes                                                                          |
+| Manifest      | Intents, snapshots, tolerances and substitutions | Yes                                                                          |
 
-Nine logical targets therefore produce eight persisted artefacts. A target may
-omit a feature that it cannot represent. It may not invent geometry, text or
-state that the resolved scene does not contain.
+Nine logical targets therefore produce eight persisted artefacts in a
+conformance bundle. The display produces none because it is not a file. The
+clipboard produces no live file because it is a transfer, but the conformance
+bundle serialises exactly one payload for it. These counts describe the
+conformance bundle, not an arbitrary user export.
+
+A target may omit a feature that it cannot represent. It may not invent
+geometry, text or state that the resolved scene does not contain. Each
+committed artefact maps to exactly one target representation, each required
+target representation maps to exactly one artefact, and a conformance test
+validates that mapping and its uniqueness rather than the total count.
 
 The encodings available for an artefact depend on the export profile. A user
 export, a native project bundle and a conformance bundle are different
@@ -78,12 +86,39 @@ and the manifest identify the same snapshot.
 
 ## Participation policy
 
-Not everything drawn on screen belongs in every output.
+Not everything drawn on screen belongs in every output. Marks are grouped into
+three classes, and each class declares its participation by output intent and
+by per-target options.
 
-- Application chrome, menus, panels, focus rings and tool palettes do not enter
-  document output.
-- Guides, grids, selection handles, crop marks and editing aids do not enter
-  print or PDF output.
+- **Editing overlays.** Selection handles, marquees, path nodes, guides, grids,
+  snap indicators, measurement annotations and focus rings. They exist for the
+  editor alone and never enter a proof or a production artefact.
+- **Proof marks.** Trim and bleed boundaries, page grids and preflight callouts
+  that explain production geometry on a review page. They appear in the editor
+  page plane and in a proof render, and never in a production PDF.
+- **Requested production marks.** Crop marks, registration marks and colour
+  bars. They are off by default, are requested per output target, appear only
+  in a production PDF whose target has the option on, and are recorded in the
+  manifest.
+
+The participation table makes the distinction binding.
+
+| Surface or artefact        | Editing overlays | Proof marks                      | Requested production marks                 |
+| -------------------------- | ---------------- | -------------------------------- | ------------------------------------------ |
+| Editor window              | Yes              | Page plane                       | Preview only                               |
+| Proof render               | No               | Yes                              | No                                         |
+| Production PDF, option off | No               | No                               | No                                         |
+| Production PDF, option on  | No               | No                               | Yes                                        |
+| Raster document export     | No               | No                               | Only if the target declares them requested |
+| Manifest                   | No               | Names the proof set, if produced | Names each requested mark class            |
+
+Application chrome, menus, panels and tool palettes are outside all three
+classes and do not enter document output. A diagnostic whole-interface export
+is the separate operation described below.
+
+- Selection handles and editing grids are never a requested production mark.
+  No output option promotes them, and enabling production marks does not change
+  their exclusion.
 - State marks do enter every target that renders the object at interface scale,
   including print. A thumbnail at least 48 pixels on its shorter side carries a
   shape mark; a smaller thumbnail carries the state in its list row and in the
@@ -93,6 +128,15 @@ Not everything drawn on screen belongs in every output.
   not a parity defect.
 - A diagnostic whole-interface export is a separate operation from a user's
   document export and declares that it includes chrome.
+
+The requested mark set is part of the snapshot taken before rendering. The
+manifest records each target, the mark classes requested for it and whether the
+proof set was produced. Toggling a production-mark option changes only that
+node set: document geometry, placement, identity, revision and the resolved
+scene remain identical. A reviewer tests this by rendering the same snapshot
+twice with the option off and on and comparing the two artefacts; only the
+requested mark nodes may differ, and guides, grids and selection handles must
+be absent from both.
 
 ## The reference scale
 
@@ -229,11 +273,11 @@ side effect of every CSV export. An ordinary user export creates the file the
 user asked for and the metadata that file needs.
 
 The supported encodings are declared per profile. SVG is a supported vector
-encoding for Burin Draw documents and diagram export in the studio profile; it
-is not a Burin target, and a profile that does not require it does not
-advertise it. PDF/X conformance is claimed only by a profile that validates the
-chosen PDF/X level; otherwise the output is described as PDF with a declared
-colour intent, not as PDF/X.
+encoding of the semantic workspace profile for diagram export, and the studio
+profile inherits it for Burin Draw documents. It is not a Burin target, and a
+profile that does not require it does not advertise it. PDF/X conformance is
+claimed only by a profile that validates the chosen PDF/X level; otherwise the
+output is described as PDF with a declared colour intent, not as PDF/X.
 
 ## Testing parity
 

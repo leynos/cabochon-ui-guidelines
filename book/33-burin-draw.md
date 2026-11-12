@@ -48,9 +48,17 @@ no **Insert** button; its effect is the gesture it completes.
 
 ## Units and rulers
 
-A drawing declares its unit: millimetres, points or pica pixels. That unit is a
-document unit, and it is not the logical unit that measures the interface. The
-three spaces are distinct and never silently converted.
+A drawing declares its unit. Four document units are supported, and each has a
+stated dimension and conversion. A document unit is not the logical unit that
+measures the interface, and neither is a sample pixel. The three spaces are
+distinct and never silently converted.
+
+| Document unit  | Dimension           | Conversion                                                                 |
+| -------------- | ------------------- | -------------------------------------------------------------------------- |
+| Millimetre     | Physical length     | 25.4 millimetres = 1 inch                                                  |
+| Point          | Physical length     | 72 points = 1 inch; 1 point = 25.4/72 millimetres                          |
+| Pica           | Physical length     | 1 pica = 12 points = 1/6 inch                                              |
+| Document pixel | Sample-space length | 1 document pixel = 1 document unit; no physical size until one is declared |
 
 | Space     | Measured in       | Example               |
 | --------- | ----------------- | --------------------- |
@@ -61,6 +69,10 @@ three spaces are distinct and never silently converted.
 - Rulers show the declared unit and tick at a spacing suited to the zoom.
 - The inspector shows position and size in the declared unit.
 - The status line shows the pointer position in the same unit.
+- Changing between physical units converts the declared values exactly and
+  records the conversion. Changing to or from document pixels requires a
+  declared physical size, because a document pixel has no physical dimension
+  until one is declared.
 - Changing the unit changes the display, not the geometry.
 - A document without a declared physical size uses document pixels and reports
   that it has no print intent.
@@ -141,11 +153,14 @@ declared intent.
 - The display intent resolves the editing view; the print intent resolves the
   print presentation at the declared output intent. Geometry is compared only
   where the participation policy includes the same nodes.
-- A document with a declared physical size prints at that size, with crop
-  marks only when the user asks for them.
+- A document with a declared physical size prints at that size. Crop marks are
+  a requested production mark: they are off by default, enter the production
+  PDF only when the user asks for them, and are recorded in the manifest.
 - A document without a physical size prints at a declared scale, shown in the
   print surface.
-- Guides, grid and selection handles never print.
+- Guides, grid, selection handles and every other editing overlay never print,
+  whether or not production marks are requested. A proof render carries proof
+  marks only, as [Output parity](37-output-parity.md) requires.
 - Text remains selectable in PDF and readable in the accessibility tree.
 - The export reads one accepted snapshot and stages its output before
   publication, so an interruption never pairs new pages with an old manifest.

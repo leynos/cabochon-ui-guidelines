@@ -210,6 +210,12 @@ def state_mark(cx: float, cy: float, kind: str, colour: str) -> str:
     raise ValueError(f"unknown state mark {kind!r}")
 
 
+def mark_group(mark: str, state_id: str, role: str, body: str) -> str:
+    """Wrap a state mark so identity, role and drawn geometry travel together."""
+    attributes = attrs(data_mark=mark, data_state_id=state_id, data_role=role)
+    return f"<g {attributes}>{body}</g>"
+
+
 def chip(
     x: float,
     y: float,
@@ -219,11 +225,17 @@ def chip(
     size: float = 11,
     state: str | None = None,
     mark: str = "dot",
+    role: str = "pine2",
 ) -> tuple[str, float]:
     width = max(58.0, len(label) * size * 0.62 + 18)
-    body = f'<g data-mark="{mark}">'
+    body = '<g data-state-chip="true">'
     body += rect(x, y, width, 20, fill=fill, stroke=colour, sw=1)
-    body += state_mark(x + 10, y + 10, mark, colour)
+    body += mark_group(
+        mark,
+        state or "",
+        role,
+        state_mark(x + 10, y + 10, mark, colour),
+    )
     body += txt(
         x + 18,
         y + 14,
@@ -241,9 +253,9 @@ def chip(
 def state_chip(x: float, y: float, name: str) -> tuple[str, float]:
     """Draw a live or resolution state chip.
 
-    Every supported state has one declared word, cue and colour role. An
-    unknown state is a generation failure, not a silent fallback to a plausible
-    colour.
+    Every supported state has one declared identity, word, cue, mark and colour
+    role. An unknown state is a generation failure, not a silent fallback to a
+    plausible colour.
     """
     state = LIVE_STATES.get(name) or RESOLUTION_STATES.get(name)
     if state is None:
@@ -257,8 +269,9 @@ def state_chip(x: float, y: float, name: str) -> tuple[str, float]:
         y,
         state["word"].upper(),
         colour=str(state["colour"]),
-        state=name,
+        state=str(state["id"]),
         mark=str(mark),
+        role=str(state["role"]),
     )
 
 
@@ -612,11 +625,17 @@ def fig_state() -> str:
     ]
     for index, (name, colour, text, action) in enumerate(states):
         x = 64 + index * 220
-        mark = str(LIVE_STATES[name]["mark"])
-        body += f'<g data-mark="{mark}">'
+        record = LIVE_STATES[name]
+        mark = str(record["mark"])
+        body += '<g data-state-card="true">'
         body += rect(x, 166, 204, 190, fill=HIGH, stroke=colour, sw=2 if name in {"Stale", "Denied"} else 1)
-        body += state_mark(x + 22, 194, mark, colour)
-        body += txt(x + 38, 200, name.upper(), size=12, fill=colour, family=F_MONO, weight="bold", spacing=0.6, data_state=name)
+        body += mark_group(
+            mark,
+            str(record["id"]),
+            str(record["role"]),
+            state_mark(x + 22, 194, mark, colour),
+        )
+        body += txt(x + 38, 200, name.upper(), size=12, fill=colour, family=F_MONO, weight="bold", spacing=0.6, data_state=str(record["id"]))
         body += para(x + 18, 226, 168, text, size=11, leading=16)
         body += line(x + 18, 300, x + 186, 300, stroke=LINE)
         body += txt(x + 18, 326, action, size=11, fill=INK, weight="bold")
@@ -1980,10 +1999,15 @@ def fig_embed() -> str:
         state = RESOLUTION_STATES[name]
         colour = str(state["colour"])
         mark = str(state["mark"])
-        body += f'<g data-mark="{mark}">'
+        body += '<g data-state-card="true">'
         body += rect(sx, 630, 200, 58, fill=HIGH, stroke=colour)
-        body += state_mark(sx + 18, 652, mark, colour)
-        body += txt(sx + 32, 652, name, size=12, fill=colour, weight="bold", data_state=name)
+        body += mark_group(
+            mark,
+            str(state["id"]),
+            str(state["role"]),
+            state_mark(sx + 18, 652, mark, colour),
+        )
+        body += txt(sx + 32, 652, name, size=12, fill=colour, weight="bold", data_state=str(state["id"]))
         body += txt(sx + 12, 672, detail, size=10, fill=SOFT, family=F_MONO)
         body += "</g>"
     body += para(944, 638, 192, "Only a resolved embed carries a live state: Current, Refreshing, Stale, Broken or Denied.", size=10, leading=15)
@@ -2120,13 +2144,18 @@ def annotate(name: str, svg: str) -> str:
     scale = spec["scale"]
     components = spec["components"]
     profile = str(spec["profile"])
-    metadata = {
+    metadata: dict[str, object] = {
         "name": name,
         "class": figure_class,
         "scale": scale,
         "profile": profile,
         "components": components,
+        "states": spec["states"],
     }
+    if "size" in spec:
+        metadata["size"] = spec["size"]
+    if "bounds" in spec:
+        metadata["bounds"] = spec["bounds"]
     payload = escape(json.dumps(metadata, sort_keys=True))
     scale_attr = "" if scale is None else f' data-figure-scale="{scale}"'
     attrs_text = (
@@ -2138,6 +2167,49 @@ def annotate(name: str, svg: str) -> str:
     marker = ">\n"
     index = svg.index(marker) + len(marker)
     return svg[:index] + f"  <metadata>{payload}</metadata>\n" + svg[index:]
+
+
+def production_component(
+    x: float, y: float, w: float, h: float, kind: str, label: str
+) -> str:
+    """Draw one component at its catalogue height for the production fixtures.
+
+    The group carries its identity and measured height, but the checker derives
+    the rendered bounds from the geometry and transforms rather than trusting
+    the annotation.
+    """
+    attributes = attrs(data_component=kind, data_height=h)
+    body = f"<g {attributes}>"
+    body += rect(x, y, w, h, fill=HIGH, stroke=INK)
+    body += txt(x + 8, y + h / 2 + 4, label, size=10, fill=INK, family=F_MONO)
+    body += "</g>"
+    return body
+
+
+def fig_prod_chrome() -> str:
+    body = production_component(0, 0, 320, 31, "title_bar", "TITLE BAR · 31 lu")
+    body += production_component(0, 31, 320, 29, "menu_bar", "MENU BAR · 29 lu")
+    body += production_component(8, 68, 96, 30, "tool_button", "TOOL · 30 lu")
+    body += production_component(0, 110, 320, 26, "status_line", "STATUS LINE · 26 lu")
+    return svg_doc(
+        320,
+        140,
+        "Production chrome fixture",
+        "Title bar, menu bar, tool button and status line drawn at exact catalogue heights.",
+        body,
+    )
+
+
+def fig_prod_control() -> str:
+    body = production_component(8, 8, 120, 36, "primary_action", "PRIMARY · 36 lu")
+    body += production_component(144, 11, 80, 30, "tool_button", "TOOL · 30 lu")
+    return svg_doc(
+        320,
+        80,
+        "Production control fixture",
+        "Primary action and tool button drawn at exact catalogue heights.",
+        body,
+    )
 
 
 def main() -> int:
@@ -2176,6 +2248,8 @@ def main() -> int:
         "fig-30-output": fig_output,
         "fig-31-localization": fig_localization,
         "fig-32-accessibility": fig_accessibility,
+        "fig-prod-chrome": fig_prod_chrome,
+        "fig-prod-control": fig_prod_control,
     }
     missing = sorted(set(figures) - set(FIGURE_SPECS))
     extra = sorted(set(FIGURE_SPECS) - set(figures))

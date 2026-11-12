@@ -79,16 +79,16 @@ promise the rest of the environment depends on.
 
 **Export** writes a bundle with eight artefacts:
 
-| Artefact             | Content                                      |
-| -------------------- | -------------------------------------------- |
-| `content.pdf`        | Screen-oriented vector output                |
-| `content-print.pdf`  | Print-oriented output with intent and bleed  |
-| `content.png`        | Raster at the declared scale                 |
-| `thumbnail.png`      | Small raster for lists and previews          |
-| `accessibility.json` | Roles, names, states and bounds              |
-| `clipboard/`         | Text and geometry for the clipboard          |
-| `hit-map.json`       | Hit regions keyed by scene node              |
-| `export.json`        | Manifest of intents, tolerances and versions |
+| Artefact             | Content                                           |
+| -------------------- | ------------------------------------------------- |
+| `content.pdf`        | Screen-oriented vector output                     |
+| `content-print.pdf`  | Print-oriented output with intent and bleed       |
+| `content.png`        | Raster at the declared scale                      |
+| `thumbnail.png`      | Small raster for lists and previews               |
+| `accessibility.json` | Roles, names, states and bounds                   |
+| `clipboard/`         | Serialised payload of the live clipboard transfer |
+| `hit-map.json`       | Hit regions keyed by scene node                   |
+| `export.json`        | Manifest of intents, tolerances and versions      |
 
 All eight come from the same scene. Geometry, text placement, clipping and
 metadata must agree within the tolerances in
@@ -96,7 +96,10 @@ metadata must agree within the tolerances in
 must describe the same nodes that were drawn.
 
 The eight artefacts form a **conformance bundle**, not the shape of every user
-export. They are produced by the review command that proves the contract, and
+export. The clipboard is a live transfer, not a file; `clipboard/` is its
+serialised representation in the bundle. Each of the eight maps to one target
+representation, and each required target representation maps to exactly one
+artefact. They are produced by the review command that proves the contract, and
 they all read one accepted snapshot: the scene revision, the presentation
 intents, the authority decision and the renderer version. A user who exports
 one PNG or one PDF receives that file and its manifest entry, not the other

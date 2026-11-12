@@ -75,6 +75,12 @@ Malformed embed has no live state and shows its resolution state instead. Stale
 and Denied are properties of a resolved relationship, not alternative
 resolution states.
 
+A Resolved object whose provider fails to supply a semantic accessibility
+projection keeps its resolution state. It uses the bounded fallback declared in
+[Accessibility](39-accessibility.md);
+it does not become Opaque, and an authorization refusal does not alter
+resolution either.
+
 Removing, crashing or reinstalling a provider changes resolution and
 availability. It does not change whether the payload may be disclosed. An
 unresolved embed that is not authorised shows a non-disclosing placeholder and

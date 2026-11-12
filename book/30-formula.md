@@ -11,8 +11,9 @@ summary: A tool at the point of use, with named sources, visible authority and a
 
 The formula tool is Cabochon's proof that a tool can act across object types
 without ambient authority. It appears beside a compatible selection, names what
-it will read, shows what it is allowed to do and returns a live value with its
-own identity.
+it will read, shows what it is allowed to do and, when the user inserts the
+result, creates a new live value with its own identity. Editing that value
+afterwards changes the same object; it does not create another identity.
 
 ## Where it appears
 

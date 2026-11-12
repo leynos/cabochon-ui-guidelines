@@ -25,8 +25,8 @@ draw a page shadow to show the paper edge, as the declared exception in
   and its size or kind. This is the **page navigator** variant of the navigator
   role, not the standard 210-unit navigator; it inherits the navigator's row,
   selection and collapse behaviour and declares its narrower default.
-- Page plane: the flexible remainder, showing the current page with its bleed
-  and crop marks.
+- Page plane: the flexible remainder, showing the current page with its trim,
+  bleed boundary and proof marks.
 - Preflight panel: 300 logical units, listing checks and their outcomes.
 - Status line: page number, output intent and bleed.
 
@@ -46,9 +46,19 @@ A page declares a size, an orientation and a bleed.
 - Reordering pages is a drag in the panel and one undoable transaction.
 - A page may be a plate, a spread or a cover, and the panel says which.
 
-The page plane draws the bleed as a teal dashed rule outside the trim and the
-crop marks as ink hairlines. Neither bleed nor crop marks are part of the
-document's visible design; they are production marks.
+The page plane draws the trim and bleed boundaries as teal dashed rules and
+adds a page grid and preflight callouts when asked. These are proof marks: they
+explain production geometry for review and never enter a production PDF. The
+page plane shows requested production marks only as an unemphasised preview,
+and never as document content.
+
+A page's production marks are requested per output target. Crop marks,
+registration marks and colour bars are off by default. When requested, they
+enter the production PDF and nothing else, and the manifest records the mark
+classes requested for that target. The participation policy in
+[Output parity](37-output-parity.md) is authoritative; selection handles,
+guides and editing grids are not production marks and no output option promotes
+them.
 
 ## Placing objects
 
@@ -106,14 +116,17 @@ requires embedding.
 
 The primary action is **Export PDF**, with **Proof** beside it.
 
-- **Proof** renders the current page at screen resolution with marks and a
-  preflight summary, for review only.
+- **Proof** renders the current page at screen resolution with proof marks and
+  a preflight summary, for review only. It never includes requested production
+  marks.
 - **Export PDF** writes the full document at the declared intent, with an
-  accompanying manifest.
-- The export surface names the intent, the resolution, the bleed and the
-  colour conversion it will apply.
+  accompanying manifest. Requested production marks are included only when
+  their per-target option is on.
+- The export surface names the intent, the resolution, the bleed, the
+  production marks requested and the colour conversion it will apply.
 - The manifest records each page, each placed object, its instance identity,
-  its accepted revision and the presentation used.
+  its accepted revision, the presentation used and the mark classes requested
+  for the target.
 
 The export reads one accepted snapshot. Every page, the manifest and any
 accompanying artefact identify the same document revision, source-revision

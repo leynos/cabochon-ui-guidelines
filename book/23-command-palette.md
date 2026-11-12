@@ -102,14 +102,15 @@ The palette is a search surface, so it obeys the metadata disclosure policy in
 | Control+K | Close, when the palette is already open          |
 
 The palette is one tab stop. The field keeps focus while the arrow keys move
-the result selection, so Tab never leaves the palette and never moves between
-results. Tab completion applies only inside the query field: it completes the
-word under the caret from the currently visible results, and it does nothing
-when there is no unique completion. It never invokes a result and never inserts
-a command's arguments. Escape clears an active completion before it closes the
-palette, so the first Escape undoes the completion and the second leaves. The
-result list is exposed to assistive technology as a listbox with an active
-option.
+the result selection, so Tab never moves between results. Tab completion
+applies only inside the query field: it completes the word under the caret from
+the currently visible results. When a completion is offered, Tab consumes the
+key and completes; when none is offered, Tab dismisses the palette and returns
+focus through the focus-return chain, as Escape does. Completion never invokes
+a result and never inserts a command's arguments. Escape clears an active
+completion before it closes the palette, so the first Escape undoes the
+completion and the second leaves. The result list is exposed to assistive
+technology as a listbox with an active option.
 
 ## Running a command
 

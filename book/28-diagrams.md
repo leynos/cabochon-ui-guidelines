@@ -183,8 +183,9 @@ accessibility path. A purely visual diagram is not acceptable.
 ## Export
 
 A diagram exports to SVG, PNG and PDF through the shared Burin targets, and its
-source exports as text. SVG is a supported vector encoding in the studio
-profile, not a separate Burin target. The export must preserve the drawing's
+source exports as text. SVG is a supported vector encoding of the semantic
+workspace profile, which the diagram editor claims; the studio profile inherits
+it. It is not a separate Burin target. The export must preserve the drawing's
 geometry and its text as text where the target supports it, and it must
 identify the source revision and presentation intent it rendered. The
 instrument must not flatten the source into the drawing on export. These are

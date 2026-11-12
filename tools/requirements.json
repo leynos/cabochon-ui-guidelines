@@ -1,0 +1,1667 @@
+{
+  "version": 1,
+  "checklist": "40-checklist.md",
+  "profiles": [
+    "substrate",
+    "semantic",
+    "studio"
+  ],
+  "forces": [
+    "must",
+    "should"
+  ],
+  "evidence_routes": [
+    "test",
+    "manual"
+  ],
+  "requirements": [
+    {
+      "id": "CON-01",
+      "owner": {
+        "file": "03-ecosystem-map.md",
+        "anchor": "the-substrate-components"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CON-02",
+      "owner": {
+        "file": "03-ecosystem-map.md",
+        "anchor": "the-substrate-components"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CON-03",
+      "owner": {
+        "file": "37-output-parity.md",
+        "anchor": "targets-artefacts-and-encodings"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make check"
+        }
+      ]
+    },
+    {
+      "id": "CON-04",
+      "owner": {
+        "file": "37-output-parity.md",
+        "anchor": "targets-artefacts-and-encodings"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make check"
+        }
+      ]
+    },
+    {
+      "id": "CON-05",
+      "owner": {
+        "file": "37-output-parity.md",
+        "anchor": "the-manifest"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make check"
+        }
+      ]
+    },
+    {
+      "id": "CON-06",
+      "owner": {
+        "file": "36-hello-window.md",
+        "anchor": "identity-in-a-substrate-only-scene"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "The scene is substrate-only.",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CON-07",
+      "owner": {
+        "file": "38-localization.md",
+        "anchor": "the-two-pseudo-locales"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "A pseudo-locale or shipped-locale build is produced.",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "WIN-01",
+      "owner": {
+        "file": "09-windows.md",
+        "anchor": "the-bands"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "WIN-02",
+      "owner": {
+        "file": "06-document-centre.md",
+        "anchor": "the-document-plane"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "WIN-03",
+      "owner": {
+        "file": "10-menus.md",
+        "anchor": "order"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "WIN-04",
+      "owner": {
+        "file": "10-menus.md",
+        "anchor": "wording"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "WIN-05",
+      "owner": {
+        "file": "11-toolbars-status.md",
+        "anchor": "the-status-line"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "WIN-06",
+      "owner": {
+        "file": "09-windows.md",
+        "anchor": "four-independent-properties"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "WIN-07",
+      "owner": {
+        "file": "09-windows.md",
+        "anchor": "decoration-profiles"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "WIN-08",
+      "owner": {
+        "file": "09-windows.md",
+        "anchor": "decoration-profiles"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "A window is decorated by the host or by the application.",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "WIN-09",
+      "owner": {
+        "file": "09-windows.md",
+        "anchor": "permitted-window-roles"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "WIN-10",
+      "owner": {
+        "file": "11-toolbars-status.md",
+        "anchor": "the-status-line"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "LAY-01",
+      "owner": {
+        "file": "14-spacing-metrics.md",
+        "anchor": "the-scale"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make layout"
+        }
+      ]
+    },
+    {
+      "id": "LAY-02",
+      "owner": {
+        "file": "14-spacing-metrics.md",
+        "anchor": "pane-padding"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make layout"
+        }
+      ]
+    },
+    {
+      "id": "LAY-03",
+      "owner": {
+        "file": "20-panes.md",
+        "anchor": "the-three-pane-window"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make layout"
+        }
+      ]
+    },
+    {
+      "id": "LAY-04",
+      "owner": {
+        "file": "20-panes.md",
+        "anchor": "the-three-pane-window"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make layout"
+        }
+      ]
+    },
+    {
+      "id": "LAY-05",
+      "owner": {
+        "file": "20-panes.md",
+        "anchor": "the-three-pane-window"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make layout"
+        }
+      ]
+    },
+    {
+      "id": "LAY-06",
+      "owner": {
+        "file": "20-panes.md",
+        "anchor": "splitters"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make layout"
+        }
+      ]
+    },
+    {
+      "id": "LAY-07",
+      "owner": {
+        "file": "20-panes.md",
+        "anchor": "collapse-and-restore"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make layout"
+        }
+      ]
+    },
+    {
+      "id": "LAY-08",
+      "owner": {
+        "file": "14-spacing-metrics.md",
+        "anchor": "layout-profiles"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "A window is narrower than the expanded layout computed minimum.",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make layout"
+        }
+      ]
+    },
+    {
+      "id": "LAY-09",
+      "owner": {
+        "file": "14-spacing-metrics.md",
+        "anchor": "component-roles-and-variants"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make layout"
+        }
+      ]
+    },
+    {
+      "id": "LAY-10",
+      "owner": {
+        "file": "20-panes.md",
+        "anchor": "splitters"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make layout"
+        }
+      ]
+    },
+    {
+      "id": "TYP-01",
+      "owner": {
+        "file": "13-typography.md",
+        "anchor": "the-scale"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "TYP-02",
+      "owner": {
+        "file": "13-typography.md",
+        "anchor": "the-scale"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "TYP-03",
+      "owner": {
+        "file": "13-typography.md",
+        "anchor": "the-three-voices"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "TYP-04",
+      "owner": {
+        "file": "12-palette.md",
+        "anchor": "contrast"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "TYP-05",
+      "owner": {
+        "file": "12-palette.md",
+        "anchor": "semantic-roles"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "TYP-06",
+      "owner": {
+        "file": "12-palette.md",
+        "anchor": "dark-theme"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "A supported theme is active.",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "TYP-07",
+      "owner": {
+        "file": "12-palette.md",
+        "anchor": "semantic-roles"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "TYP-08",
+      "owner": {
+        "file": "15-planes-borders.md",
+        "anchor": "radii"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "TYP-09",
+      "owner": {
+        "file": "15-planes-borders.md",
+        "anchor": "shadow"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "TYP-10",
+      "owner": {
+        "file": "12-palette.md",
+        "anchor": "scope-of-the-palette"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-01",
+      "owner": {
+        "file": "07-object-identity.md",
+        "anchor": "what-identity-means"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-02",
+      "owner": {
+        "file": "07-object-identity.md",
+        "anchor": "presentation-identity"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-03",
+      "owner": {
+        "file": "07-object-identity.md",
+        "anchor": "duplicate-derive-export"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-04",
+      "owner": {
+        "file": "25-errors-recovery.md",
+        "anchor": "retry-and-recovery"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-05",
+      "owner": {
+        "file": "25-errors-recovery.md",
+        "anchor": "atomic-operations-batches-and-partial-failure"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-06",
+      "owner": {
+        "file": "32-embeds.md",
+        "anchor": "resolution-authority-and-cache-are-independent"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-07",
+      "owner": {
+        "file": "32-embeds.md",
+        "anchor": "resolution-authority-and-cache-are-independent"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-08",
+      "owner": {
+        "file": "08-live-relationships.md",
+        "anchor": "the-five-states"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make states"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-09",
+      "owner": {
+        "file": "08-live-relationships.md",
+        "anchor": "transitions"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make states"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-10",
+      "owner": {
+        "file": "08-live-relationships.md",
+        "anchor": "authority-and-availability-are-events-in-their-own-right"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make states"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-11",
+      "owner": {
+        "file": "08-live-relationships.md",
+        "anchor": "the-five-states"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make states"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-12",
+      "owner": {
+        "file": "08-live-relationships.md",
+        "anchor": "stale"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make states"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-13",
+      "owner": {
+        "file": "08-live-relationships.md",
+        "anchor": "broken-and-denied"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "Current authority denies a read of a live or embedded object.",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make states"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-14",
+      "owner": {
+        "file": "08-live-relationships.md",
+        "anchor": "aggregating-child-states"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "A document contains child objects in different states.",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make states"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-15",
+      "owner": {
+        "file": "08-live-relationships.md",
+        "anchor": "recoverability-is-a-transition-not-a-state"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-16",
+      "owner": {
+        "file": "07-object-identity.md",
+        "anchor": "presentation-identity"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-17",
+      "owner": {
+        "file": "08-live-relationships.md",
+        "anchor": "metadata-disclosure"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OBJ-18",
+      "owner": {
+        "file": "07-object-identity.md",
+        "anchor": "duplicate-derive-export"
+      },
+      "force": "must",
+      "profile": "semantic",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CTL-01",
+      "owner": {
+        "file": "18-focus-keyboard.md",
+        "anchor": "tab-order"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CTL-02",
+      "owner": {
+        "file": "18-focus-keyboard.md",
+        "anchor": "the-focus-ring"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CTL-03",
+      "owner": {
+        "file": "18-focus-keyboard.md",
+        "anchor": "focus-memory-and-the-focus-return-chain"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CTL-04",
+      "owner": {
+        "file": "19-controls.md",
+        "anchor": "sizes-and-spacing"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CTL-05",
+      "owner": {
+        "file": "14-spacing-metrics.md",
+        "anchor": "bounds"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CTL-06",
+      "owner": {
+        "file": "39-accessibility.md",
+        "anchor": "targets-and-pointer"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CTL-07",
+      "owner": {
+        "file": "16-icons.md",
+        "anchor": "accessibility"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CTL-08",
+      "owner": {
+        "file": "19-controls.md",
+        "anchor": "sliders-and-steppers"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CTL-09",
+      "owner": {
+        "file": "18-focus-keyboard.md",
+        "anchor": "input-modes-and-routing"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CTL-10",
+      "owner": {
+        "file": "18-focus-keyboard.md",
+        "anchor": "input-modes-and-routing"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CTL-11",
+      "owner": {
+        "file": "17-motion.md",
+        "anchor": "timing-events"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CTL-12",
+      "owner": {
+        "file": "23-command-palette.md",
+        "anchor": "opening-and-closing"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CTL-13",
+      "owner": {
+        "file": "10-menus.md",
+        "anchor": "command-records"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "CTL-14",
+      "owner": {
+        "file": "24-selection-tools.md",
+        "anchor": "one-active-tool"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "A canvas tool has a pending gesture.",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "FBK-01",
+      "owner": {
+        "file": "25-errors-recovery.md",
+        "anchor": "the-anatomy-of-an-error"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "FBK-02",
+      "owner": {
+        "file": "25-errors-recovery.md",
+        "anchor": "inline-first"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "FBK-03",
+      "owner": {
+        "file": "22-dialogs.md",
+        "anchor": "defaults-and-focus"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "FBK-04",
+      "owner": {
+        "file": "17-motion.md",
+        "anchor": "timing-events"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "FBK-05",
+      "owner": {
+        "file": "17-motion.md",
+        "anchor": "cancellation"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "FBK-06",
+      "owner": {
+        "file": "17-motion.md",
+        "anchor": "timing-events"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "FBK-07",
+      "owner": {
+        "file": "11-toolbars-status.md",
+        "anchor": "progress"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "FBK-08",
+      "owner": {
+        "file": "22-dialogs.md",
+        "anchor": "three-separate-properties"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "FBK-09",
+      "owner": {
+        "file": "37-output-parity.md",
+        "anchor": "failure-behaviour"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "FBK-10",
+      "owner": {
+        "file": "37-output-parity.md",
+        "anchor": "failure-behaviour"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "An export is partial.",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "FBK-11",
+      "owner": {
+        "file": "10-menus.md",
+        "anchor": "order"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OUT-01",
+      "owner": {
+        "file": "37-output-parity.md",
+        "anchor": "targets-artefacts-and-encodings"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OUT-02",
+      "owner": {
+        "file": "37-output-parity.md",
+        "anchor": "participation-policy"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make check"
+        }
+      ]
+    },
+    {
+      "id": "OUT-03",
+      "owner": {
+        "file": "37-output-parity.md",
+        "anchor": "the-snapshot"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make check"
+        }
+      ]
+    },
+    {
+      "id": "OUT-04",
+      "owner": {
+        "file": "37-output-parity.md",
+        "anchor": "failure-behaviour"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make check"
+        }
+      ]
+    },
+    {
+      "id": "OUT-05",
+      "owner": {
+        "file": "37-output-parity.md",
+        "anchor": "text"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make check"
+        }
+      ]
+    },
+    {
+      "id": "OUT-06",
+      "owner": {
+        "file": "37-output-parity.md",
+        "anchor": "what-must-agree"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OUT-07",
+      "owner": {
+        "file": "37-output-parity.md",
+        "anchor": "colour"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OUT-08",
+      "owner": {
+        "file": "37-output-parity.md",
+        "anchor": "hit-regions"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make check"
+        }
+      ]
+    },
+    {
+      "id": "OUT-09",
+      "owner": {
+        "file": "34-cabochon-press.md",
+        "anchor": "preflight"
+      },
+      "force": "must",
+      "profile": "studio",
+      "applies_when": "A preflight outcome is overridden.",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "OUT-10",
+      "owner": {
+        "file": "37-output-parity.md",
+        "anchor": "export-profiles"
+      },
+      "force": "must",
+      "profile": "studio",
+      "applies_when": "The output claims PDF/X conformance.",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "LOC-01",
+      "owner": {
+        "file": "38-localization.md",
+        "anchor": "resources"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "LOC-02",
+      "owner": {
+        "file": "38-localization.md",
+        "anchor": "testing"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "A pseudo-locale build is produced.",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "LOC-03",
+      "owner": {
+        "file": "38-localization.md",
+        "anchor": "direction"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "LOC-04",
+      "owner": {
+        "file": "38-localization.md",
+        "anchor": "numbers-dates-and-units"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "LOC-05",
+      "owner": {
+        "file": "39-accessibility.md",
+        "anchor": "the-tree"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "LOC-06",
+      "owner": {
+        "file": "39-accessibility.md",
+        "anchor": "testing"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "LOC-07",
+      "owner": {
+        "file": "39-accessibility.md",
+        "anchor": "zoom-and-reflow"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "Interface scale is 200 per cent or greater.",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "LOC-08",
+      "owner": {
+        "file": "39-accessibility.md",
+        "anchor": "zoom-and-reflow"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "LOC-09",
+      "owner": {
+        "file": "17-motion.md",
+        "anchor": "reduced-motion"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "DOC-01",
+      "owner": {
+        "file": "01-purpose.md",
+        "anchor": "scope"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "DOC-02",
+      "owner": {
+        "file": "README.md",
+        "anchor": "building-the-book"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "test",
+          "detail": "make check"
+        }
+      ]
+    },
+    {
+      "id": "DOC-03",
+      "owner": {
+        "file": "37-output-parity.md",
+        "anchor": "the-manifest"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "review against the owning rule"
+        }
+      ]
+    },
+    {
+      "id": "DOC-04",
+      "owner": {
+        "file": "README.md",
+        "anchor": "building-the-book"
+      },
+      "force": "must",
+      "profile": "substrate",
+      "applies_when": "always",
+      "evidence": [
+        {
+          "route": "manual",
+          "detail": "proof-sheet review at 100 and 200 per cent"
+        }
+      ]
+    }
+  ]
+}

@@ -24,38 +24,34 @@ find one here.
 
 The eight parts move from orientation to practice.
 
+<!-- markdownlint-disable MD013 -->
+
 1. **Orientation** — [Purpose](01-purpose.md), [Cabochon
-   character](02-cabochon-character.md), [Ecosystem
-   map](03-ecosystem-map.md), [The first
-   batch](04-first-batch.md) and [Principles](05-principles.md).
+   character](02-cabochon-character.md),
+   [Ecosystem map](03-ecosystem-map.md), [The first batch](04-first-batch.md)
+   and [Principles](05-principles.md).
 2. **The document world** — [The document at the
-   centre](06-document-centre.md), [Object
-   identity](07-object-identity.md) and [Live
-   relationships](08-live-relationships.md).
+   centre](06-document-centre.md), [Object identity](07-object-identity.md) and
+   [Live relationships](08-live-relationships.md).
 3. **Structure** — [Windows](09-windows.md), [Menus](10-menus.md) and
    [Toolbars and status](11-toolbars-status.md).
 4. **Visual language** — [Palette](12-palette.md),
-   [Typography](13-typography.md), [Spacing and
-   metrics](14-spacing-metrics.md), [Planes and
-   borders](15-planes-borders.md), [Icons](16-icons.md) and
-   [Motion](17-motion.md).
+   [Typography](13-typography.md), [Spacing and metrics](14-spacing-metrics.md), [Planes and borders](15-planes-borders.md), [Icons](16-icons.md)
+   and [Motion](17-motion.md).
 5. **Interaction** — [Focus and keyboard](18-focus-keyboard.md),
-   [Controls](19-controls.md), [Panes](20-panes.md),
-   [Inspector](21-inspector.md), [Dialogs](22-dialogs.md), [Command
-   palette](23-command-palette.md), [Selection and
-   tools](24-selection-tools.md) and [Errors and
-   recovery](25-errors-recovery.md).
+   [Controls](19-controls.md), [Panes](20-panes.md), [Inspector](21-inspector.md), [Dialogs](22-dialogs.md), [Command palette](23-command-palette.md), [Selection and tools](24-selection-tools.md)
+   and [Errors and recovery](25-errors-recovery.md).
 6. **The workspace** — [Facet Notes](26-facet-notes.md),
-   [Dataframes](27-dataframes.md), [Diagrams](28-diagrams.md),
-   [Bitmaps](29-bitmaps.md), [The formula tool](30-formula.md),
-   [Projects](31-projects.md) and [Embeds](32-embeds.md).
+   [Dataframes](27-dataframes.md), [Diagrams](28-diagrams.md), [Bitmaps](29-bitmaps.md), [The formula tool](30-formula.md), [Projects](31-projects.md)
+   and [Embeds](32-embeds.md).
 7. **The studio and the contracts** — [Burin Draw](33-burin-draw.md),
-   [Cabochon Press](34-cabochon-press.md), [Enfilade
-   Table](35-enfilade-table.md), [hello-window](36-hello-window.md) and
-   [Output parity](37-output-parity.md).
+   [Cabochon Press](34-cabochon-press.md), [Enfilade Table](35-enfilade-table.md), [hello-window](36-hello-window.md)
+   and [Output parity](37-output-parity.md).
 8. **Breadth** — [Localization](38-localization.md),
    [Accessibility](39-accessibility.md) and the
    [conformance checklist](40-checklist.md).
+
+<!-- markdownlint-enable MD013 -->
 
 [References](appendix-references.md) lists the design traditions and primary
 documents that informed the book.
@@ -86,11 +82,22 @@ software cannot drift apart.
 
 Every figure declares its class in its SVG metadata. A **schematic** is drawn
 at plate scale to explain a relationship; its measurements are not a
-production-size example. An **editorial** image is illustration, such as the
-cover. A **production reference** is drawn at 1:1 logical units and is checked
-against the component catalogue. The machine-readable annotation lives in
-`tools/figure-data.json`, and `tools/check-figures.py` rejects a figure whose
-declared class, scale or component geometry disagrees with what it draws.
+production-size example, and it declares no scale. An **editorial** image is
+illustration, such as the cover. A **production reference** is drawn at 1:1
+logical units; it declares a canvas and per-component bounds, and the checker
+measures those bounds from the drawn primitives and their transforms rather
+than from the annotation. Two small fixtures, `fig-prod-chrome` and
+`fig-prod-control`, exercise this branch with the catalogue heights.
+
+The machine-readable annotation lives in `tools/figure-data.json`. The checker
+validates each state as one record — identity, word, mark, role and colour —
+and requires the state inventory declared for each figure. It rejects a mark
+with no visible geometry, a hidden or clipped mark, a class or scale that
+disagrees with the data, and production geometry whose rendered bounds differ
+from the declared bounds. The SVG subset is deliberately narrow: absolute
+`M`/`L`/`A`/`Z` paths and `translate`, `scale`, `rotate` and `matrix`
+transforms, with clipping attributes refused.
+`tools/check-figures.py --self-test` proves each of those negatives is detected.
 
 ## Relationship to the design book
 

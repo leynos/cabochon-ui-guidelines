@@ -33,7 +33,8 @@ renegotiate.
 - `escutcheon-check` proves the resource format: menus, strings, icons,
   shortcuts, command metadata, dialog layout and localization hooks.
 - The Lapidary fixture proves that one scene renders consistently to display,
-  PDF, print, thumbnail, raster, clipboard, accessibility, hit map and manifest.
+  PDF, print, thumbnail, raster, clipboard, accessibility, hit map and
+  manifest: nine targets, eight of which persist as artefacts.
 - The Burin fixture proves the output contract, including failure behaviour,
   hit-testing geometry and the manifest.
 

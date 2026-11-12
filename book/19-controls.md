@@ -18,12 +18,17 @@ that needs a new control should add it here before using it.
 A button performs an action. Its label is a verb phrase in sentence case:
 **Save note**, **Export plate**, **Replace**.
 
-| Variant     | Fill          | Text  | Use                                  |
-| ----------- | ------------- | ----- | ------------------------------------ |
-| Standard    | Control plane | Ink   | The ordinary action in a group       |
-| Primary     | Pine 2        | White | The one expected action in a surface |
-| Destructive | Oxide         | White | An action that removes or replaces   |
-| Disabled    | Control plane | Soft  | An action that is not available      |
+| Variant     | Fill             | Text             | Use                                  |
+| ----------- | ---------------- | ---------------- | ------------------------------------ |
+| Standard    | Control fill     | Text primary     | The ordinary action in a group       |
+| Primary     | Primary fill     | Primary text     | The one expected action in a surface |
+| Destructive | Destructive fill | Destructive text | An action that removes or replaces   |
+| Disabled    | Disabled fill    | Disabled text    | An action that is not available      |
+
+The table names semantic roles. [The palette](12-palette.md) resolves each role
+for the active theme; an implementation must not substitute a light-theme hex
+literal. The light theme resolves primary fill to Pine 2 and primary text to
+white, but those values are the light theme's answer, not the contract.
 
 - A surface has at most one primary button.
 - A destructive button appears only in a confirmation or in a menu, never as

@@ -54,11 +54,15 @@ than chrome:
 - a 126-pixel rail when the instrument has a persistent category list;
 - a 240-pixel inspector when the instrument has one.
 
-At the default 1280 by 800 window with both side panes and the horizontal
-bands, the document plane is 914 by 670 pixels, about 60 per cent of the
-window. The binding test is that the document plane remains the largest region
-and at least 420 pixels wide. When a window cannot hold both panes and that
-width, an instrument collapses a pane rather than shrinking the document.
+At the default 1280 by 800 window with the 126-pixel rail, the 240-pixel
+inspector, two 6-pixel splitters and the horizontal bands, the document plane
+is 902 by 670 pixels, about 59 per cent of the window. The 210-pixel navigator
+variant leaves 818 pixels, and the compact profile is derived in
+[Spacing and metrics](14-spacing-metrics.md). The binding test is that the
+document plane remains the largest region and at least 420 pixels wide and 320
+pixels high; in compact mode its viewport may be shorter and its content
+scrolls. When a window cannot hold both panes and that width, an instrument
+collapses a pane rather than shrinking the document.
 
 An instrument that needs more chrome should first ask whether a pane, a sheet
 or the command palette would serve better. Chrome is persistent; a sheet is not.
