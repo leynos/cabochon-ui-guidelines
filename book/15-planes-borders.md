@@ -74,8 +74,8 @@ per scene. A scene that contains a host-decorated window, a menu and a popover
 may therefore show three shadows, each belonging to a different overlay and
 each owned by whoever decorates that overlay.
 
-- Offset: 12 pixels right and 14 pixels down for a menu or popover; 6 pixels
-  for a small tooltip.
+- Offset: 12 pixels right and 14 pixels down for a menu, popover, sheet or
+  dialog; 6 pixels right and 6 pixels down for a small tooltip.
 - Colour: ink at 9 per cent opacity, `#17201C18`.
 - Blur: none. The shadow is a second rectangle, not a blurred halo.
 - The overlay itself sits above the shadow with its 1.5-pixel border.

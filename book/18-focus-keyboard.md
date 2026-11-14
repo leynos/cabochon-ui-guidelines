@@ -35,8 +35,8 @@ border box.
 
 ## Tab order
 
-Focus moves in reading order: left to right, top to bottom within the writing
-direction of the interface.
+Focus moves in reading order: from leading to trailing, and top to bottom,
+within the writing direction of the interface.
 
 A typical document window orders its stops as follows.
 
@@ -166,10 +166,13 @@ remember what was selected without taking the keyboard.
 Focus is trapped only in a modal surface. Every other surface must allow the
 user to leave with Tab, Shift+Tab or Escape.
 
-A popover that contains a text field must close on Escape without submitting. A
-command palette must close on Escape and return focus through the focus-return
-chain. A modal dialog must return focus through the same chain when it closes,
-whether the user confirmed or cancelled.
+A popover that contains a text field must close on Escape without submitting,
+but only after the field's inner editing modes have consumed the event: an
+input-method composition or a completion is dismissed first, and a dirty draft
+stays with the surface that owns it. The routing order below is authoritative.
+A command palette must close on Escape and return focus through the
+focus-return chain. A modal dialog must return focus through the same chain
+when it closes, whether the user confirmed or cancelled.
 
 A disabled control is not a trap. It leaves the tab order, and its reason
 remains reachable through the associated help text, the menu item that mirrors

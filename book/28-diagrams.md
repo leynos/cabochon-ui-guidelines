@@ -34,8 +34,11 @@ fact.
 
 - Rendering is automatic after a short pause in typing, and on demand from the
   **Render** command.
-- A successful render replaces the drawing, records the source revision it
-  rendered and clears any diagnostics.
+- A successful render of committed source replaces the drawing, records the
+  source revision it rendered and clears any diagnostics. A render of an
+  uncommitted draft is a preview: it may replace the visible drawing while the
+  draft is being edited, but the drawing and its hit map stay bound to the last
+  committed revision, and only a render of committed source replaces them.
 - A failed render keeps the last successful drawing, dims it slightly and
   shows the diagnostic beside the source line that caused it.
 - The status line reports the render state: **Rendered 14:02**, **Rendering**,

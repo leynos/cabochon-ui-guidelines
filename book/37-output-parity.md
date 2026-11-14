@@ -98,8 +98,8 @@ by per-target options.
   page plane and in a proof render, and never in a production PDF.
 - **Requested production marks.** Crop marks, registration marks and colour
   bars. They are off by default, are requested per output target, appear only
-  in a production PDF whose target has the option on, and are recorded in the
-  manifest.
+  in a production PDF or a raster document export whose target has the option
+  on, and are recorded in the manifest.
 
 The participation table makes the distinction binding.
 
@@ -133,10 +133,10 @@ The requested mark set is part of the snapshot taken before rendering. The
 manifest records each target, the mark classes requested for it and whether the
 proof set was produced. Toggling a production-mark option changes only that
 node set: document geometry, placement, identity, revision and the resolved
-scene remain identical. A reviewer tests this by rendering the same snapshot
-twice with the option off and on and comparing the two artefacts; only the
-requested mark nodes may differ, and guides, grids and selection handles must
-be absent from both.
+scene remain identical. A reviewer tests this by capturing two snapshots from
+the same scene revision that differ only in the requested mark set, rendering
+each once, and comparing the two artefacts; only the requested mark nodes may
+differ, and guides, grids and selection handles must be absent from both.
 
 ## The reference scale
 

@@ -169,18 +169,22 @@ becomes **Copy result** and the reason is stated.
 
 ## Keyboard
 
-| Key           | Action                                                                                |
-| ------------- | ------------------------------------------------------------------------------------- |
-| Enter         | Insert the live value when the expression field has focus and composition is complete |
-| Escape        | Dismiss a completion, then cancel and restore the selection                           |
-| Control+Space | Offer selector completions                                                            |
-| Tab           | Move between expression, sources and actions                                          |
+| Key           | Action                                                                                                                     |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Enter         | Activate the current primary action; insert the live value only when the destination accepts it, otherwise copy the result |
+| Escape        | Dismiss a completion, then cancel and restore the selection                                                                |
+| Control+Space | Offer selector completions                                                                                                 |
+| Tab           | Move between expression, sources and actions                                                                               |
 
 The expression field supports the usual editing keys and must not swallow Tab,
-so that the user can reach the actions without a pointer. Enter while another
-control has focus activates that control; it does not insert the value. While
-an input-method composition is active, Enter commits the composition first. The
-input-mode rules are those of [Focus and keyboard](18-focus-keyboard.md).
+so that the user can reach the actions without a pointer. Enter activates the
+current primary action. When the expression field has focus and the destination
+accepts a live value, that action inserts the value; when the destination
+cannot accept it, the action is **Copy result** and Enter copies. Enter while
+another control has focus activates that control and does not insert the value.
+While an input-method composition is active, Enter commits the composition
+first. The input-mode rules are those of
+[Focus and keyboard](18-focus-keyboard.md).
 
 A selector completion lives inside the expression field and never traps focus.
 The first Escape dismisses an open completion and leaves the expression

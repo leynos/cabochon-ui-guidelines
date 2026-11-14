@@ -62,7 +62,8 @@ eyedropper and text. Each tool:
 - has a 30-unit button, a 16-unit glyph and a tooltip naming its shortcut;
 - shows its options in the tool strip or the inspector, not in a floating
   palette;
-- commits its stroke as one transaction when the pointer is released;
+- commits its stroke as one transaction when the pointer is released, for every
+  content tool that mutates pixels;
 - cancels cleanly on Escape, restoring the pixels from before the stroke.
 
 A tool must not leave a half-applied stroke when the user switches tools, the
@@ -70,12 +71,12 @@ window loses focus or the tool is switched by shortcut. The commit boundary is
 one deterministic rule and applies to every switching route. Selection and pan
 create no content mutation.
 
-Every tool in this palette is a **canvas tool** in the sense of
+Every content tool in this palette is a **canvas tool** in the sense of
 [Selection and tools](24-selection-tools.md). It has no **Insert** action and
 no **Cancel** button of its own; its effect is the gesture it completes, and
-Escape cancels the pending gesture. A read-only inspection, such as the
-eyedropper's sampled-colour report, is not a canvas tool and does not commit
-pixels.
+Escape cancels the pending gesture. Select and pan create no content mutation,
+and a read-only inspection such as the eyedropper's sampled-colour report is
+not a canvas tool and commits no pixels.
 
 ## Zoom and pan
 

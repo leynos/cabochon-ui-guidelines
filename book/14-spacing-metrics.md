@@ -88,8 +88,9 @@ A layout review is only arithmetic when the box model is stated.
 - A splitter occupies its own 6-unit column between panes. Its 8-unit hit
   region extends one unit into each neighbour; that extension is hit-only and
   does not reduce either pane's layout width.
-- Horizontal bands are separate rows. A one-unit rule between two regions
-  belongs to neither region's height.
+- Horizontal bands are separate rows. A one-unit separator between two bands
+  belongs to the trailing band and is included in that band's height; it
+  consumes no additional vertical allocation.
 - A collapsed pane keeps its head and a 42-unit handle. The handle replaces the
   pane's width; it is not added to it.
 - Overlays, focus decorations and hit slop are outside layout. They never
@@ -173,12 +174,14 @@ Compact components declare their strategy rather than an unstated exception.
   pane's height. It is a declared essential-geometry exception, valid only
   because a wheel, keyboard and drag-anywhere alternative is always available.
 - **Selection and path handles.** This is a named compact-target exception. The
-  visible mark is 8 units and its hit region is 20 units, clipped to the
-  object's bounds rather than the viewport. An object smaller than 20 units
-  uses its own bounds as the effective target, however small, and the keyboard
-  and property route in [Selection and tools](24-selection-tools.md) is then
-  the compliance route. The same chapter fixes the picking order for
-  overlapping handles; no instrument chooses its own.
+  visible mark is 8 units. Its hit region is 20 units, inset into the object
+  from the corner so that the whole region remains inside the object's bounds
+  for any object at least 20 units on each axis; it is never clipped by the
+  viewport. An object smaller than 20 units uses its own bounds as the
+  effective target, however small, and the keyboard and property route in
+  [Selection and tools](24-selection-tools.md) is then the compliance route.
+  The same chapter fixes the picking order for overlapping handles; no
+  instrument chooses its own.
 - **Slider thumb.** The visible thumb is 8 units. Its effective target is
   28 units around the thumb, clipped to the slider's container.
 - **Swatches.** A swatch palette is one composite. Its swatches are 24 units,

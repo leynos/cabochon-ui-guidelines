@@ -308,11 +308,15 @@ is cached. The output chapters define the staging and publication boundary.
 ## Aggregating child states
 
 A document, note or project may contain children in different states. Its
-single summary chip uses the severity order: any **Denied** child makes the
-summary **Denied**; otherwise any **Broken** child makes it **Broken**;
-otherwise any **Refreshing** child makes it **Refreshing**; otherwise any
-**Stale** child makes it **Stale**; otherwise it is **Current**. Severity ranks
-the children's visible states; it does not replace the projection that computes
+single summary chip uses the severity order over the child classes that the
+disclosure policy permits: any permitted **Denied** child makes the summary
+**Denied**; otherwise any permitted **Broken** child makes it **Broken**;
+otherwise any permitted **Refreshing** child makes it **Refreshing**; otherwise
+any permitted **Stale** child makes it **Stale**; otherwise it is **Current**.
+When the policy forbids the disclosure of an aggregate class, such as the
+existence of denied children, the summary reports the generic unavailable
+summary instead and does not enumerate the protected class. Severity ranks the
+children's visible states; it does not replace the projection that computes
 each child's state.
 
 The summary is invariant under the order of the children. It reports the

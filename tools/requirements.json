@@ -979,7 +979,7 @@
       "id": "CTL-06",
       "owner": {
         "file": "39-accessibility.md",
-        "anchor": "targets-and-pointer"
+        "anchor": "the-accessibility-output"
       },
       "force": "must",
       "profile": "substrate",

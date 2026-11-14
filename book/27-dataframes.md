@@ -178,15 +178,19 @@ Validation rules belong to the column, not to individual cells.
 - A rule is shown in the inspector with its scope and its message.
 - A violated cell carries a 2-unit oxide mark in its corner and a message on
   focus.
-- The table's status line reports how many cells violate a rule.
+- The table's status line reports how many cells violate a rule when the
+  disclosure policy permits that count; otherwise it reports that violations
+  exist without a count.
 - A rule must not prevent reading or exporting the table; it marks the data,
   it does not hide it.
 
 ## Sorting and filtering
 
 Sorting changes the view, not the stored order, unless the table declares an
-ordered column. Filtering hides rows and reports how many are hidden. Both
-actions are reversible and are recorded in the view, not in the object.
+ordered column. Filtering hides rows and reports how many are hidden when the
+disclosure policy permits that count; otherwise it reports only that rows are
+hidden. Both actions are reversible and are recorded in the view, not in the
+object.
 
 A filter that removes the selected row moves the selection to the nearest
 visible row and says so in the status line.
@@ -208,9 +212,10 @@ The dataframe keeps four independent kinds of state apart.
 - **View state.** Sorting, filtering, column widths and category selection are
   recorded in the view and never change the object's identity or revision.
 
-An empty table still has a type and a revision, and its status line says "0
-rows" rather than implying that content failed to load. A table with no
-reference columns has no relationship state to summarise.
+An empty table still has a type and a revision. Its status line says "0 rows"
+when the disclosure policy permits that count and otherwise reports the table
+as empty without a number; neither form implies that content failed to load. A
+table with no reference columns has no relationship state to summarise.
 
 ## Large tables
 

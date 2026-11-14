@@ -44,9 +44,9 @@ The first duty of an error path is to preserve the last committed state.
 
 - A failed atomic mutation leaves every object at its previous committed
   revision; no successful subset is exposed.
-- A failed refresh keeps the last accepted value when authority permits its
-  display, labelled **Broken**. It keeps an unauthorised value only in
-  protected storage.
+- A failed refresh keeps the last accepted value when the current authority
+  permits its display, labelled **Broken**. A value whose authority has ended
+  is removed from display and from protected storage; it is not retained.
 - A failed save keeps the document open, modified and with its draft intact; it
   never closes the window.
 - A failed import leaves the existing document untouched and reports the

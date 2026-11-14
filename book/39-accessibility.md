@@ -133,8 +133,10 @@ dimensions; 32 is preferred, and a dialog's primary action is 36.
 - The scrollbar is a declared exception only where a wheel, keyboard and
   drag-anywhere alternative is always present.
 - Selection and path handles are a declared compact-target exception. Their
-  visible mark is 8 units, their hit region is 20 units clipped to the object's
-  bounds, and an object smaller than 20 units uses its own bounds. The fixed
+  visible mark is 8 units. Their hit region is 20 units, inset into the object
+  from the corner so that the whole region stays inside the object's bounds for
+  an object at least 20 units on each axis; an object smaller than 20 units
+  uses its own bounds. The fixed
   picking order, Tab cycling and numeric inspector fields in
   [Selection and tools](24-selection-tools.md) are the alternative route; a
   handle that cannot meet the pointer minimum is still reachable and operable
@@ -170,8 +172,9 @@ dimensions; 32 is preferred, and a dialog's primary action is 36.
 
 ## Motion and timing
 
-- Motion respects the reduced-motion setting and collapses to 0.01
-  milliseconds.
+- Motion respects the reduced-motion setting: finite transitions collapse to
+  0.01 milliseconds, while repeating animations and activity indicators become
+  static rather than accelerating.
 - No content flashes more than three times per second.
 - A timed action can be extended or disabled.
 - An animation never delays the availability of a control.
@@ -272,9 +275,10 @@ state.
 - Semantic projection is a provider contract, not a condition of resolution. An
   installed provider must declare whether it supplies the projection. A
   provider that declares it and then fails at run time uses the bounded
-  fallback: the object's name, identity where disclosure permits, its role, the
-  actions the provider can still support and the action that retries or
-  configures it. The tree labels the description as bounded; it does not
+  fallback: the object's name when disclosure permits it, or a non-sensitive
+  generic label when it does not; identity only where disclosure permits; its
+  role; the actions the provider can still support; and the action that retries
+  or configures it. The tree labels the description as bounded; it does not
   present it as the provider's full semantics. The object stays **Resolved**,
   remains drawable and exportable, and the failure is written to diagnostics.
 - A provider that supplies no projection, or a fallback that is only partial,

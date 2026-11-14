@@ -115,8 +115,10 @@ therefore distinguishes four identifiers that other chapters also use.
   `hello-window` has none.
 - **Presentation definition.** A reusable description of how an object is
   drawn. `hello-window` has none.
-- **Presentation instance.** One placement of a definition in a scene. The
-  greeting, the explanation and the two buttons are instances.
+- **Presentation instance.** One placement in a scene, either of a presentation
+  definition or of a substrate-owned element that needs no definition. The
+  greeting, the explanation and the two buttons are instances; none of them
+  requires a reusable definition.
 - **Scene or control node.** The Lapidary node that carries geometry, hit
   region and accessible role. Every visible element is one.
 

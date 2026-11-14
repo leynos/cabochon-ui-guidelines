@@ -107,7 +107,7 @@ A control may request a capability, but it does not own the decision.
   notification channel, enters through the host's portal. The portal's consent
   is an input to the broker's adapter, not a second authority owner.
 - A control must not present a portal's permission dialog as its own, and must
-  not imply that a portal grant authorises a semantic operation.
+  not imply that a portal grant authorizes a semantic operation.
 - A denied request names the capability and offers the route to request it; it
   does not retry the portal silently.
 
@@ -117,9 +117,10 @@ A menu is a list of commands; a popover is a small surface anchored to a
 control. Both use the overlay plane, the 1.5-pixel border and the offset shadow
 from [Planes and borders](15-planes-borders.md).
 
-A popover must close when the user clicks outside it or presses Escape. It must
-not contain a second popover. If a task needs two levels, it needs a dialog or
-a pane.
+A popover must close when the user clicks outside it or presses Escape, subject
+to the Escape routing order in [Focus and keyboard](18-focus-keyboard.md). It
+must not contain a second popover. If a task needs two levels, it needs a
+dialog or a pane.
 
 A pinned read-only inspection is the one declared exception: it suspends the
 surface that opened it instead of dismissing it, and returns the user to the

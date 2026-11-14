@@ -187,11 +187,12 @@ handles, never the saved appearance of the object.
   and a separate outline around each member.
 
 A compact handle is a named exception to the 28-unit pointer minimum. Its
-visible mark is 8 units. Its hit region is 20 units centred on the mark and
-clipped to the object's bounds; it never expands into the viewport or a
-neighbouring object. The final clipped hit region, not the glyph, is the
-target. An object smaller than 20 units uses its own bounds as the effective
-target, however small, and the keyboard and property routes below are then the
+visible mark is 8 units. Its hit region is 20 units, inset into the object from
+the corner so that the whole region stays inside the object's bounds for any
+object at least 20 units on each axis; it never expands into the viewport or a
+neighbouring object. The inset hit region, not the glyph, is the target. An
+object smaller than 20 units uses its own bounds as the effective target,
+however small, and the keyboard and property routes below are then the
 compliance route.
 
 Overlapping handles resolve in one fixed order. A corner handle beats an edge

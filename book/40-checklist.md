@@ -221,7 +221,7 @@ shrinking the checklist.
       command target. Owner: [Spacing and metrics](14-spacing-metrics.md#bounds).
 - [ ] **CTL-06** — Accessible bounds describe the semantic region and are not
       required to equal the hit map. Owner:
-      [Accessibility](39-accessibility.md#targets-and-pointer).
+      [Accessibility](39-accessibility.md#the-accessibility-output).
 - [ ] **CTL-07** — Every icon-only button has an accessible name. Owner:
       [Icons](16-icons.md#accessibility).
 - [ ] **CTL-08** — A drag interaction has a keyboard alternative. Owner:

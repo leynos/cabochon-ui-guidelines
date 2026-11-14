@@ -52,9 +52,10 @@ Rules for the title bar:
 - Double-clicking the title bar must perform the host's configured action.
 
 The title bar described here is the application's internal **document header**.
-It is not the same object as a host-drawn title bar, and the two may both show
-the document's name. Which one carries the window controls is decided by the
-decoration profile, not by the header.
+It is not the same object as a host-drawn title bar. The two are mutually
+exclusive within one window: the decoration profile decides which object
+carries the single visible title and the window controls, and a window never
+shows both titles.
 
 ## Menu bar
 
@@ -70,10 +71,12 @@ The tool strip is optional. It holds commands that the user invokes repeatedly
 and that benefit from a visible, one-click target. It is not a place for every
 command, and it must not grow beyond one row.
 
-A tool strip button is 30 units square with a 16-unit glyph. Related buttons
-are grouped with an 8-unit gap and separated from the next group by a one-unit
-vertical rule with 8 units of space on each side. The strip must carry a text
-label for any command whose icon is not universally understood.
+An icon-only tool strip button is 30 units square with a 16-unit glyph. A
+labelled button keeps the 30-unit height and widens to fit its label and
+padding; it is never squeezed into a square. Related buttons are grouped with
+an 8-unit gap and separated from the next group by a one-unit vertical rule
+with 8 units of space on each side. The strip must carry a text label for any
+command whose icon is not universally understood.
 
 ## Document area
 
