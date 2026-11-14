@@ -655,9 +655,9 @@ def fig_state() -> str:
         body += txt(300, ty, transition["event"], size=11, fill=SOFT)
         body += txt(700, ty, transition["to"], size=11, fill=PINE2, family=F_MONO)
         body += txt(850, ty, transition["owner"], size=11, fill=SOFT, family=F_MONO)
-    body += txt(64, 810, "Authority and provider loss move the state directly. Every refresh passes through Refreshing.", size=13, fill=SOFT, family=F_DISPLAY, style="italic")
-    body += txt(64, 836, "A cancelled request recomputes the chip from the facts; it never restores an old label.", size=13, fill=SOFT, family=F_DISPLAY, style="italic")
-    return svg_doc(1200, 880, "Five live-relationship states and their legal transitions", "Cards for current, refreshing, stale, broken and denied, followed by the legal transition table with owners.", body)
+    body += txt(64, 840, "Authority and provider loss move the state directly. Every refresh passes through Refreshing.", size=13, fill=SOFT, family=F_DISPLAY, style="italic")
+    body += txt(64, 866, "A cancelled request recomputes the chip from the facts; it never restores an old label.", size=13, fill=SOFT, family=F_DISPLAY, style="italic")
+    return svg_doc(1200, 910, "Five live-relationship states and their legal transitions", "Cards for current, refreshing, stale, broken and denied, followed by the legal transition table with owners.", body)
 
 
 # ---------------------------------------------------------------------------

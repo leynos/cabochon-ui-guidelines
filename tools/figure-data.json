@@ -129,7 +129,7 @@
       "from": [
         "Denied"
       ],
-      "event": "A grant is issued; an accepted value exists",
+      "event": "A grant is issued; an accepted value exists and a provider is present",
       "to": "Stale",
       "owner": "Capability broker"
     },
@@ -139,6 +139,15 @@
         "Denied"
       ],
       "event": "A grant is issued; no value has been accepted",
+      "to": "Broken",
+      "owner": "Capability broker"
+    },
+    {
+      "id": "grant-issued-provider-absent",
+      "from": [
+        "Denied"
+      ],
+      "event": "A grant is issued while the provider is absent",
       "to": "Broken",
       "owner": "Capability broker"
     },

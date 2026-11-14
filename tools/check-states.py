@@ -4,10 +4,14 @@
 The five visible states are a projection of independent facts. This checker
 holds one typed source for the legal transitions, compares it with the chapter
 table and the generated figure, and runs bounded event sequences against the
-projection declared in the book.
+projection declared in the book. Replies carry a request generation, a dispatch
+epoch and a validated vector, so a stale completion or failure is rejected by
+identity rather than by a pre-classified event name. Provider availability is
+recorded even while authority is denied; the projection still returns Denied.
 
 Run from the repository root with ``python3 -I tools/check-states.py``. Pass
-``--self-test`` to prove that four deliberate defects are detected.
+``--self-test`` to prove that each projection, fact and reply-identity mutation
+is detected.
 """
 
 from __future__ import annotations
@@ -89,6 +93,15 @@ def validate_transitions(
     ]
     if not losses:
         errors.append("provider loss is not available from every state but Denied")
+    absent_grants = [
+        record
+        for record in transitions
+        if record.get("to") == "Broken"
+        and "Denied" in record.get("from", [])
+        and "provider is absent" in str(record.get("event", ""))
+    ]
+    if not absent_grants:
+        errors.append("a grant issued while the provider is absent is not modelled")
     return errors
 
 
@@ -184,8 +197,76 @@ def project(facts: dict[str, object]) -> str:
     return "Current" if fresh else "Stale"
 
 
-def apply(facts: dict[str, object], event: str) -> None:
-    """Apply one event to the fact set. Unknown events are an error."""
+NO_DATA_EVENTS = {
+    "grant_revoked",
+    "grant_issued",
+    "provider_lost",
+    "provider_recovered",
+    "source_advanced",
+    "refresh_requested",
+}
+REPLY_FIELDS = {
+    "refresh_succeeded": ("generation", "epoch", "validated"),
+    "refresh_failed": ("generation", "epoch"),
+    "refresh_cancelled": ("generation",),
+}
+EVENTS = NO_DATA_EVENTS | set(REPLY_FIELDS)
+
+
+def validate_step(
+    scenario: str, index: int, step: dict[str, object]
+) -> list[str]:
+    """Check that a fixture step carries exactly the data its event needs."""
+    errors: list[str] = []
+    event = step.get("event")
+    where = f"scenario {scenario!r} step {index + 1}"
+    if event not in EVENTS:
+        return [f"{where}: unknown event {event!r}"]
+    expected = step.get("expected")
+    if expected not in STATES:
+        errors.append(f"{where}: invalid expected state {expected!r}")
+    allowed = {"event", "expected"} | set(REPLY_FIELDS.get(str(event), ()))
+    extra = set(step) - allowed
+    if extra:
+        errors.append(f"{where}: unexpected fields {sorted(extra)!r}")
+    for field in REPLY_FIELDS.get(str(event), ()):
+        if field not in step:
+            errors.append(f"{where}: missing reply field {field!r}")
+            continue
+        if field == "validated":
+            vector = step[field]
+            if (
+                not isinstance(vector, dict)
+                or not vector
+                or not all(
+                    isinstance(key, str)
+                    and isinstance(value, int)
+                    and value >= 0
+                    for key, value in vector.items()
+                )
+            ):
+                errors.append(
+                    f"{where}: validated vector is not a non-empty "
+                    "map of names to non-negative integers"
+                )
+        elif (
+            not isinstance(step[field], int)
+            or step[field] < (1 if field == "generation" else 0)
+        ):
+            qualifier = "positive" if field == "generation" else "non-negative"
+            errors.append(f"{where}: {field} is not a {qualifier} integer")
+    return errors
+
+
+def apply(
+    facts: dict[str, object],
+    step: dict[str, object],
+    *,
+    observe_provider_while_denied: bool = True,
+    check_reply_identity: bool = True,
+) -> None:
+    """Apply one event and its reply identity to the fact set."""
+    event = step["event"]
     if event == "grant_revoked":
         facts["authorized"] = False
         facts["request_active"] = False
@@ -193,60 +274,116 @@ def apply(facts: dict[str, object], event: str) -> None:
     elif event == "grant_issued":
         facts["authorized"] = True
     elif event == "provider_lost":
-        if facts["authorized"]:
+        if observe_provider_while_denied or facts["authorized"]:
             facts["availability"] = "lost"
             facts["request_active"] = False
             facts["invalidation_epoch"] += 1
     elif event == "provider_recovered":
-        if facts["authorized"]:
+        if observe_provider_while_denied or facts["authorized"]:
             facts["availability"] = "present"
     elif event == "source_advanced":
         if facts["authorized"] and facts["availability"] == "present":
             for key in facts["known_source"]:
                 facts["known_source"][key] += 1
-            # A notification during a refresh supersedes the in-flight request.
-            # The projection remains Refreshing while the new generation runs.
+            if facts["request_active"]:
+                # The notification supersedes the in-flight generation. The
+                # replacement request covers the vector that has just arrived.
+                facts["request_generation"] += 1
+                facts["request_covers"] = dict(facts["known_source"])
     elif event == "refresh_requested":
         if facts["authorized"] and facts["availability"] == "present":
+            facts["request_generation"] += 1
             facts["request_active"] = True
+            facts["request_covers"] = dict(facts["known_source"])
     elif event == "refresh_succeeded":
         if facts["authorized"] and facts["request_active"]:
-            facts["request_active"] = False
-            facts["availability"] = "present"
-            facts["accepted"] = True
-            facts["accepted_validated"] = dict(facts["known_source"])
-            facts["accepted_epoch"] = facts["invalidation_epoch"]
+            matching = (
+                not check_reply_identity
+                or (
+                    step["generation"] == facts["request_generation"]
+                    and step["epoch"] == facts["invalidation_epoch"]
+                    and vector_at_least(
+                        step["validated"], facts["known_source"]
+                    )
+                    and vector_at_least(
+                        step["validated"], facts["request_covers"]
+                    )
+                )
+            )
+            if matching:
+                facts["request_active"] = False
+                facts["availability"] = "present"
+                facts["accepted"] = True
+                facts["accepted_validated"] = dict(step["validated"])
+                facts["accepted_epoch"] = facts["invalidation_epoch"]
     elif event == "refresh_failed":
-        if facts["request_active"]:
-            facts["request_active"] = False
-            facts["availability"] = "uncertain"
+        if facts["authorized"] and facts["request_active"]:
+            matching = (
+                not check_reply_identity
+                or (
+                    step["generation"] == facts["request_generation"]
+                    and step["epoch"] == facts["invalidation_epoch"]
+                )
+            )
+            if matching:
+                facts["request_active"] = False
+                facts["availability"] = "uncertain"
     elif event == "refresh_cancelled":
-        facts["request_active"] = False
-    elif event in {"superseded_reply", "obsolete_reply"}:
-        return
+        matching = not check_reply_identity or (
+            step["generation"] == facts["request_generation"]
+        )
+        if facts["request_active"] and matching:
+            facts["request_active"] = False
     else:
         raise SystemExit(f"state contract: unknown fixture event {event!r}")
 
 
-def run_scenarios() -> list[str]:
+def run_scenario(
+    scenario: dict[str, object],
+    *,
+    observe_provider_while_denied: bool = True,
+    check_reply_identity: bool = True,
+) -> list[str]:
+    """Run one fixture sequence and report every projection mismatch."""
     errors: list[str] = []
-    defaults = FIXTURES["defaults"]
-    for scenario in FIXTURES["scenarios"]:
-        facts = copy.deepcopy(defaults)
-        facts.update(copy.deepcopy(scenario.get("facts", {})))
-        for step in scenario["events"]:
-            apply(facts, step["event"])
-            actual = project(facts)
-            if actual != step["expected"]:
-                errors.append(
-                    f"scenario {scenario['name']!r} after {step['event']!r}: "
-                    f"projected {actual}, expected {step['expected']}"
-                )
+    facts = copy.deepcopy(FIXTURES["defaults"])
+    facts.update(copy.deepcopy(scenario.get("facts", {})))
+    for index, step in enumerate(scenario["events"]):
+        step_errors = validate_step(str(scenario["name"]), index, step)
+        if step_errors:
+            errors.extend(step_errors)
+            continue
+        apply(
+            facts,
+            step,
+            observe_provider_while_denied=observe_provider_while_denied,
+            check_reply_identity=check_reply_identity,
+        )
+        actual = project(facts)
+        if actual != step["expected"]:
+            errors.append(
+                f"scenario {scenario['name']!r} after {step['event']!r}: "
+                f"projected {actual}, expected {step['expected']}"
+            )
     return errors
 
 
+def run_scenarios() -> list[str]:
+    errors: list[str] = []
+    for scenario in FIXTURES["scenarios"]:
+        errors.extend(run_scenario(scenario))
+    return errors
+
+
+def scenario_named(name: str) -> dict[str, object]:
+    for scenario in FIXTURES["scenarios"]:
+        if scenario["name"] == name:
+            return scenario
+    raise SystemExit(f"state contract: fixture {name!r} is missing")
+
+
 def check_scenario_sensitivity() -> list[str]:
-    """Prove that the fixtures catch the two projection defects in the report."""
+    """Prove that the fixtures catch projection, fact and reply defects."""
     errors: list[str] = []
     first_load = copy.deepcopy(FIXTURES["defaults"])
     first_load["request_active"] = True
@@ -278,46 +415,111 @@ def check_scenario_sensitivity() -> list[str]:
 
     if ignore_epoch(recovered) == project(recovered):
         errors.append("self-test: ignored invalidation epoch was not detected")
+
+    provider_scenario = scenario_named("provider loss while denied is remembered")
+    if run_scenario(provider_scenario):
+        errors.append("self-test: provider-fact fixture does not pass")
+    if not run_scenario(
+        provider_scenario, observe_provider_while_denied=False
+    ):
+        errors.append(
+            "self-test: provider facts ignored while denied were not detected"
+        )
+
+    reply_scenario = scenario_named("superseded reply is discarded")
+    if run_scenario(reply_scenario):
+        errors.append("self-test: reply-identity fixture does not pass")
+    if not run_scenario(reply_scenario, check_reply_identity=False):
+        errors.append("self-test: ignored reply identity was not detected")
     return errors
 
 
 def self_test() -> int:
     failures: list[str] = []
+    checks = 0
+
+    def require(condition: bool, message: str) -> None:
+        nonlocal checks
+        checks += 1
+        if not condition:
+            failures.append(message)
+
     transitions = copy.deepcopy(transition_rows())
 
     without_revocation = [
         record for record in transitions if record["id"] != "authority-revoked"
     ]
-    if not any(
-        "revocation is not available" in error
-        for error in validate_transitions(without_revocation)
-    ):
-        failures.append("missing revocation edge was not detected")
+    require(
+        any(
+            "revocation is not available" in error
+            for error in validate_transitions(without_revocation)
+        ),
+        "missing revocation edge was not detected",
+    )
+
+    without_absent_grant = [
+        record
+        for record in transitions
+        if record["id"] != "grant-issued-provider-absent"
+    ]
+    require(
+        any(
+            "provider is absent is not modelled" in error
+            for error in validate_transitions(without_absent_grant)
+        ),
+        "missing provider-absent grant edge was not detected",
+    )
 
     wrong_owner = copy.deepcopy(transitions)
     for record in wrong_owner:
         if record["id"] == "refresh-denied":
             record["owner"] = "Host"
-    if not any(
-        "unknown transition" in error for error in compare_chapter(wrong_owner)
-    ):
-        failures.append("owner drift from the chapter table was not detected")
+    require(
+        any(
+            "unknown transition" in error
+            for error in compare_chapter(wrong_owner)
+        ),
+        "owner drift from the chapter table was not detected",
+    )
 
-    failures.extend(check_scenario_sensitivity())
+    sensitivity = check_scenario_sensitivity()
+    for label in (
+        "Broken no-cache projection",
+        "ignored invalidation epoch",
+        "provider facts ignored while denied",
+        "ignored reply identity",
+    ):
+        require(
+            not any(label in error for error in sensitivity),
+            f"{label} was not detected",
+        )
+    for error in sensitivity:
+        if not any(
+            label in error
+            for label in (
+                "Broken no-cache projection",
+                "ignored invalidation epoch",
+                "provider facts ignored while denied",
+                "ignored reply identity",
+            )
+        ):
+            require(False, error)
 
     missing_event = copy.deepcopy(transitions)
     missing_event[0]["event"] = "An event the figure omits"
-    if not any(
-        "figure does not render event" in error
-        for error in compare_figure(missing_event)
-    ):
-        failures.append("figure drift from the typed source was not detected")
+    require(
+        any(
+            "figure does not render event" in error
+            for error in compare_figure(missing_event)
+        ),
+        "figure drift from the typed source was not detected",
+    )
 
     if failures:
         for failure in failures:
             print(f"state contract self-test: {failure}", file=sys.stderr)
         return 1
-    print("state contract self-test detected all 4 mutations")
+    print(f"state contract self-test detected all {checks} mutations")
     return 0
 
 

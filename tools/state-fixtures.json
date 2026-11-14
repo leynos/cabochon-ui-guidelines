@@ -7,21 +7,34 @@
     "accepted_epoch": 0,
     "known_source": { "rate": 1 },
     "invalidation_epoch": 0,
-    "request_active": false
+    "request_active": false,
+    "request_generation": 0,
+    "request_covers": {}
   },
   "scenarios": [
     {
       "name": "first load without a cached value",
       "events": [
         { "event": "refresh_requested", "expected": "Refreshing" },
-        { "event": "refresh_succeeded", "expected": "Current" }
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 0,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
       ]
     },
     {
       "name": "first load times out",
       "events": [
         { "event": "refresh_requested", "expected": "Refreshing" },
-        { "event": "refresh_failed", "expected": "Broken" }
+        {
+          "event": "refresh_failed",
+          "generation": 1,
+          "epoch": 0,
+          "expected": "Broken"
+        }
       ]
     },
     {
@@ -33,7 +46,11 @@
       "events": [
         { "event": "refresh_requested", "expected": "Refreshing" },
         { "event": "source_advanced", "expected": "Refreshing" },
-        { "event": "refresh_cancelled", "expected": "Stale" }
+        {
+          "event": "refresh_cancelled",
+          "generation": 2,
+          "expected": "Stale"
+        }
       ]
     },
     {
@@ -45,7 +62,13 @@
       "events": [
         { "event": "refresh_requested", "expected": "Refreshing" },
         { "event": "source_advanced", "expected": "Refreshing" },
-        { "event": "refresh_succeeded", "expected": "Current" }
+        {
+          "event": "refresh_succeeded",
+          "generation": 2,
+          "epoch": 0,
+          "validated": { "rate": 2 },
+          "expected": "Current"
+        }
       ]
     },
     {
@@ -58,8 +81,71 @@
         { "event": "source_advanced", "expected": "Stale" },
         { "event": "refresh_requested", "expected": "Refreshing" },
         { "event": "source_advanced", "expected": "Refreshing" },
-        { "event": "superseded_reply", "expected": "Refreshing" },
-        { "event": "refresh_succeeded", "expected": "Current" }
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 0,
+          "validated": { "rate": 2 },
+          "expected": "Refreshing"
+        },
+        {
+          "event": "refresh_succeeded",
+          "generation": 2,
+          "epoch": 0,
+          "validated": { "rate": 3 },
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "reply vector below the known source is rejected",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 0,
+          "validated": { "rate": 0 },
+          "expected": "Refreshing"
+        },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 0,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "reply from an older invalidation epoch is rejected",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        { "event": "provider_lost", "expected": "Broken" },
+        { "event": "provider_recovered", "expected": "Stale" },
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 2,
+          "epoch": 0,
+          "validated": { "rate": 1 },
+          "expected": "Refreshing"
+        },
+        {
+          "event": "refresh_succeeded",
+          "generation": 2,
+          "epoch": 1,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
       ]
     },
     {
@@ -70,7 +156,12 @@
       },
       "events": [
         { "event": "refresh_requested", "expected": "Refreshing" },
-        { "event": "refresh_failed", "expected": "Broken" }
+        {
+          "event": "refresh_failed",
+          "generation": 1,
+          "epoch": 0,
+          "expected": "Broken"
+        }
       ]
     },
     {
@@ -83,9 +174,21 @@
         { "event": "refresh_requested", "expected": "Refreshing" },
         { "event": "grant_revoked", "expected": "Denied" },
         { "event": "grant_issued", "expected": "Stale" },
-        { "event": "obsolete_reply", "expected": "Stale" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 0,
+          "validated": { "rate": 1 },
+          "expected": "Stale"
+        },
         { "event": "refresh_requested", "expected": "Refreshing" },
-        { "event": "refresh_succeeded", "expected": "Current" }
+        {
+          "event": "refresh_succeeded",
+          "generation": 2,
+          "epoch": 1,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
       ]
     },
     {
@@ -94,7 +197,55 @@
         { "event": "grant_revoked", "expected": "Denied" },
         { "event": "grant_issued", "expected": "Broken" },
         { "event": "refresh_requested", "expected": "Refreshing" },
-        { "event": "refresh_succeeded", "expected": "Current" }
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 1,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "provider loss while denied is remembered",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "grant_revoked", "expected": "Denied" },
+        { "event": "provider_lost", "expected": "Denied" },
+        { "event": "grant_issued", "expected": "Broken" },
+        { "event": "provider_recovered", "expected": "Stale" },
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 2,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "provider facts survive revocation and recovery",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "provider_lost", "expected": "Broken" },
+        { "event": "grant_revoked", "expected": "Denied" },
+        { "event": "provider_recovered", "expected": "Denied" },
+        { "event": "grant_issued", "expected": "Stale" },
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 2,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
       ]
     },
     {
@@ -109,7 +260,13 @@
       "events": [
         { "event": "refresh_requested", "expected": "Refreshing" },
         { "event": "grant_revoked", "expected": "Denied" },
-        { "event": "obsolete_reply", "expected": "Denied" }
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 0,
+          "validated": { "rate": 1 },
+          "expected": "Denied"
+        }
       ]
     },
     {
@@ -122,7 +279,13 @@
         { "event": "provider_lost", "expected": "Broken" },
         { "event": "provider_recovered", "expected": "Stale" },
         { "event": "refresh_requested", "expected": "Refreshing" },
-        { "event": "refresh_succeeded", "expected": "Current" }
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 1,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
       ]
     },
     {
@@ -150,14 +313,34 @@
       },
       "events": [
         { "event": "refresh_requested", "expected": "Refreshing" },
-        { "event": "refresh_cancelled", "expected": "Current" }
+        {
+          "event": "refresh_cancelled",
+          "generation": 1,
+          "expected": "Current"
+        }
       ]
     },
     {
-      "name": "refresh failure without a cached value",
+      "name": "stale failure reply cannot end a newer request",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
       "events": [
         { "event": "refresh_requested", "expected": "Refreshing" },
-        { "event": "refresh_failed", "expected": "Broken" }
+        { "event": "source_advanced", "expected": "Refreshing" },
+        {
+          "event": "refresh_failed",
+          "generation": 1,
+          "epoch": 0,
+          "expected": "Refreshing"
+        },
+        {
+          "event": "refresh_failed",
+          "generation": 2,
+          "epoch": 0,
+          "expected": "Broken"
+        }
       ]
     }
   ]

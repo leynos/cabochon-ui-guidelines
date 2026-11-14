@@ -122,10 +122,12 @@ completion is offered; otherwise it leaves the field. A canvas tool's
 single-letter shortcuts apply only while the canvas has focus and no text field
 is active.
 
-Escape cancels the innermost mode in this order: composition, cell edit or text
-draft, completion, transient surface, tool. It never commits a draft. Every
-surface dismissal, including a menu, a popover, a palette and a dialog, returns
-focus through the focus-return chain below.
+Escape cancels the innermost mode in this order: composition, completion, cell
+edit or text draft, transient surface, tool. Dismissing a completion leaves the
+draft text and its edit history intact; the next Escape reverts the draft and
+leaves the mode. Escape never commits a draft. Every surface dismissal,
+including a menu, a popover, a palette and a dialog, returns focus through the
+focus-return chain below.
 
 Every composite declares its exit. A menu closes on Escape and on Left or
 Right; a tree leaves on Tab; a grid leaves on Tab in navigation mode; a tab bar
@@ -205,3 +207,9 @@ canvas tool, confirming each time that the intended level consumed the key,
 that the composite could be left, and that focus returned through the declared
 chain. Disabled controls are checked separately: their reason is discoverable
 without activation, and no disabled control is counted as a missing tab stop.
+
+`make keyboard` runs the ordered Escape fixtures in
+`tools/keyboard-fixtures.json`. In the central fixture a text field holds an
+edited draft and an open completion: the first Escape dismisses the completion,
+leaves the draft text and its dirty flag intact, and keeps focus in the field;
+only the second Escape reverts the draft.

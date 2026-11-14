@@ -24,70 +24,30 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from markdown_structure import (  # noqa: E402
+    anchors,
+    image_targets,
+    slug,
+    strip_code_and_comments,
+    targets,
+)
+
 ROOT = Path(__file__).resolve().parent.parent
 BOOK = ROOT / "book"
 FIGURES = ROOT / "figures"
 CONTRACT = json.loads((ROOT / "tools" / "book-contract.json").read_text(encoding="utf-8"))
 
-LINK_RE = re.compile(r"!?\[[^\]]*\]\(\s*([^)\s]+)(?:\s+[\"'][^\"']*[\"'])?\s*\)")
 FRONT_FIGURE_RE = re.compile(r"^figure:\s*[\"']?([^\"'\n]+)[\"']?\s*$", re.MULTILINE)
 FRONT_PART_RE = re.compile(r"^part:\s*[\"']?([^\"'\n]+)[\"']?\s*$", re.MULTILINE)
-HEADING_RE = re.compile(r"^#{1,6}\s+(.+?)\s*#*\s*$", re.MULTILINE)
-EXPLICIT_ANCHOR_RE = re.compile(r"<a\s+id=[\"']([^\"']+)[\"']")
 REQUIREMENT_RE = re.compile(r"\*\*([A-Z]{3}-[0-9]{2})\*\*")
 OWNER_RE = re.compile(r"Owner:\s*\[[^\]]*\]\(([^)]+)\)")
-COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
-INLINE_CODE_RE = re.compile(r"`[^`\n]*`")
-
-
-def slug(text: str) -> str:
-    text = text.strip().lower()
-    text = re.sub(r"[^\w\s-]", "", text, flags=re.UNICODE)
-    return re.sub(r"\s+", "-", text)
-
-
-def strip_code_and_comments(text: str) -> str:
-    """Remove HTML comments, fenced blocks and inline code spans."""
-    kept: list[str] = []
-    fence: str | None = None
-    for line in text.splitlines():
-        stripped = line.lstrip()
-        marker = stripped[:3]
-        if marker in {"```", "~~~"}:
-            if fence is None:
-                fence = marker
-            elif fence == marker:
-                fence = None
-            continue
-        if fence is None:
-            kept.append(line)
-    return INLINE_CODE_RE.sub("", COMMENT_RE.sub("", "\n".join(kept)))
-
-
-def anchors(path: Path) -> set[str]:
-    text = path.read_text(encoding="utf-8")
-    found: set[str] = set()
-    seen: dict[str, int] = {}
-    for heading in HEADING_RE.findall(text):
-        base = slug(heading)
-        count = seen.get(base, 0)
-        found.add(base if count == 0 else f"{base}-{count}")
-        seen[base] = count + 1
-    found.update(EXPLICIT_ANCHOR_RE.findall(text))
-    return found
-
-
-def link_targets(text: str) -> list[str]:
-    targets: list[str] = []
-    for raw in LINK_RE.findall(strip_code_and_comments(text)):
-        targets.append(raw.strip().split(" ", 1)[0])
-    return targets
 
 
 def check_links(chapters: list[Path], problems: list[str]) -> None:
     for chapter in chapters:
         text = chapter.read_text(encoding="utf-8")
-        for target in link_targets(text):
+        for target in targets(text):
             if target.startswith(("http://", "https://", "mailto:")):
                 continue
             if target.startswith("#"):
@@ -118,10 +78,10 @@ def check_front_figure(chapters: list[Path], problems: list[str]) -> None:
         figure = declared[0]
         if not (FIGURES / figure).exists():
             problems.append(f"{chapter.relative_to(ROOT)}: missing figure {figure}")
-        if f"../figures/{figure}" not in link_targets(text):
+        if f"../figures/{figure}" not in image_targets(text):
             problems.append(
                 f"{chapter.relative_to(ROOT)}: declared figure {figure} "
-                "is not embedded in the body"
+                "is not embedded as an image in the body"
             )
 
 
@@ -397,6 +357,24 @@ def self_test() -> int:
         None,
     )
     mutate(
+        "heading inside a comment",
+        lambda root: append(
+            root / "book" / "01-purpose.md",
+            "\n<!--\n## Comment-only heading\n-->\n\n"
+            "[broken](#comment-only-heading)\n",
+        ),
+        "missing anchor #comment-only-heading in book/01-purpose.md",
+    )
+    mutate(
+        "heading inside fenced code",
+        lambda root: append(
+            root / "book" / "01-purpose.md",
+            "\n```\n## Fenced heading\n```\n\n"
+            "[broken](#fenced-heading)\n",
+        ),
+        "missing anchor #fenced-heading in book/01-purpose.md",
+    )
+    mutate(
         "duplicate heading suffix",
         lambda root: append(
             root / "book" / "01-purpose.md",
@@ -412,7 +390,18 @@ def self_test() -> int:
             "fig-01-map.svg",
             1,
         ),
-        "declared figure fig-01-map.svg is not embedded in the body",
+        "declared figure fig-01-map.svg is not embedded as an image in the body",
+    )
+    mutate(
+        "hyperlink instead of an image",
+        lambda root: replace(
+            root / "book" / "02-cabochon-character.md",
+            "![",
+            "[",
+            1,
+        ),
+        "declared figure fig-02-small-world.svg is not embedded as an image "
+        "in the body",
     )
     mutate(
         "figure mentioned only in a comment",
@@ -428,7 +417,7 @@ def self_test() -> int:
                 "\n-->\n",
             )
         ),
-        "is not embedded in the body",
+        "is not embedded as an image in the body",
     )
     mutate(
         "missing requirement owner",

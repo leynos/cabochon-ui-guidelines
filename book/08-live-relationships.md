@@ -126,8 +126,9 @@ following transitions.
 | Current                 | The source reports a newer revision                                        | Stale      | Provider                                |
 | Refreshing              | The source reports a newer revision                                        | Refreshing | Provider                                |
 | Broken                  | The provider returns; an accepted value exists                             | Stale      | Runtime                                 |
-| Denied                  | A grant is issued; an accepted value exists                                | Stale      | Capability broker                       |
+| Denied                  | A grant is issued; an accepted value exists and a provider is present      | Stale      | Capability broker                       |
 | Denied                  | A grant is issued; no value has been accepted                              | Broken     | Capability broker                       |
+| Denied                  | A grant is issued while the provider is absent                             | Broken     | Capability broker                       |
 | Current, Stale, Broken  | A refresh request is dispatched while authorised and a provider is present | Refreshing | Application                             |
 | Denied                  | A grant is issued, then a refresh is dispatched with a provider present    | Refreshing | Application after the Capability broker |
 | Refreshing              | A validated result satisfies the freshness condition                       | Current    | Application                             |
@@ -146,7 +147,8 @@ because no provider is present to report a newer revision.
 **Recomputed** and **No change** are outcomes, not sixth states. **Recomputed**
 means the request ends and the projection is evaluated again from the current
 facts; a cancellation never restores the label that preceded the request. **No
-change** means the reply belongs to a superseded generation and is discarded.
+change** means the reply belongs to a superseded generation, carries a stale
+invalidation epoch or is behind the known source, and is discarded.
 
 A source notification is itself a scheduling event. When it arrives with no
 request in flight, the default is to dispatch a refresh. The relationship then
@@ -161,30 +163,35 @@ The visible chip is the last step of a lifecycle that exists even when nothing
 paints.
 
 1. **Request.** The application allocates a monotonically increasing request
-   generation and records the identity, the known-source vector at dispatch and
-   the authority decision. No accepted value is discarded. A dispatch is
-   refused while authority or a provider is absent; the relationship then stays
-   **Denied** or **Broken**.
+   generation and records the identity, the known-source vector at dispatch,
+   the invalidation epoch at dispatch and the authority decision. No accepted
+   value is discarded. A dispatch is refused while authority or a provider is
+   absent; the relationship then stays **Denied** or **Broken**.
 2. **In flight.** The relationship is **Refreshing**. If an authorised cached
    value exists, it remains visible and selectable. If none exists, the object
    shows a non-disclosing loading placeholder, not an empty value and not a
    zero. A first load with no cached value is therefore **Refreshing**, not
    **Broken**.
-3. **Completion.** A result is accepted only when its generation is the current
-   generation, authority is still valid, the provider is still present and its
-   validated vector covers the known-source vector at completion. Acceptance
-   replaces the accepted value and vector, records the current invalidation
-   epoch, and projects as **Current**. A result that is behind the known source
-   is superseded: it is not accepted and does not publish.
+3. **Completion.** A reply carries its request generation, the invalidation
+   epoch recorded at dispatch and its validated vector. A result is accepted
+   only when its generation is the current generation, its dispatch epoch is
+   still current, authority is still valid, the provider is still present and
+   its validated vector covers the known-source vector at completion.
+   Acceptance replaces the accepted value and vector, records the current
+   invalidation epoch, and projects as **Current**. A result that is behind the
+   known source is superseded: it is not accepted and does not publish.
 4. **Rejection.** A transport failure or timeout ends the request, records the
    reason and marks availability uncertain, so the projection is **Broken**. A
    refusal or an authority withdrawal moves the relationship to **Denied**. A
    cancellation ends the request and recomputes the projection from the facts;
    if the source advanced during the request, the result is **Stale**, not the
    label that preceded it.
-5. **Obsolete replies.** A reply from an older generation than the current one
-   is discarded. It cannot overwrite a newer result, cannot revive a denial and
-   cannot settle a superseded request.
+5. **Obsolete replies.** A reply from an older generation or invalidation epoch
+   than the current one is discarded, as is a reply whose validated vector does
+   not cover the known source. It cannot overwrite a newer result, cannot
+   revive a denial and cannot settle a superseded request. Completion and
+   failure use the same identity rule; a stale failure cannot end a newer
+   request.
 
 A source notification advances the known-source vector before any refresh is
 scheduled. If it arrives during a request, that generation is superseded and a
@@ -370,8 +377,10 @@ a denial and confirm that it does not publish.
 
 Exercise every transition in the table above. The fixture set in
 `tools/state-fixtures.json` covers first load without a cached value, a source
-advance during a refresh, cancellation after that advance, supersession, a
-timeout, a grant change during a request and a late completion after denial.
+advance during a refresh, cancellation after that advance, supersession by
+generation, a rejected reply vector, a reply from an older invalidation epoch,
+a timeout, a stale failure, a grant change during a request, provider loss
+while denied, recovery while denied and a late completion after denial.
 `make states` runs the fixtures and compares the chapter and figure with the
 typed transition source. The [checklist](40-checklist.md) lists the transitions
 that must be witnessed before release.

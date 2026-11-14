@@ -22,28 +22,15 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from markdown_structure import anchors  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
-BOOK = ROOT / "book"
 
 REQUIREMENT_RE = re.compile(r"\*\*([A-Z]{3}-[0-9]{2})\*\*")
 OWNER_RE = re.compile(r"Owner:\s*\[[^\]]*\]\(([^)]+)\)")
-HEADING_RE = re.compile(r"^#{1,6}\s+(.+?)\s*#*\s*$", re.MULTILINE)
-EXPLICIT_ANCHOR_RE = re.compile(r"<a\s+id=[\"']([^\"']+)[\"']")
 
 PROFILE_ORDER = {"substrate": 0, "semantic": 1, "studio": 2}
-
-
-def slug(text: str) -> str:
-    text = text.strip().lower()
-    text = re.sub(r"[^\w\s-]", "", text, flags=re.UNICODE)
-    return re.sub(r"\s+", "-", text)
-
-
-def anchors(path: Path) -> set[str]:
-    text = path.read_text(encoding="utf-8")
-    found = {slug(heading) for heading in HEADING_RE.findall(text)}
-    found.update(EXPLICIT_ANCHOR_RE.findall(text))
-    return found
 
 
 def parse_checklist(path: Path, problems: list[str]) -> dict[str, list[str]]:
@@ -70,7 +57,10 @@ def load_registry(path: Path, problems: list[str]) -> dict:
 
 
 def check_records(
-    registry: dict, checklist: dict[str, list[str]], problems: list[str]
+    registry: dict,
+    checklist: dict[str, list[str]],
+    root: Path,
+    problems: list[str],
 ) -> None:
     profiles = registry.get("profiles", [])
     forces = registry.get("forces", [])
@@ -97,7 +87,7 @@ def check_records(
         owner = record.get("owner", {})
         file_name = owner.get("file", "")
         anchor = owner.get("anchor", "")
-        path = BOOK / file_name
+        path = root / "book" / file_name
         if not path.is_file():
             problems.append(f"{identifier}: missing owner file {file_name!r}")
         elif anchor not in anchors(path):
@@ -131,13 +121,11 @@ def check_records(
         if identifier not in checklist:
             problems.append(f"registry record {identifier} has no checklist item")
         else:
-            owner_files = {
-                owner.partition("#")[0] for owner in checklist[identifier]
-            }
-            if file_name not in owner_files:
+            expected_owner = f"{file_name}#{anchor}" if anchor else file_name
+            if expected_owner not in checklist[identifier]:
                 problems.append(
                     f"{identifier}: checklist owner disagrees with registry "
-                    f"owner {file_name!r}"
+                    f"owner {expected_owner!r}"
                 )
 
     for identifier in checklist:
@@ -165,12 +153,13 @@ def run(root: Path) -> list[str]:
     checklist = parse_checklist(root / "book" / spec["checklist"], problems)
     registry = load_registry(root / "tools" / spec["registry"], problems)
     if registry:
-        check_records(registry, checklist, problems)
+        check_records(registry, checklist, root, problems)
     return problems
 
 
 def self_test() -> None:
     failures: list[str] = []
+    detected = 0
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary) / "repo"
         root.mkdir()
@@ -184,6 +173,7 @@ def self_test() -> None:
             failures.append(f"baseline is not clean: {baseline[:3]}")
 
         def mutate(name: str, edit, expected: str) -> None:
+            nonlocal detected
             target = root / "tools" / "requirements.json"
             original = target.read_text()
             data = json.loads(original)
@@ -192,9 +182,12 @@ def self_test() -> None:
             problems = run(root)
             if expected not in "\n".join(problems):
                 failures.append(f"{name}: expected {expected!r}, got {problems[:3]}")
+            else:
+                detected += 1
             target.write_text(original)
 
         def edit_checklist(name: str, edit, expected: str) -> None:
+            nonlocal detected
             target = root / "book" / "40-checklist.md"
             original = target.read_text()
             changed = edit(original)
@@ -205,6 +198,8 @@ def self_test() -> None:
             problems = run(root)
             if expected not in "\n".join(problems):
                 failures.append(f"{name}: expected {expected!r}, got {problems[:3]}")
+            else:
+                detected += 1
             target.write_text(original)
 
         mutate(
@@ -243,8 +238,44 @@ def self_test() -> None:
             lambda data: data["requirements"][0]["owner"].update(
                 {"file": "01-purpose.md", "anchor": "scope"}
             ),
-            "CON-01: checklist owner disagrees with registry owner '01-purpose.md'",
+            "CON-01: checklist owner disagrees with registry owner "
+            "'01-purpose.md#scope'",
         )
+        edit_checklist(
+            "same-file wrong anchor",
+            lambda text: text.replace(
+                "03-ecosystem-map.md#the-substrate-components",
+                "03-ecosystem-map.md#ecosystem-map",
+                1,
+            ),
+            "CON-01: checklist owner disagrees with registry owner "
+            "'03-ecosystem-map.md#the-substrate-components'",
+        )
+
+        owner_copy = root / "book" / "03-ecosystem-map.md"
+        owner_original = owner_copy.read_text()
+        changed_owner = owner_original.replace(
+            "## The substrate components",
+            "## The renamed substrate components",
+            1,
+        )
+        if changed_owner == owner_original:
+            failures.append("copied owner mutation did not apply")
+        else:
+            owner_copy.write_text(changed_owner)
+            copied_problems = run(root)
+            if not any(
+                "CON-01: missing owner anchor "
+                "03-ecosystem-map.md#the-substrate-components" in problem
+                for problem in copied_problems
+            ):
+                failures.append(
+                    "copied owner anchor mutation was resolved against the "
+                    f"real repository: {copied_problems[:3]}"
+                )
+            else:
+                detected += 1
+            owner_copy.write_text(owner_original)
 
         def remove_item(text: str) -> str:
             start = text.index("- [ ] **DOC-04**")
@@ -278,7 +309,10 @@ def self_test() -> None:
     if failures:
         print("\n".join(f"self-test: {failure}" for failure in failures))
         raise SystemExit(1)
-    print("self-test: 8 mutations detected, baseline and wording-only edit pass")
+    print(
+        f"self-test: {detected} mutations detected, "
+        "baseline and wording-only edit pass"
+    )
 
 
 def main() -> None:

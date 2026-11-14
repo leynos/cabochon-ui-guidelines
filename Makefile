@@ -1,4 +1,4 @@
-.PHONY: help figures validate-svg check-fmt fmt markdownlint spelling links states layout requirements check all
+.PHONY: help figures validate-svg check-fmt fmt markdownlint spelling links states keyboard layout requirements check all
 
 SHELL := bash
 PYTHON ?= python3
@@ -35,6 +35,10 @@ states: ## Check the live-state projection, transitions and event fixtures
 	$(PYTHON) -I tools/check-states.py
 	$(PYTHON) -I tools/check-states.py --self-test
 
+keyboard: ## Check the declared Escape routing order
+	$(PYTHON) -I tools/check-keyboard.py
+	$(PYTHON) -I tools/check-keyboard.py --self-test
+
 layout: ## Derive and check the layout budgets from declared tokens
 	$(PYTHON) -I tools/check-layout.py
 	$(PYTHON) -I tools/check-layout.py --self-test
@@ -43,7 +47,7 @@ requirements: ## Check the structured requirement registry against the checklist
 	$(PYTHON) -I tools/check-requirements.py
 	$(PYTHON) -I tools/check-requirements.py --self-test
 
-check: check-fmt markdownlint spelling links states layout requirements validate-svg ## Run every gate
+check: check-fmt markdownlint spelling links states keyboard layout requirements validate-svg ## Run every gate
 	@echo "All gates passed."
 
 all: check ## Compatibility alias for check

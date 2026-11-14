@@ -1,0 +1,132 @@
+{
+  "defaults": {
+    "mode": "text",
+    "composition": false,
+    "completion_open": false,
+    "draft": "",
+    "committed": "",
+    "draft_dirty": false,
+    "surface_open": false,
+    "tool_gesture": false
+  },
+  "scenarios": [
+    {
+      "name": "first Escape dismisses completion before the draft",
+      "facts": {
+        "completion_open": true,
+        "draft": "Annual energy",
+        "committed": "Annual",
+        "draft_dirty": true,
+        "surface_open": true
+      },
+      "steps": [
+        {
+          "expected": {
+            "mode": "text",
+            "completion_open": false,
+            "draft": "Annual energy",
+            "draft_dirty": true,
+            "surface_open": true
+          }
+        },
+        {
+          "expected": {
+            "mode": "navigation",
+            "completion_open": false,
+            "draft": "Annual",
+            "draft_dirty": false,
+            "surface_open": true
+          }
+        },
+        {
+          "expected": {
+            "mode": "navigation",
+            "completion_open": false,
+            "draft": "Annual",
+            "draft_dirty": false,
+            "surface_open": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "composition precedes completion and the draft",
+      "facts": {
+        "composition": true,
+        "completion_open": true,
+        "draft": "にほん",
+        "committed": "",
+        "draft_dirty": true
+      },
+      "steps": [
+        {
+          "expected": {
+            "composition": false,
+            "completion_open": true,
+            "draft": "にほん",
+            "draft_dirty": true
+          }
+        },
+        {
+          "expected": {
+            "composition": false,
+            "completion_open": false,
+            "draft": "にほん",
+            "draft_dirty": true
+          }
+        },
+        {
+          "expected": {
+            "mode": "navigation",
+            "completion_open": false,
+            "draft": "",
+            "draft_dirty": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "an edited draft without completion reverts and leaves",
+      "facts": {
+        "draft": "Annual energy",
+        "committed": "Annual",
+        "draft_dirty": true
+      },
+      "steps": [
+        {
+          "expected": {
+            "mode": "navigation",
+            "draft": "Annual",
+            "draft_dirty": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "a clean text field simply leaves",
+      "facts": {
+        "draft": "Annual",
+        "committed": "Annual"
+      },
+      "steps": [
+        {
+          "expected": {
+            "mode": "navigation",
+            "draft": "Annual",
+            "draft_dirty": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "a transient surface closes in navigation mode",
+      "facts": {
+        "mode": "navigation",
+        "surface_open": true
+      },
+      "steps": [
+        { "expected": { "mode": "navigation", "surface_open": false } }
+      ]
+    }
+  ]
+}
