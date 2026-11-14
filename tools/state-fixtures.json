@@ -1,0 +1,347 @@
+{
+  "defaults": {
+    "authorized": true,
+    "availability": "present",
+    "accepted": false,
+    "accepted_validated": {},
+    "accepted_epoch": 0,
+    "known_source": { "rate": 1 },
+    "invalidation_epoch": 0,
+    "request_active": false,
+    "request_generation": 0,
+    "request_covers": {}
+  },
+  "scenarios": [
+    {
+      "name": "first load without a cached value",
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 0,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "first load times out",
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_failed",
+          "generation": 1,
+          "epoch": 0,
+          "expected": "Broken"
+        }
+      ]
+    },
+    {
+      "name": "source advance during refresh then cancel",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        { "event": "source_advanced", "expected": "Refreshing" },
+        {
+          "event": "refresh_cancelled",
+          "generation": 2,
+          "expected": "Stale"
+        }
+      ]
+    },
+    {
+      "name": "superseding request settles at the new head",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        { "event": "source_advanced", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 2,
+          "epoch": 0,
+          "validated": { "rate": 2 },
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "superseded reply is discarded",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "source_advanced", "expected": "Stale" },
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        { "event": "source_advanced", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 0,
+          "validated": { "rate": 2 },
+          "expected": "Refreshing"
+        },
+        {
+          "event": "refresh_succeeded",
+          "generation": 2,
+          "epoch": 0,
+          "validated": { "rate": 3 },
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "reply vector below the known source is rejected",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 0,
+          "validated": { "rate": 0 },
+          "expected": "Refreshing"
+        },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 0,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "reply from an older invalidation epoch is rejected",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        { "event": "provider_lost", "expected": "Broken" },
+        { "event": "provider_recovered", "expected": "Stale" },
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 2,
+          "epoch": 0,
+          "validated": { "rate": 1 },
+          "expected": "Refreshing"
+        },
+        {
+          "event": "refresh_succeeded",
+          "generation": 2,
+          "epoch": 1,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "timeout after a cached value",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_failed",
+          "generation": 1,
+          "epoch": 0,
+          "expected": "Broken"
+        }
+      ]
+    },
+    {
+      "name": "grant change during a request",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        { "event": "grant_revoked", "expected": "Denied" },
+        { "event": "grant_issued", "expected": "Stale" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 0,
+          "validated": { "rate": 1 },
+          "expected": "Stale"
+        },
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 2,
+          "epoch": 1,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "grant issued without a cached value",
+      "events": [
+        { "event": "grant_revoked", "expected": "Denied" },
+        { "event": "grant_issued", "expected": "Broken" },
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 1,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "provider loss while denied is remembered",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "grant_revoked", "expected": "Denied" },
+        { "event": "provider_lost", "expected": "Denied" },
+        { "event": "grant_issued", "expected": "Broken" },
+        { "event": "provider_recovered", "expected": "Stale" },
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 2,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "provider facts survive revocation and recovery",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "provider_lost", "expected": "Broken" },
+        { "event": "grant_revoked", "expected": "Denied" },
+        { "event": "provider_recovered", "expected": "Denied" },
+        { "event": "grant_issued", "expected": "Stale" },
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 2,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "source notification while broken with a provider",
+      "events": [
+        { "event": "source_advanced", "expected": "Broken" },
+        { "event": "refresh_requested", "expected": "Refreshing" }
+      ]
+    },
+    {
+      "name": "late completion cannot reverse a denial",
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        { "event": "grant_revoked", "expected": "Denied" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 0,
+          "validated": { "rate": 1 },
+          "expected": "Denied"
+        }
+      ]
+    },
+    {
+      "name": "provider loss and recovery require revalidation",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "provider_lost", "expected": "Broken" },
+        { "event": "provider_recovered", "expected": "Stale" },
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 1,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "provider loss cannot change a denied state",
+      "events": [
+        { "event": "grant_revoked", "expected": "Denied" },
+        { "event": "provider_lost", "expected": "Denied" }
+      ]
+    },
+    {
+      "name": "source notification during Current",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "source_advanced", "expected": "Stale" }
+      ]
+    },
+    {
+      "name": "cancel without a source advance",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_cancelled",
+          "generation": 1,
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "stale failure reply cannot end a newer request",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        { "event": "source_advanced", "expected": "Refreshing" },
+        {
+          "event": "refresh_failed",
+          "generation": 1,
+          "epoch": 0,
+          "expected": "Refreshing"
+        },
+        {
+          "event": "refresh_failed",
+          "generation": 2,
+          "epoch": 0,
+          "expected": "Broken"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "tokens": {
+    "title": 31,
+    "menu": 29,
+    "tool_strip": 30,
+    "status": 26,
+    "masthead": 44,
+    "document_width_min": 420,
+    "document_content_height": 320,
+    "document_viewport_min": 320,
+    "compact_viewport_min": 240,
+    "navigator": 210,
+    "inspector": 240,
+    "rail": 126,
+    "splitter": 6,
+    "collapsed_strip": 28,
+    "floor_width": 512,
+    "floor_height": 384,
+    "default_width": 1280,
+    "default_height": 800
+  },
+  "profiles": {
+    "document": ["title", "menu", "status"],
+    "document_strip": ["title", "menu", "tool_strip", "status"],
+    "studio": ["masthead", "title", "menu", "status"],
+    "studio_strip": ["masthead", "title", "menu", "tool_strip", "status"],
+    "compact": ["title", "menu", "status"]
+  },
+  "configurations": [
+    {
+      "name": "studio strip, standard panes",
+      "width": "default_width",
+      "height": "default_height",
+      "profile": "studio_strip",
+      "left": "navigator",
+      "right": "inspector",
+      "expected": [818, 640]
+    },
+    {
+      "name": "studio without a tool strip, standard panes",
+      "width": "default_width",
+      "height": "default_height",
+      "profile": "studio",
+      "left": "navigator",
+      "right": "inspector",
+      "expected": [818, 670]
+    },
+    {
+      "name": "studio without a tool strip, rail",
+      "width": "default_width",
+      "height": "default_height",
+      "profile": "studio",
+      "left": "rail",
+      "right": "inspector",
+      "expected": [902, 670]
+    },
+    {
+      "name": "compact at the supported floor",
+      "width": "floor_width",
+      "height": "floor_height",
+      "profile": "compact",
+      "left": "collapsed_strip",
+      "right": "collapsed_strip",
+      "expected": [456, 298],
+      "compact": true
+    }
+  ]
+}
