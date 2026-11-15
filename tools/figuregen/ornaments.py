@@ -1,4 +1,11 @@
-"""Figure generator module: ornaments."""
+"""Draw the shared page ornaments, state chips and miniature document views.
+
+`title_block`, `kicker` and `frame` set the page furniture, `state_chip` pairs
+each declared state with a distinct non-colour mark, and `mini_note`,
+`mini_table`, `mini_page` and `mini_canvas` draw the document previews. Nearly
+every `figuregen.figures.*` builder imports the module, as does
+`figuregen.widgets`.
+"""
 
 # The drawing primitives take geometry and style arguments positionally; see
 # the matching ruff exemption for tools/figuregen in pyproject.toml.

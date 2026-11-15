@@ -1,4 +1,10 @@
-"""Paths, declared data and Markdown table helpers for the layout contract."""
+"""Paths, declared data and Markdown table helpers for the layout contract.
+
+The module loads `tools/layout-budgets.json` and locates
+`book/14-spacing-metrics.md`, then provides the table and arithmetic helpers
+that the budget and chapter checks share. Every sibling layout module imports
+it.
+"""
 
 from __future__ import annotations
 

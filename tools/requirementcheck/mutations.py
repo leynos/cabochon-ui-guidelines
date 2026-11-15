@@ -1,4 +1,9 @@
-"""Describe the self-test mutations and their required diagnostics."""
+"""Describe the registry self-test mutations and their required diagnostics.
+
+The module supplies the registry and checklist edits used by the self-test,
+together with helpers that copy the book and registry into a disposable
+repository. `requirementcheck.selftest` imports them.
+"""
 
 from __future__ import annotations
 

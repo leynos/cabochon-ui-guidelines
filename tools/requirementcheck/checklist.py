@@ -1,4 +1,9 @@
-"""Parse the checklist into the requirement identifiers it declares."""
+"""Parse the checklist into the requirement identifiers it declares.
+
+The `parse_checklist` function strips comments and fenced examples, then maps
+each visible checklist item to the owner links it names.
+`requirementcheck.checks` imports it before the registry comparison.
+"""
 
 from __future__ import annotations
 

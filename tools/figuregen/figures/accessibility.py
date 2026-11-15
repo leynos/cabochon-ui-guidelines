@@ -1,4 +1,11 @@
-"""Figure generator module: figures.accessibility."""
+"""Draw the accessibility tree and focus order figure.
+
+The figure sets a numbered focus order inside a document window beside an
+accessibility tree of roles and names. The exported `fig_accessibility`
+function returns the SVG string, drawn from the shared `figuregen.palette`
+colours. `figuregen.cli` calls it to write `fig-32-accessibility.svg` under
+`figures/`.
+"""
 
 from __future__ import annotations
 

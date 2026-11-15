@@ -1,4 +1,10 @@
-"""Figure generator module: figures.localization."""
+"""Draw the pseudo-localized windows figure.
+
+Two windows show expanded en-XA text and mirrored ar-XB layout. The exported
+`fig_localization` function returns the SVG string, drawn from the shared
+`figuregen.palette` colours. `figuregen.cli` calls it to write
+`fig-31-localization.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

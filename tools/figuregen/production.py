@@ -1,4 +1,10 @@
-"""Figure generator module: production."""
+"""Annotate rendered figures and draw the production-height fixtures.
+
+`annotate` embeds a metadata block and `data-figure-*` attributes so
+`tools/check-figures.py` can compare a figure with `tools/figure-data.json`,
+while `production_component`, `fig_prod_chrome` and `fig_prod_control` draw the
+catalogue-height fixtures. `figuregen.cli` imports `annotate` and both fixtures.
+"""
 
 # The drawing primitives take geometry and style arguments positionally; see
 # the matching ruff exemption for tools/figuregen in pyproject.toml.

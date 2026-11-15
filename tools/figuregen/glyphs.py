@@ -1,8 +1,8 @@
-"""Figure generator module: shared tool-strip glyphs.
+"""Draw the shared tool-strip glyphs once for every strip that needs them.
 
-Every tool strip draws the same select, pen, line, rectangle, ellipse and text
-symbols, so the geometry lives here once. A strip chooses the glyph sequence and
-the offsets; it never redraws the symbol.
+`tool_glyph` returns the select, pen, line, rectangle, ellipse, link or text
+symbol for a strip to position, so no strip redraws the geometry itself. The
+`figuregen.figures.toolbars` and `figuregen.figures.window` modules call it.
 """
 
 from __future__ import annotations

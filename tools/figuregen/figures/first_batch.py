@@ -1,4 +1,10 @@
-"""Figure generator module: figures.first_batch."""
+"""Draw the first batch roadmap figure.
+
+Three bands list the now, next and later work of contracts, workspace and
+studio. The exported `fig_first_batch` function returns the SVG string, drawn
+from the shared `figuregen.palette` colours. `figuregen.cli` calls it to write
+`fig-03-first-batch.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

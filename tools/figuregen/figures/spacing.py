@@ -1,4 +1,10 @@
-"""Figure generator module: figures.spacing."""
+"""Draw the spacing scale and measured tool strip figure.
+
+Eight spacing steps sit beside an annotated toolbar with target and padding
+measurements. The exported `fig_spacing` function returns the SVG string,
+drawn from the shared `figuregen.palette` colours. `figuregen.cli` calls it to
+write `fig-09-spacing.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

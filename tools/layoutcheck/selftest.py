@@ -1,4 +1,9 @@
-"""Prove that the layout checks detect the defects they exist to prevent."""
+"""Prove that the layout checks detect the defects they exist to prevent.
+
+The `self_test` function runs seven probes over changed tokens, worked values
+and table cells, requiring the matching diagnostic from the budget and chapter
+checks. `layoutcheck.cli` invokes it for `--self-test`.
+"""
 
 from __future__ import annotations
 

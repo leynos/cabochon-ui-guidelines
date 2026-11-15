@@ -1,4 +1,10 @@
-"""Figure generator module: figures.window."""
+"""Draw the window anatomy figure.
+
+The figure annotates a Facet Notes window with pixel metrics for its parts.
+The exported `fig_window` function returns the SVG string, drawn from the
+shared `figuregen.palette` colours. `figuregen.cli` calls it to write
+`fig-13-window.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,9 @@
-"""Run the registry check against the checklist in one pass."""
+"""Run the registry check against the checklist in one pass.
+
+The `run` function loads `tools/book-contract.json` and delegates to
+`requirementcheck.checklist` and `requirementcheck.registry`.
+`requirementcheck.cli` and `requirementcheck.selftest` import it.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,11 @@
-"""Figure generator module: figdata."""
+"""Load the shared figure catalogue from `tools/figure-data.json`.
+
+The module parses the file once and exposes `OUT`, the committed `figures`
+directory, along with the figure specs, live states, live transitions and
+resolution states that the builders read. `figuregen.cli`, `figuregen.ornaments`
+and `figuregen.production` import it, as do `figuregen.figures.embed` and
+`figuregen.figures.live_state`.
+"""
 
 from __future__ import annotations
 

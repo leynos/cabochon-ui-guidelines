@@ -1,4 +1,10 @@
-"""Figure generator module: figures.focus."""
+"""Draw the focus ring and keyboard map figure.
+
+The figure measures a focus ring and tab order, then maps the essential
+keyboard commands. The exported `fig_focus` function returns the SVG string,
+drawn from the shared `figuregen.palette` colours. `figuregen.cli` calls it to
+write `fig-20-focus.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

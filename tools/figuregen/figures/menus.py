@@ -1,4 +1,10 @@
-"""Figure generator module: figures.menus."""
+"""Draw the menu bar with an open File menu figure.
+
+The figure shows an open File menu with shortcuts, a disabled item and
+separators. The exported `fig_menus` function returns the SVG string, drawn
+from the shared `figuregen.palette` colours. `figuregen.cli` calls it to write
+`fig-14-menus.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

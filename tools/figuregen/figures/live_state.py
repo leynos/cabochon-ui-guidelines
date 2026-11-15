@@ -1,4 +1,10 @@
-"""Figure generator module: figures.live_state."""
+"""Draw the live state and transition figure.
+
+The figure pairs five state cards with the table of legal transitions and
+their owners. The exported `fig_state` function returns the SVG string, drawn
+from `LIVE_STATES` and `LIVE_TRANSITIONS` in `figuregen.figdata`.
+`figuregen.cli` calls it to write `fig-06-state.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

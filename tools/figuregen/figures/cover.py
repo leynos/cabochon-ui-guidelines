@@ -1,4 +1,11 @@
-"""Figure generator module: figures.cover."""
+"""Draw the cover plate figure.
+
+The cover shows a polished cabochon on paper, named around by Facet Notes,
+Enfilade Table, Burin Draw and Cabochon Press. The exported `fig_cover`
+function returns the SVG string, drawn from the shared `figuregen.palette`
+colours. `figuregen.cli` calls it to write `fig-00-cover.svg` under
+`figures/`.
+"""
 
 from __future__ import annotations
 

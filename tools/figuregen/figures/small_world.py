@@ -1,4 +1,10 @@
-"""Figure generator module: figures.small_world."""
+"""Draw the Cabochon character figure.
+
+Four cards give the compact, document-centred, liberal and practical choices a
+specimen each. The exported `fig_small_world` function returns the SVG string,
+drawn from the shared `figuregen.palette` colours. `figuregen.cli` calls it to
+write `fig-02-small-world.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

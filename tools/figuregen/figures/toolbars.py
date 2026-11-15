@@ -1,4 +1,10 @@
-"""Figure generator module: figures.toolbars."""
+"""Draw the tool strip and status line figure.
+
+The figure shows a drawing tool strip, a status line with a live state, and
+target sizes. The exported `fig_toolbars` function returns the SVG string,
+drawn from the shared `figuregen.palette` colours. `figuregen.cli` calls it to
+write `fig-15-toolbars.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

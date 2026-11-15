@@ -1,4 +1,10 @@
-"""Figure generator module: widgets."""
+"""Draw the window furniture and form controls that the figures compose.
+
+`window_shell` combines `titlebar`, `menu_strip` and `status_bar`, and the
+module also exports `pane_head`, `field`, `button`, `checkbox`, `radio` and
+`inspector_row`. Most `figuregen.figures.*` builders import it, and it takes
+state chips from `figuregen.ornaments`.
+"""
 
 # The drawing primitives take geometry and style arguments positionally; see
 # the matching ruff exemption for tools/figuregen in pyproject.toml.

@@ -1,4 +1,9 @@
-"""Figure generator module: cli."""
+"""Register each figure name with its builder and write the SVG files.
+
+`main` checks its registry against `FIGURE_SPECS` from `tools/figure-data.json`,
+annotates every rendered figure with the metadata declared there, and writes
+`figures/*.svg`. `tools/make-figures.py` is the only caller.
+"""
 
 from __future__ import annotations
 

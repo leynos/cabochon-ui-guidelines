@@ -1,4 +1,10 @@
-"""Figure generator module: figures.formula."""
+"""Draw the formula tool popover figure.
+
+The figure shows selected table cells and a formula popover with expression,
+sources, authority and state. The exported `fig_formula` function returns the
+SVG string, drawn from the shared `figuregen.palette` colours. `figuregen.cli`
+calls it to write `fig-26-formula.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

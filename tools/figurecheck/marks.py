@@ -1,4 +1,9 @@
-"""Verify that a state mark draws the primitive its record claims."""
+"""Verify that a state mark draws the primitive its record claims.
+
+The `mark_is_drawn` function maps a declared mark kind such as `dot` or `lock`
+to the filled, stroked or linear primitives it requires. `figurecheck.states`
+imports it to check each state mark group.
+"""
 
 from __future__ import annotations
 

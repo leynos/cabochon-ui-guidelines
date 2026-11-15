@@ -1,4 +1,9 @@
-"""Command-line entry point for the layout budget checks."""
+"""Command-line entry point for the layout budget checks.
+
+The `main` function validates the configurations and chapter 14, and selects
+`layoutcheck.selftest` when `--self-test` is given. The `tools/check-layout.py`
+script imports and calls it.
+"""
 
 from __future__ import annotations
 

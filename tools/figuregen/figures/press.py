@@ -1,4 +1,10 @@
-"""Figure generator module: figures.press."""
+"""Draw the Cabochon Press window figure.
+
+The window shows a pages panel, an A4 page with bleed and crop marks, and a
+preflight panel. The exported `fig_press` function returns the SVG string,
+drawn from the shared `figuregen.palette` colours. `figuregen.cli` calls it to
+write `fig-24-press.svg` under `figures/`.
+"""
 
 # Figure builders hold one local per drawing coordinate; see the matching
 # ruff exemption for tools/figuregen in pyproject.toml.

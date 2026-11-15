@@ -1,4 +1,10 @@
-"""Measure the geometry that a constrained SVG subset renders."""
+"""Measure the geometry that a constrained SVG subset renders.
+
+The module provides `parse_transform`, `path_bbox` and `rendered_bbox`, which
+compute transformed bounds for the primitives the checker accepts. The
+annotation, production, state and mark checks import these helpers, using the
+tags and matrices from `figurecheck.contract`.
+"""
 
 from __future__ import annotations
 

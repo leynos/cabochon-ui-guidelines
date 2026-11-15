@@ -1,4 +1,9 @@
-"""Run the fixture event sequences against the declared projection."""
+"""Run the fixture event sequences against the declared projection.
+
+The `run_scenario` and `run_scenarios` functions apply each step from
+`tools/state-fixtures.json` and compare the projected state with the expected
+one. `statecheck.cli` and `statecheck.selftest` import them.
+"""
 
 from __future__ import annotations
 

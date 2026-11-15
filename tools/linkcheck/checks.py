@@ -1,4 +1,9 @@
-"""Run every structural link check in one pass."""
+"""Run every structural link check in one pass.
+
+The `run_checks` function walks `book/*.md` and calls the link, front-figure
+and manifest checks from `linkcheck.links` plus the requirement checks from
+`linkcheck.requirements`. `linkcheck.cli` imports it.
+"""
 
 from __future__ import annotations
 

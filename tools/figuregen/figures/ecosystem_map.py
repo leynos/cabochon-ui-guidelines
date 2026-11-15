@@ -1,4 +1,10 @@
-"""Figure generator module: figures.ecosystem_map."""
+"""Draw the two-plane ecosystem map figure.
+
+The map places an application above the GEM substrate and a semantic lower
+plane, with Mullion deferred. The exported `fig_map` function returns the SVG
+string, drawn from the shared `figuregen.palette` colours. `figuregen.cli`
+calls it to write `fig-01-map.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

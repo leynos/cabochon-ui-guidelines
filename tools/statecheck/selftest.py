@@ -1,4 +1,9 @@
-"""Prove that the state contract rejects the mutations it claims to catch."""
+"""Prove that the state contract rejects the mutations it claims to catch.
+
+The `self_test` function mutates the transitions, projection and fixtures and
+requires each defect to surface through the sibling checks.
+`statecheck.cli` invokes it for `--self-test`.
+"""
 
 from __future__ import annotations
 

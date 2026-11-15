@@ -1,4 +1,10 @@
-"""Figure generator module: figures.material_palette."""
+"""Draw the material palette figure.
+
+The figure names the light and dark swatches with hex values and
+contrast-safe roles. The exported `fig_palette` function returns the SVG
+string, drawn from the shared `figuregen.palette` colours. `figuregen.cli`
+calls it to write `fig-07-palette.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,10 @@
-"""Figure generator module: palette."""
+"""Define the colour roles and font stacks that every figure shares.
+
+The module holds plain string constants: paper and ink tones, the pine, oxide
+and amber accents, their dark-theme counterparts, and the display, UI and
+monospace font stacks. `figuregen.canvas` imports `F_UI`, `INK`, `PAPER` and
+`SOFT`, and every `figuregen.figures.*` builder imports the roles it needs.
+"""
 
 from __future__ import annotations
 

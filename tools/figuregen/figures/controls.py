@@ -1,4 +1,10 @@
-"""Figure generator module: figures.controls."""
+"""Draw the control gallery figure.
+
+The gallery shows buttons, fields, checkboxes, radio buttons, a slider and
+tabs at their target sizes. The exported `fig_controls` function returns the
+SVG string, drawn from the shared `figuregen.palette` colours. `figuregen.cli`
+calls it to write `fig-18-controls.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

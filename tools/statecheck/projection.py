@@ -1,4 +1,10 @@
-"""Project the visible state from the facts the book declares."""
+"""Project the visible state from the facts the book declares.
+
+The `project` function ranks Denied, Refreshing, Broken and Current or Stale,
+using `vector_at_least` to compare validated and known source vectors.
+`statecheck.events`, `statecheck.scenarios` and `statecheck.selftest` import
+it.
+"""
 
 from __future__ import annotations
 

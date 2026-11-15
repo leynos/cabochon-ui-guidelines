@@ -1,4 +1,9 @@
-"""Make the repository's Python tools importable from the tests."""
+"""Make the tools directory importable for the property tests.
+
+pytest loads this file automatically and prepends the repository's `tools/`
+directory to `sys.path`. The property tests then import the `statecheck`
+package, which lives in that directory rather than on the installed path.
+"""
 
 from __future__ import annotations
 

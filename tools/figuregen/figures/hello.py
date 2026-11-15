@@ -1,4 +1,10 @@
-"""Figure generator module: figures.hello."""
+"""Draw the hello-window reference application figure.
+
+The figure shows the hello-window application, its export bundle and the
+contracts it proves. The exported `fig_hello` function returns the SVG string,
+drawn from the shared `figuregen.palette` colours. `figuregen.cli` calls it to
+write `fig-27-hello-window.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

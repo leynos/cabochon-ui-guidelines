@@ -1,4 +1,10 @@
-"""Figure generator module: figures.notes."""
+"""Draw the Facet Notes window figure.
+
+The window shows a note tree, three embedded objects in different states and a
+relations panel. The exported `fig_notes` function returns the SVG string,
+drawn from the shared `figuregen.palette` colours. `figuregen.cli` calls it to
+write `fig-22-notes.svg` under `figures/`.
+"""
 
 # The drawing primitives take geometry and style arguments positionally; see
 # the matching ruff exemption for tools/figuregen in pyproject.toml.

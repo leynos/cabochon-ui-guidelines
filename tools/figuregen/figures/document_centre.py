@@ -1,4 +1,10 @@
-"""Figure generator module: figures.document_centre."""
+"""Draw the document-centred presentations figure.
+
+The figure links one object to its note, table, drawing and page
+presentations. The exported `fig_document_centre` function returns the SVG
+string, drawn from the shared `figuregen.palette` colours. `figuregen.cli`
+calls it to write `fig-05-document-centre.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

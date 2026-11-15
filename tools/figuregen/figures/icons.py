@@ -1,4 +1,10 @@
-"""Figure generator module: figures.icons."""
+"""Draw the icon grid, sizes and states figure.
+
+The grid lays out fourteen line glyphs with size and state examples. The
+exported `fig_icons` function returns the SVG string, drawn from the shared
+`figuregen.palette` colours. `figuregen.cli` calls it to write
+`fig-11-icons.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

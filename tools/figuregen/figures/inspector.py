@@ -1,4 +1,10 @@
-"""Figure generator module: figures.inspector."""
+"""Draw the object inspector figure.
+
+The panel lists an object's identity, presentation, authority and state. The
+exported `fig_inspector` function returns the SVG string, drawn from the shared
+`figuregen.palette` colours. `figuregen.cli` calls it to write
+`fig-17-inspector.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

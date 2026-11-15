@@ -1,4 +1,10 @@
-"""Figure generator module: figures.draw."""
+"""Draw the Burin Draw window figure.
+
+The window shows a canvas with a tool palette, rulers, guides and an object
+inspector. The exported `fig_draw` function returns the SVG string, drawn from
+the shared `figuregen.palette` colours. `figuregen.cli` calls it to write
+`fig-23-draw.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

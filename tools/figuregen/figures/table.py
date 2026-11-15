@@ -1,4 +1,10 @@
-"""Figure generator module: figures.table."""
+"""Draw the Enfilade Table window figure.
+
+The window shows category filters, a formula bar, a typed grid and a cell
+inspector. The exported `fig_table` function returns the SVG string, drawn
+from its `_COLS`, `_WIDTHS` and `_ROWS` data and the shared `figuregen.palette`
+colours. `figuregen.cli` calls it to write `fig-25-table.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

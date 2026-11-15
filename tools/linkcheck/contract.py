@@ -1,4 +1,9 @@
-"""Paths, patterns and the loaded contract shared by the link checks."""
+"""Paths, patterns and the loaded contract shared by the link checks.
+
+The module loads `tools/book-contract.json` and exposes the `BOOK`, `FIGURES`,
+`CONTRACT` and regular-expression values that the sibling link modules share.
+The check, link, requirement, self-test and command-line modules import it.
+"""
 
 from __future__ import annotations
 

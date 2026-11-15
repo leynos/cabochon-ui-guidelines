@@ -1,4 +1,9 @@
-"""Check the requirement identifiers, owners and semantic relationships."""
+"""Check the requirement identifiers, owners and semantic relationships.
+
+The module provides `check_requirements`, `check_states`, `check_profiles`,
+`check_commands` and `check_resources`, which read `tools/book-contract.json`
+and the chapters it names. `linkcheck.checks` imports all five.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,10 @@
-"""Figure generator module: figures.command_palette."""
+"""Draw the command palette over a document figure.
+
+The figure overlays a search field, grouped results and keyboard hints on a
+dimmed document. The exported `fig_command_palette` function returns the SVG
+string, drawn from the shared `figuregen.palette` colours. `figuregen.cli`
+calls it to write `fig-21-command-palette.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

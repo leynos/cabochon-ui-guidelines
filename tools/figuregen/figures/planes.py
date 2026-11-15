@@ -1,4 +1,10 @@
-"""Figure generator module: figures.planes."""
+"""Draw the four interface planes figure.
+
+The figure shows paper, pane, control and overlay planes with borders and one
+offset shadow. The exported `fig_planes` function returns the SVG string,
+drawn from the shared `figuregen.palette` colours. `figuregen.cli` calls it to
+write `fig-10-planes.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

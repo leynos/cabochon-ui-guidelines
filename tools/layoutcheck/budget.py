@@ -1,4 +1,10 @@
-"""Derive and validate each configuration against the declared tokens."""
+"""Derive and validate each configuration against the declared tokens.
+
+The module provides `bands`, `pane_width`, `side_width`, `derive` and
+`validate`, which compute a configuration's band total and document plane.
+`layoutcheck.chapter`, `layoutcheck.cli` and `layoutcheck.selftest` import
+these functions; tokens come from `tools/layout-budgets.json`.
+"""
 
 from __future__ import annotations
 

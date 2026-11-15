@@ -1,4 +1,10 @@
-"""Check the declared transitions against the chapter table and the figure."""
+"""Check the declared transitions against the chapter table and the figure.
+
+The `validate_transitions`, `compare_chapter` and `compare_figure` functions
+check `tools/figure-data.json` against `book/08-live-relationships.md` and
+`figures/fig-06-state.svg`. `statecheck.cli` and `statecheck.selftest` import
+them.
+"""
 
 from __future__ import annotations
 

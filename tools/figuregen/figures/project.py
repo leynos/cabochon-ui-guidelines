@@ -1,4 +1,10 @@
-"""Figure generator module: figures.project."""
+"""Draw the project window figure.
+
+The window shows a file tree, a document list with live states and an identity
+panel. The exported `fig_project` function returns the SVG string, drawn from
+the shared `figuregen.palette` colours. `figuregen.cli` calls it to write
+`fig-28-project.svg` under `figures/`.
+"""
 
 # Figure builders hold one local per drawing coordinate; see the matching
 # ruff exemption for tools/figuregen in pyproject.toml.

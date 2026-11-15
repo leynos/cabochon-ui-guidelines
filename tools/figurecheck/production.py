@@ -1,4 +1,10 @@
-"""Check the production fixtures against the component catalogue."""
+"""Check the production fixtures against the component catalogue.
+
+The `check_production_geometry` function derives each component's rendered
+height and bounds from the drawn primitives and compares them with the
+catalogue in `tools/figure-data.json`. `figurecheck.checks` calls it for every
+production figure.
+"""
 
 from __future__ import annotations
 

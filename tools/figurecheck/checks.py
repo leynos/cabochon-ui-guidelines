@@ -1,4 +1,10 @@
-"""Run every figure check and assemble the failure report."""
+"""Run every figure check and assemble the failure report.
+
+The `run` function compares the generated SVG inventory with
+`tools/figure-data.json`, then dispatches each figure to the annotation, state
+and production-geometry checks. `figurecheck.cli` and `figurecheck.selftest`
+both import it.
+"""
 
 from __future__ import annotations
 

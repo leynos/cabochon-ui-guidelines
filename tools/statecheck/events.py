@@ -1,4 +1,9 @@
-"""Validate fixture events and apply them to the fact set."""
+"""Validate fixture events and apply them to the fact set.
+
+The `validate_step` and `apply` functions check each fixture step's shape and
+derive its effect on the `Facts` record. `statecheck.scenarios` and
+`statecheck.selftest` import them.
+"""
 
 from __future__ import annotations
 

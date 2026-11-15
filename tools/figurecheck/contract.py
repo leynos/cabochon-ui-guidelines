@@ -1,4 +1,9 @@
-"""Constants and validated state records shared by the figure checks."""
+"""Constants and validated state records shared by the figure checks.
+
+The module loads `tools/figure-data.json` and exposes the `DATA` and
+`STATE_RECORDS` values, the accepted class and mark names, and the `BBox` and
+`GeometryError` types. Every sibling figure module imports it.
+"""
 
 from __future__ import annotations
 

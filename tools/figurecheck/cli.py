@@ -1,4 +1,9 @@
-"""Command-line entry point for the figure contract checks."""
+"""Command-line entry point for the figure contract checks.
+
+The `main` function runs the checks from `figurecheck.checks` over the
+`figures/` directory and selects `figurecheck.selftest` when `--self-test` is
+given. The `tools/check-figures.py` script imports and calls it.
+"""
 
 from __future__ import annotations
 

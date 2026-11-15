@@ -1,4 +1,9 @@
-"""Check every local link, front-matter figure and manifest entry."""
+"""Check every local link, front-matter figure and manifest entry.
+
+The `check_links`, `check_front_figure` and `check_manifest` functions validate
+link targets, anchors and chapter metadata across `book/*.md`.
+`linkcheck.checks` imports all three.
+"""
 
 from __future__ import annotations
 

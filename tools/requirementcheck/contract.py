@@ -1,4 +1,9 @@
-"""Paths, patterns and the profile order shared by the registry checks."""
+"""Paths, patterns and the profile order shared by the registry checks.
+
+The module defines `ROOT`, the requirement and owner regular expressions, and
+the `PROFILE_ORDER` ranking. The checklist, registry, mutation and command-line
+modules import it.
+"""
 
 from __future__ import annotations
 

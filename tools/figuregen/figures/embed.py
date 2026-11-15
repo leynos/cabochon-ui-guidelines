@@ -1,4 +1,11 @@
-"""Figure generator module: figures.embed."""
+"""Draw the embed envelope and provider figure.
+
+The figure shows a note embed resolving to its provider, with the resolved,
+opaque, unavailable and malformed outcomes below. The exported `fig_embed`
+function returns the SVG string, drawn from the `RESOLUTION_STATES` records in
+`figuregen.figdata`. `figuregen.cli` calls it to write `fig-29-embed.svg`
+under `figures/`.
+"""
 
 from __future__ import annotations
 

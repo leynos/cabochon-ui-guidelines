@@ -1,4 +1,9 @@
-"""Command-line entry point for the registry checks."""
+"""Command-line entry point for the registry checks.
+
+The `main` function runs `requirementcheck.checks.run` over the repository and
+selects `requirementcheck.selftest` when `--self-test` is given. The
+`tools/check-requirements.py` script imports and calls it.
+"""
 
 from __future__ import annotations
 

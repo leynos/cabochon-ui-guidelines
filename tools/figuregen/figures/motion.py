@@ -1,4 +1,10 @@
-"""Figure generator module: figures.motion."""
+"""Draw the motion timing chart figure.
+
+The chart plots ease-out curves for 80, 140 and 180 millisecond transitions.
+The exported `fig_motion` function returns the SVG string, drawn from the
+shared `figuregen.palette` colours. `figuregen.cli` calls it to write
+`fig-12-motion.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

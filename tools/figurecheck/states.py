@@ -1,4 +1,10 @@
-"""Verify the live-state inventory and the marks each figure draws."""
+"""Verify the live-state inventory and the marks each figure draws.
+
+The `check_states` function matches each figure's labels and mark groups
+against `STATE_RECORDS` from `tools/figure-data.json` and checks the declared
+inventory. `figurecheck.checks` calls it, and it in turn uses
+`figurecheck.marks`.
+"""
 
 from __future__ import annotations
 

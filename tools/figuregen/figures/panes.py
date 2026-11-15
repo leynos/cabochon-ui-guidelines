@@ -1,4 +1,10 @@
-"""Figure generator module: figures.panes."""
+"""Draw the pane layout figure.
+
+Navigator, document and inspector panes appear with minimum widths, a splitter
+and a collapsed pane. The exported `fig_panes` function returns the SVG
+string, drawn from the shared `figuregen.palette` colours. `figuregen.cli`
+calls it to write `fig-16-panes.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

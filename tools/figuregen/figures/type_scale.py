@@ -1,4 +1,10 @@
-"""Figure generator module: figures.type_scale."""
+"""Draw the typographic voices and type scale figure.
+
+Display, interface and metadata specimens sit above an eight-row type scale.
+The exported `fig_type` function returns the SVG string, drawn from the shared
+`figuregen.palette` colours. `figuregen.cli` calls it to write
+`fig-08-type.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

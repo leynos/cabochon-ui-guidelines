@@ -1,4 +1,10 @@
-"""Paths, typed fixture shapes and shared constants for the state contract."""
+"""Paths, typed fixture shapes and shared constants for the state contract.
+
+The module loads `tools/figure-data.json` and `tools/state-fixtures.json`, and
+locates `book/08-live-relationships.md` and `figures/fig-06-state.svg`. It
+defines the `Facts`, `Step` and `Scenario` shapes that every sibling module
+imports.
+"""
 
 from __future__ import annotations
 

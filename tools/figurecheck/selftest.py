@@ -1,4 +1,9 @@
-"""Prove that the figure checker detects the defects it claims to prevent."""
+"""Prove that the figure checker detects the defects it claims to prevent.
+
+The `self_test` function copies the figures, applies each mutation from
+`tools/figure-mutations.json` and requires the matching diagnostic from
+`figurecheck.checks.run`. `figurecheck.cli` invokes it for `--self-test`.
+"""
 
 from __future__ import annotations
 

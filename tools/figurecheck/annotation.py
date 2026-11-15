@@ -1,4 +1,9 @@
-"""Compare a figure's embedded annotation with the shared figure data."""
+"""Compare a figure's embedded annotation with the shared figure data.
+
+The `check_annotation` function verifies the declared class, profile, scale and
+embedded metadata against `tools/figure-data.json`. `figurecheck.checks` calls
+it for each parsed figure alongside the state and production checks.
+"""
 
 from __future__ import annotations
 

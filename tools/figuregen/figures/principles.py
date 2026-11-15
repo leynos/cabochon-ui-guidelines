@@ -1,4 +1,10 @@
-"""Figure generator module: figures.principles."""
+"""Draw the four principles figure.
+
+Four cards state that rectangles behave, objects persist, output is native and
+state speaks. The exported `fig_principles` function returns the SVG string,
+drawn from the shared `figuregen.palette` colours. `figuregen.cli` calls it to
+write `fig-04-principles.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

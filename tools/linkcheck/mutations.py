@@ -1,4 +1,9 @@
-"""Describe the self-test mutations and their required diagnostics."""
+"""Describe the self-test mutations and their required diagnostics.
+
+The `_mutation_cases` function returns each deliberate defect and the message
+it must provoke, with `replace` and `append` as the edit helpers.
+`linkcheck.selftest` imports these cases.
+"""
 
 from __future__ import annotations
 

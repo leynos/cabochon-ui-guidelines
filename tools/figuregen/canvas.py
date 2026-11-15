@@ -1,4 +1,11 @@
-"""Figure generator module: canvas."""
+"""Provide SVG element builders and text helpers for every figure module.
+
+Each function returns a fragment as a string, so a figure builder composes
+geometry without escaping markup by hand, and `svg_doc` wraps a body in a
+titled document. `figuregen.glyphs`, `figuregen.ornaments`,
+`figuregen.production`, `figuregen.widgets` and every `figuregen.figures.*`
+builder import it.
+"""
 
 # The drawing primitives take geometry and style arguments positionally; see
 # the matching ruff exemption for tools/figuregen in pyproject.toml.

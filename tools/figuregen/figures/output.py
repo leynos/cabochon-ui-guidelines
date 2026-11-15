@@ -1,4 +1,10 @@
-"""Figure generator module: figures.output."""
+"""Draw the scene-to-output workstations figure.
+
+The figure connects one Lapidary scene to nine output workstations. The
+exported `fig_output` function returns the SVG string, drawn from the shared
+`figuregen.palette` colours. `figuregen.cli` calls it to write
+`fig-30-output.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

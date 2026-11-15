@@ -1,4 +1,10 @@
-"""Figure generator module: figures.dialog."""
+"""Draw the destructive confirmation dialog figure.
+
+The dialog asks whether to replace an embedded table, naming the object and
+offering a way out. The exported `fig_dialog` function returns the SVG string,
+drawn from the shared `figuregen.palette` colours. `figuregen.cli` calls it to
+write `fig-19-dialog.svg` under `figures/`.
+"""
 
 from __future__ import annotations
 

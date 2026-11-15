@@ -1,4 +1,9 @@
-"""Command-line entry point for the link checks."""
+"""Command-line entry point for the link checks.
+
+The `main` function runs `linkcheck.checks.run_checks` over the book and
+selects `linkcheck.selftest` when `--self-test` is given. The
+`tools/check-links.py` script imports and calls it.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,9 @@
-"""Prove each registry check detects its defect and benign edits pass."""
+"""Prove each registry check detects its defect and benign edits pass.
+
+The `self_test` function applies the cases from `requirementcheck.mutations` to
+a temporary copy and requires each diagnostic while benign edits still pass.
+`requirementcheck.cli` invokes it for `--self-test`.
+"""
 
 from __future__ import annotations
 

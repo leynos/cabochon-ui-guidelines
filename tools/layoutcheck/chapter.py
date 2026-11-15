@@ -1,4 +1,9 @@
-"""Check the chapter's band and worked tables against the derived budgets."""
+"""Check the chapter's band and worked tables against the derived budgets.
+
+The `check_chapter` function parses the tables in chapter 14 and compares each
+row with the values derived by `layoutcheck.budget`. `layoutcheck.cli` and
+`layoutcheck.selftest` import it.
+"""
 
 from __future__ import annotations
 

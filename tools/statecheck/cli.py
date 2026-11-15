@@ -1,4 +1,10 @@
-"""Command-line entry point for the state contract checks."""
+"""Command-line entry point for the state contract checks.
+
+The `main` function validates the transitions and event scenarios from
+`tools/figure-data.json` and `tools/state-fixtures.json`, selecting
+`statecheck.selftest` for `--self-test`. The `tools/check-states.py` script
+imports and calls it.
+"""
 
 from __future__ import annotations
 

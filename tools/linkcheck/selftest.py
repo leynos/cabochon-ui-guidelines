@@ -1,4 +1,9 @@
-"""Prove that each mutation provokes the diagnostic it claims."""
+"""Prove that each mutation provokes the diagnostic it claims.
+
+The `self_test` function copies the repository, applies every case from
+`linkcheck.mutations` and reruns `tools/check-links.py` in an isolated
+interpreter. `linkcheck.cli` invokes it for `--self-test`.
+"""
 
 from __future__ import annotations
 

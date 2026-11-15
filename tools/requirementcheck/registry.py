@@ -1,4 +1,9 @@
-"""Check the registry schema, its records and their ownership."""
+"""Check the registry schema, its records and their ownership.
+
+The `load_registry` and `check_records` functions validate
+`tools/requirements.json` against the schema, each owner anchor and the parsed
+checklist. `requirementcheck.checks` imports both.
+"""
 
 from __future__ import annotations
 
