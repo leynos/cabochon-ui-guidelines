@@ -1,9 +1,10 @@
 """Measure the geometry that a constrained SVG subset renders.
 
-The module provides `parse_transform`, `path_bbox` and `rendered_bbox`, which
-compute transformed bounds for the primitives the checker accepts. The
-annotation, production, state and mark checks import these helpers, using the
-tags and matrices from `figurecheck.contract`.
+The module provides `parse_transform` and `rendered_bbox`, which compute
+transformed bounds for the primitives the checker accepts, and re-exports
+`path_bbox` from `figurecheck.paths`. The annotation, production, state and mark
+checks import these helpers, using the tags and matrices from
+`figurecheck.contract`.
 """
 
 from __future__ import annotations
@@ -15,12 +16,12 @@ from figurecheck.contract import (
     GEOMETRY_TAGS,
     IDENTITY,
     NUMBER_RE,
-    PATH_TOKEN_RE,
     SVG_NS,
     TRANSFORM_RE,
     BBox,
     GeometryError,
 )
+from figurecheck.paths import path_bbox
 
 if typ.TYPE_CHECKING:
     from xml.etree import ElementTree
@@ -140,62 +141,6 @@ def merge_bbox(first: BBox | None, second: BBox) -> BBox:
     )
 
 
-def _consume_arc(
-    tokens: list[str], index: int, radius: float
-) -> tuple[float, tuple[float, float], int]:
-    """Read one arc's radii and endpoint, widening the radius it spans."""
-    if index + 7 > len(tokens):
-        raise GeometryError("truncated arc in path")
-    radius = max(radius, float(tokens[index]), float(tokens[index + 1]))
-    point = (float(tokens[index + 5]), float(tokens[index + 6]))
-    return radius, point, index + 7
-
-
-def _consume_point(
-    tokens: list[str], index: int
-) -> tuple[tuple[float, float], int]:
-    """Read one coordinate pair from path tokens."""
-    if index + 2 > len(tokens):
-        raise GeometryError("truncated point in path")
-    return (float(tokens[index]), float(tokens[index + 1])), index + 2
-
-
-def path_bbox(data: str) -> BBox:
-    """Compute the bounding box of the segments an SVG path data string draws."""
-    tokens = PATH_TOKEN_RE.findall(data)
-    points: list[tuple[float, float]] = []
-    radius = 0.0
-    command: str | None = None
-    drawn = False
-    starts_here = False
-    index = 0
-    while index < len(tokens):
-        token = tokens[index]
-        if token.isalpha():
-            command = token
-            starts_here = True
-            index += 1
-            continue
-        if command not in {"M", "L", "A"}:
-            raise GeometryError(f"unsupported path command {command!r}")
-        if command == "A":
-            radius, point, index = _consume_arc(tokens, index, radius)
-        else:
-            point, index = _consume_point(tokens, index)
-        if command != "M" or not starts_here:
-            drawn = True
-        starts_here = False
-        points.append(point)
-    if not drawn:
-        raise GeometryError("path draws no segments")
-    return (
-        min(point[0] for point in points) - radius,
-        min(point[1] for point in points) - radius,
-        max(point[0] for point in points) + radius,
-        max(point[1] for point in points) + radius,
-    )
-
-
 def _rect_bbox(element: ElementTree.Element) -> BBox:
     """Compute the bounding box of a rectangle element."""
     x = parse_number(element.get("x", "0"), "rect x")
@@ -312,6 +257,20 @@ def _ancestry(
     return chain
 
 
+def _inherited_presentation(
+    element: ElementTree.Element,
+    parents: dict[ElementTree.Element, ElementTree.Element],
+    name: str,
+    default: str | None = None,
+) -> str | None:
+    """Return a presentation value, inherited from the nearest ancestor."""
+    for node in _ancestry(element, parents):
+        value = _presentation(node, name)
+        if value is not None:
+            return value
+    return default
+
+
 def clip_used(
     element: ElementTree.Element,
     parents: dict[ElementTree.Element, ElementTree.Element],
@@ -323,13 +282,25 @@ def clip_used(
     )
 
 
-def paint_visible(element: ElementTree.Element) -> bool:
+def paint_visible(
+    element: ElementTree.Element,
+    parents: dict[ElementTree.Element, ElementTree.Element],
+) -> bool:
     """Return whether an element paints anything visible."""
-    fill = (element.get("fill") or "").lower()
-    stroke = (element.get("stroke") or "").lower()
-    fill_opacity = parse_number(element.get("fill-opacity", "1"), "fill-opacity")
-    stroke_opacity = parse_number(element.get("stroke-opacity", "1"), "stroke-opacity")
-    stroke_width = parse_number(element.get("stroke-width", "1"), "stroke-width")
+    fill = (_inherited_presentation(element, parents, "fill", "") or "").lower()
+    stroke = (_inherited_presentation(element, parents, "stroke", "") or "").lower()
+    fill_opacity = parse_number(
+        _inherited_presentation(element, parents, "fill-opacity", "1"),
+        "fill-opacity",
+    )
+    stroke_opacity = parse_number(
+        _inherited_presentation(element, parents, "stroke-opacity", "1"),
+        "stroke-opacity",
+    )
+    stroke_width = parse_number(
+        _inherited_presentation(element, parents, "stroke-width", "1"),
+        "stroke-width",
+    )
     has_fill = fill not in {"", "none", "transparent"} and fill_opacity > 0
     has_stroke = (
         stroke not in {"", "none", "transparent"}
@@ -365,7 +336,7 @@ def rendered_bbox(
         reason = hidden_reason(element, parents)
         if reason is not None:
             raise GeometryError(f"{label} is not visible ({reason})")
-        if not paint_visible(element):
+        if not paint_visible(element, parents):
             raise GeometryError(f"{label} draws nothing visible")
         local_box = primitive_bbox(element)
         box = merge_bbox(

@@ -24,18 +24,35 @@ def chip(  # pylint: disable=too-many-arguments
 
     Parameters
     ----------
-    x, y : float
+    x : float
+        The chip's left edge in logical units.
+    y : float
+        The chip's top edge in logical units; the body is 20 logical units
+        high.
     label : str
-    colour, fill : str
+        The label text, drawn in bold mono 18 logical units from the left
+        edge.
+    colour : str
+        The colour of the outline, the mark and the label.
+    fill : str
+        The colour that fills the chip body.
     size : float
+        The label font size in logical units, which also sets the chip width.
     state : str | None
-        State identifier.
-    mark, role : str
-        Mark name and colour role.
+        The state identifier recorded as the ``data-state`` annotation, or
+        ``None`` to record none.
+    mark : str
+        The mark name, which selects the non-colour mark drawn beside the
+        label.
+    role : str
+        The colour role recorded alongside the mark.
 
     Returns
     -------
     tuple[str, float]
+        The SVG fragment string for the chip group and the chip's width in
+        logical units, which is ``max(58.0, len(label) * size * 0.62 + 18)``
+        and therefore never less than 58.
     """
     width = max(58.0, len(label) * size * 0.62 + 18)
     body = '<g data-state-chip="true">'
@@ -63,15 +80,33 @@ def chip(  # pylint: disable=too-many-arguments
 def state_chip(x: float, y: float, name: str) -> tuple[str, float]:
     """Draw a live or resolution state chip.
 
+    The chip takes its label, colour, mark and role from the named state, and
+    the label is drawn in upper case.
+
     Parameters
     ----------
-    x, y : float
+    x : float
+        The chip's left edge in logical units.
+    y : float
+        The chip's top edge in logical units; the body is 20 logical units
+        high.
     name : str
-        State name.
+        The state name, looked up first among the live states and then among
+        the resolution states.
 
     Returns
     -------
     tuple[str, float]
+        The SVG fragment string for the chip group and the chip's computed
+        width in logical units.
+
+    Raises
+    ------
+    ValueError
+        If ``name`` is not a known state, or if the state it names declares no
+        non-colour mark. The known live states are ``Current``, ``Refreshing``,
+        ``Stale``, ``Broken`` and ``Denied``, and the known resolution states
+        are ``Resolved``, ``Opaque``, ``Unavailable`` and ``Malformed``.
     """
     state = LIVE_STATES.get(name) or RESOLUTION_STATES.get(name)
     if state is None:

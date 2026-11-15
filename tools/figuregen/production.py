@@ -25,13 +25,24 @@ def annotate(name: str, svg: str) -> str:
     Parameters
     ----------
     name : str
-        Figure name.
+        The figure name, which must have an entry in
+        ``tools/figure-data.json``.
     svg : str
-        Rendered SVG document.
+        The rendered SVG document to annotate.
 
     Returns
     -------
     str
+        The annotated SVG document, with the ``data-figure-*`` attributes
+        added to its first ``role="img"`` element and a ``<metadata>`` block
+        inserted after its opening tag.
+
+    Raises
+    ------
+    ValueError
+        If ``name`` has no entry in ``tools/figure-data.json``, or if that
+        entry declares a class other than ``schematic``, ``editorial`` or
+        ``production``.
     """
     spec = FIGURE_SPECS.get(name)
     if spec is None:
@@ -74,12 +85,26 @@ def production_component(  # pylint: disable=too-many-arguments
 
     Parameters
     ----------
-    x, y, w, h : float
-    kind, label : str
+    x : float
+        The component's left edge in logical units.
+    y : float
+        The component's top edge in logical units.
+    w : float
+        The component's width in logical units.
+    h : float
+        The component's height in logical units, which is also recorded as its
+        ``data-height`` annotation.
+    kind : str
+        The catalogue component name, recorded as its ``data-component``
+        annotation.
+    label : str
+        The text drawn in mono at 10 logical units, inset 8 from the left edge
+        and centred vertically.
 
     Returns
     -------
     str
+        The SVG fragment string for one component group.
     """
     attributes = attrs(data_component=kind, data_height=h)
     body = f"<g {attributes}>"

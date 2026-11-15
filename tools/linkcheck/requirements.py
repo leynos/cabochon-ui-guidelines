@@ -13,10 +13,10 @@ if typ.TYPE_CHECKING:
     from pathlib import Path
 
 
+from markdown_links import link_targets
 from markdown_structure import (
     anchors,
     checklist_items,
-    link_targets,
     slug,
     strip_code_and_comments,
     strip_fences_and_comments,

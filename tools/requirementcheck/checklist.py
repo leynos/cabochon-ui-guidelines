@@ -18,7 +18,41 @@ if typ.TYPE_CHECKING:
 
 
 def parse_checklist(path: Path, problems: list[str]) -> dict[str, list[str]]:
-    """Parse visible checklist items, ignoring comments, fences and code."""
+    """Parse visible checklist items, ignoring comments, fences and code.
+
+    Each item body must begin with a bold requirement identifier such as
+    ``**CON-01**``. The body is stored against that identifier together with
+    the destinations of every ``Owner:`` link it names.
+
+    Parameters
+    ----------
+    path : Path
+        The checklist Markdown file to read as UTF-8.
+    problems : list[str]
+        Diagnostics collected for the caller. The list is appended to in
+        place and never cleared. It receives:
+
+        * ``"checklist item has no requirement identifier"`` for an item
+          body that does not start with a bold identifier;
+        * ``"duplicate checklist identifier CON-01"``, with the real
+          identifier in place of the example, when an identifier is
+          already present.
+
+    Returns
+    -------
+    dict[str, list[str]]
+        Each requirement identifier mapped to the owner destinations its
+        item names, in source order; the list is empty when the item names
+        no owner. A later item repeating an identifier replaces the earlier
+        entry's owner list rather than merging with it.
+
+    Raises
+    ------
+    OSError
+        If the checklist file cannot be read.
+    UnicodeDecodeError
+        If the file is not valid UTF-8.
+    """
     items: dict[str, list[str]] = {}
     text = strip_code_and_comments(path.read_text(encoding="utf-8"))
     for block in checklist_items(text):

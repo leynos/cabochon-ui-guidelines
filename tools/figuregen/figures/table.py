@@ -24,11 +24,31 @@ _ROWS = [
 ]
 
 
+def _category_counts() -> list[tuple[str, int]]:
+    """Count the rows in each category, in order of first appearance."""
+    source = _COLS.index("Source")
+    order: list[str] = []
+    counts: dict[str, int] = {}
+    for row in _ROWS:
+        category = row[source].split(" · ", 1)[0]
+        if category not in counts:
+            order.append(category)
+            counts[category] = 0
+        counts[category] += 1
+    return [("All rows", len(_ROWS)), *[(name, counts[name]) for name in order]]
+
+
+def _output_total() -> int:
+    """Sum the Output column over the displayed rows."""
+    output = _COLS.index("Output")
+    return sum(int(row[output].replace(",", "")) for row in _ROWS)
+
+
 def _categories(x: float, y: float, cat_w: float, h: float) -> str:
     """Draw the category rail."""
     body = rect(x, y + 60, cat_w, h - 86, fill=PAPER, stroke=None)
     body += pane_head(x, y + 60, cat_w, "Categories")
-    cats = [("All rows", 12), ("Wind", 5), ("Solar", 3), ("Hydro", 2), ("Imported", 2)]
+    cats = _category_counts()
     for index, (name, count) in enumerate(cats):
         cy = y + 100 + index * 32
         if index == 0:
@@ -200,7 +220,10 @@ def fig_table() -> str:
         h,
         title="Enfilade Table — Generation mix",
         menu=["File", "Edit", "View", "Data", "Object", "Window", "Help"],
-        status="Sum 37,840 GWh · 5 rows · 4 columns",
+        status=(
+            f"Output total {_output_total():,} GWh · "
+            f"{len(_ROWS)} rows · {len(_COLS)} columns"
+        ),
         state="Current",
     )
     cat_w = 210

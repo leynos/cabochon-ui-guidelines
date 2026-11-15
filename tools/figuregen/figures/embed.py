@@ -151,7 +151,7 @@ def fig_embed() -> str:
         64,
         710,
         1072,
-        "No state deletes the embed or flattens it into pixels. The last readable value remains visible, with its state and the operation that would restore it.",
+        "No state deletes the embed or flattens it into pixels. A cached value stays visible only while one exists and authority permits it; its state and the operation that would restore it are shown. Denied shows no protected value.",
         size=11,
         leading=16,
     )

@@ -24,7 +24,24 @@ from requirementcheck.mutations import (
 
 
 def self_test() -> None:
-    """Prove each check detects its defect and that benign edits still pass."""
+    """Prove each check detects its defect and that benign edits still pass.
+
+    A temporary copy of the book and registry tools is made, the mutations
+    from `requirementcheck.mutations` are applied one at a time, and each
+    must produce its expected diagnostic while the untouched baseline, a
+    wording-only edit and a comment-only checklist item still pass.
+
+    Returns
+    -------
+    None
+        The function returns nothing; it reports through standard output.
+
+    Raises
+    ------
+    SystemExit
+        With status one when the baseline, a mutation or a benign edit
+        misbehaves; each failure is printed with a ``self-test:`` prefix.
+    """
     failures: list[str] = []
     detected = 0
     with tempfile.TemporaryDirectory() as temporary:

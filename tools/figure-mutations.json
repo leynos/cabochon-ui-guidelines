@@ -152,5 +152,26 @@
     "old": "<g data-mark=\"dot\" data-state-id=\"current\" data-role=\"pine2\">",
     "new": "<g data-mark=\"dot\" data-state-id=\"current\" data-role=\"pine2\" transform=\"translate(-87.5,0)\">",
     "expected": "clipped by the viewBox"
+  },
+  {
+    "label": "trailing subpath outside the viewBox",
+    "filename": "fig-06-state.svg",
+    "old": "d=\"M 309.40 191.40 L 308.60 192.60 L 307.40 192.20\"",
+    "new": "d=\"M 309.40 191.40 L 308.60 192.60 L 307.40 192.20 M 2000 2000 2001 2001\"",
+    "expected": "clipped by the viewBox"
+  },
+  {
+    "label": "inline zero stroke width",
+    "filename": "fig-06-state.svg",
+    "old": "<line x1=\"743.2\" y1=\"191.6\" x2=\"744.2\" y2=\"192.8\" stroke=\"#8A302F\" stroke-width=\"1\"/>",
+    "new": "<line x1=\"743.2\" y1=\"191.6\" x2=\"744.2\" y2=\"192.8\" stroke=\"#8A302F\" stroke-width=\"1\" style=\"stroke-width:0\"/>",
+    "expected": "draws nothing visible"
+  },
+  {
+    "label": "inherited zero stroke width",
+    "filename": "fig-06-state.svg",
+    "old": "<g data-mark=\"broken\" data-state-id=\"broken\" data-role=\"oxide\"><line x1=\"742.6\" y1=\"194\" x2=\"744.7\" y2=\"194\" stroke=\"#8A302F\" stroke-width=\"1.8\"/>",
+    "new": "<g data-mark=\"broken\" data-state-id=\"broken\" data-role=\"oxide\" stroke-width=\"0\"><line x1=\"742.6\" y1=\"194\" x2=\"744.7\" y2=\"194\" stroke=\"#8A302F\"/>",
+    "expected": "draws nothing visible"
   }
 ]

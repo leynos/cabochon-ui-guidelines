@@ -28,6 +28,23 @@ from figuregen.palette import (
 from figuregen.widgets import inspector_row, pane_head, window_shell
 
 
+def _chip_width(name: str) -> float:
+    """Measure a state chip without keeping its drawing.
+
+    Parameters
+    ----------
+    name : str
+        State name.
+
+    Returns
+    -------
+    float
+        The chip's width in logical units, so a card can right-align it.
+    """
+    _, width = state_chip(0, 0, name)
+    return width
+
+
 def fig_project() -> str:  # pylint: disable=too-many-locals
     """Draw the project window with tree, documents and identity panel.
 
@@ -78,8 +95,11 @@ def fig_project() -> str:  # pylint: disable=too-many-locals
             fill=WHITE if selected else (INK if depth < 2 else SOFT),
         )
     body += line(x + left_w, y + 60, x + left_w, y + h - 26, stroke=INK)
-    # Centre list.
+    # Centre list. The identity panel begins at rx, so the cards stop a
+    # 24-unit gutter short of it and the separator never covers their border.
+    rx = x + w - right_w
     cx = x + left_w + 24
+    card_w = rx - cx - 24
     body += txt(cx, y + 98, "Documents", size=16, family=F_DISPLAY, style="italic")
     docs = [
         ("transition.md", "note:transition", "3 embeds · updated 14:02", "Current"),
@@ -88,22 +108,22 @@ def fig_project() -> str:  # pylint: disable=too-many-locals
     ]
     for index, (name, identity, detail, state) in enumerate(docs):
         dy = y + 120 + index * 92
-        body += rect(cx, dy, 508, 76, fill=HIGH, stroke=LINE)
+        body += rect(cx, dy, card_w, 76, fill=HIGH, stroke=LINE)
         body += txt(cx + 16, dy + 26, name, size=12, weight="bold")
         body += txt(cx + 16, dy + 46, identity, size=11, fill=SOFT, family=F_MONO)
         body += txt(cx + 16, dy + 64, detail, size=11, fill=SOFT)
-        state_body, _ = state_chip(cx + 400, dy + 14, state)
+        chip_x = cx + card_w - 12 - _chip_width(state)
+        state_body, _ = state_chip(chip_x, dy + 14, state)
         body += state_body
     body += para(
         cx,
         y + 430,
-        508,
+        card_w,
         "A project remembers which views were open, which panes were collapsed and which objects were pinned. It does not own the objects inside it.",
         size=11,
         leading=17,
     )
     # Right links.
-    rx = x + w - right_w
     body += rect(rx, y + 60, right_w, h - 86, fill=PAPER, stroke=None)
     body += line(rx, y + 60, rx, y + h - 26, stroke=INK)
     body += pane_head(rx, y + 60, right_w, "Identity")

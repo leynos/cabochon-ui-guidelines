@@ -103,7 +103,7 @@ def fig_first_batch() -> str:
             )
         if mark == "done":
             body += txt(
-                1136,
+                284,
                 y + 22,
                 "shipped",
                 size=10,
@@ -113,7 +113,7 @@ def fig_first_batch() -> str:
             )
         elif mark == "active":
             body += txt(
-                1136,
+                284,
                 y + 22,
                 "in progress",
                 size=10,
@@ -123,7 +123,7 @@ def fig_first_batch() -> str:
             )
         else:
             body += txt(
-                1136,
+                284,
                 y + 22,
                 "held to the same rules",
                 size=10,

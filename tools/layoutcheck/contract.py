@@ -145,15 +145,25 @@ def addends(cell: str) -> list[int]:
 def stated_total(cell: str) -> int:
     """Return the total that a worked arithmetic cell states.
 
+    A cell that states no total, because it has no equals sign, still supplies
+    its own integer as the total. The total is read from the text after the
+    last equals sign.
+
     Parameters
     ----------
     cell : str
-        The worked arithmetic cell.
+        The worked arithmetic cell, such as ``28 + 28 = 56``.
 
     Returns
     -------
     int
-        The total that follows the equals sign.
+        The integer after the last equals sign, or the integer that the whole
+        cell holds when the cell states no total.
+
+    Raises
+    ------
+    ValueError
+        If the stated total is not an integer.
     """
     return int(cell.split("=")[-1])
 
@@ -161,16 +171,24 @@ def stated_total(cell: str) -> int:
 def plane_size(cell: str) -> tuple[int, int] | None:
     """Return the complete width and height that a plane cell states.
 
+    A complete size is a pair of integers joined by a multiplication sign,
+    with whitespace optional on either side of it. Anything after the height
+    is allowed as an annotation provided that it does not begin with a digit
+    or a full stop. A fractional height such as ``320 \u00d7 20.5`` and
+    an incomplete size such as ``320 \u00d7`` do not state a complete
+    size.
+
     Parameters
     ----------
     cell : str
-        The document-plane cell.
+        The document-plane cell, such as ``456 \u00d7 298, content 320
+        scrolls``.
 
     Returns
     -------
     tuple[int, int] | None
-        The width and height, or ``None`` when the cell does not state a
-        complete size.
+        The width and height in logical units, or ``None`` when the cell does
+        not state a complete size.
     """
     match = PLANE_RE.match(cell)
     if match is None:
@@ -181,17 +199,27 @@ def plane_size(cell: str) -> tuple[int, int] | None:
 def number(tokens: dict[str, int], value: object) -> int:
     """Return a literal number, or resolve a named token against the table.
 
+    An ``int`` value, which includes a ``bool``, is returned unchanged. Any
+    other value is converted with ``str()`` and looked up in ``tokens`` by the
+    resulting name.
+
     Parameters
     ----------
     tokens : dict[str, int]
         The declared token table, keyed by token name.
     value : object
-        A literal integer or the name of a token.
+        A literal ``int`` or the name of a token.
 
     Returns
     -------
     int
-        The literal value, or the token's declared value.
+        The literal integer, or the token's declared value.
+
+    Raises
+    ------
+    KeyError
+        If the name of a value that is not an ``int`` has no entry in
+        ``tokens``.
     """
     if isinstance(value, int):
         return value

@@ -19,7 +19,25 @@ if typ.TYPE_CHECKING:
 
 
 def load_registry(path: Path, problems: list[str]) -> dict[str, object]:
-    """Load the registry, recording an unreadable file as a problem."""
+    """Load the registry, recording an unreadable file as a problem.
+
+    Parameters
+    ----------
+    path : Path
+        The JSON registry to read as UTF-8.
+    problems : list[str]
+        Diagnostics collected for the caller. The list is appended to in
+        place and never cleared. A file that cannot be read or decoded adds
+        ``"requirement registry is unreadable: <error>"``, where ``<error>``
+        is the exception's message.
+
+    Returns
+    -------
+    dict[str, object]
+        The decoded JSON document, normally an object, or an empty
+        dictionary when the file cannot be read or decoded. Later checks
+        treat an empty result as a missing registry.
+    """
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
@@ -162,7 +180,51 @@ def check_records(
     root: Path,
     problems: list[str],
 ) -> None:
-    """Check the registry schema, records, ownership and profile coverage."""
+    """Check the registry schema, records, ownership and profile coverage.
+
+    An empty registry, a missing schema list or a missing or empty
+    requirements list stops the check after its message is recorded.
+    Otherwise every record is checked, and the checklist and profiles are
+    compared against it.
+
+    Parameters
+    ----------
+    registry : dict[str, object]
+        The decoded ``tools/requirements.json`` document.
+    checklist : dict[str, list[str]]
+        The checklist parsed by `parse_checklist`.
+    root : Path
+        The repository root; each owner file is resolved under
+        ``root / "book"``.
+    problems : list[str]
+        Diagnostics collected for the caller. The list is appended to in
+        place and never cleared, so several messages may be added for one
+        record. Schema messages are:
+
+        * ``"requirement registry is empty"``;
+        * ``"registry schema lists are missing"``;
+        * ``"registry has no requirements"``;
+        * ``"registry contains a record that is not an object"``.
+
+        Most record messages begin with the identifier, as in
+        ``"CON-01: no owner"``, and report a duplicate or malformed
+        identifier, a missing owner, an owner file or anchor that does not
+        exist, an invalid ``force`` or ``profile``, no applicability
+        predicate, a missing or invalid evidence route, or a checklist
+        owner that disagrees with the registry. The checklist and profile
+        coverage checks add:
+
+        * ``"checklist item <id> has no registry record"``;
+        * ``"registry record <id> has no checklist item"``;
+        * ``"profile <name> inherits no applicable must requirement"``
+          when ``semantic`` or ``studio`` has no applicable ``must``
+          requirement.
+
+    Returns
+    -------
+    None
+        The function reports only through `problems` and returns nothing.
+    """
     if not registry:
         problems.append("requirement registry is empty")
         return

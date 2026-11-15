@@ -1,9 +1,7 @@
-"""Draw the window furniture and form controls that the figures compose.
+"""Draw the window chrome: title bar, menu strip, status line and shell.
 
-`window_shell` combines `titlebar`, `menu_strip` and `status_bar`, and the
-module also exports `pane_head`, `field`, `button`, `checkbox`, `radio` and
-`inspector_row`. Most `figuregen.figures.*` builders import it, and it takes
-state chips from `figuregen.ornaments`.
+The `figuregen.widgets` package re-exports these functions for the
+`figuregen.figures.*` builders that draw application windows.
 """
 
 # The drawing primitives take geometry and style arguments positionally; see
@@ -11,20 +9,9 @@ state chips from `figuregen.ornaments`.
 
 from __future__ import annotations
 
-from figuregen.canvas import circle, line, path, rect, txt
+from figuregen.canvas import line, rect, txt
 from figuregen.ornaments import state_chip
-from figuregen.palette import (
-    F_MONO,
-    HIGH,
-    INK,
-    LINE,
-    OXIDE,
-    PAPER,
-    PINE,
-    PINE2,
-    SOFT,
-    WHITE,
-)
+from figuregen.palette import HIGH, INK, LINE, PAPER, PINE2, SOFT, WHITE
 
 
 def titlebar(  # pylint: disable=too-many-arguments
@@ -38,15 +25,30 @@ def titlebar(  # pylint: disable=too-many-arguments
 ) -> str:
     """Draw a window title bar with optional window controls.
 
+    The bar is 31 logical units high and carries a bottom edge line.
+
     Parameters
     ----------
-    x, y, w : float
+    x : float
+        The bar's left edge in logical units.
+    y : float
+        The bar's top edge in logical units.
+    w : float
+        The bar's width in logical units.
     title : str
-    rtl, controls : bool
+        The title text, drawn bold at 12 logical units and inset from the
+        leading edge.
+    rtl : bool
+        Draw the title and controls right to left when true; the default
+        ``False`` places them from the left.
+    controls : bool
+        Draw the minimise, maximise and close glyphs when true, which is the
+        default; ``False`` omits them.
 
     Returns
     -------
     str
+        The SVG fragment string for the title bar.
     """
     body = rect(x, y, w, 31, fill=PAPER, stroke=None)
     body += line(x, y + 30.5, x + w, y + 30.5, stroke=LINE)
@@ -79,16 +81,29 @@ def menu_strip(  # pylint: disable=too-many-arguments
 ) -> str:
     """Draw a menu strip with one active menu.
 
+    The strip is 29 logical units high and carries a bottom edge line. The
+    active label gains a filled background and white bold text.
+
     Parameters
     ----------
-    x, y, w : float
+    x : float
+        The strip's left edge in logical units.
+    y : float
+        The strip's top edge in logical units.
+    w : float
+        The strip's width in logical units.
     items : list[str]
+        The menu labels, drawn at 12 logical units.
     active : str | None
+        The label to highlight, or ``None``, the default, to highlight none.
     rtl : bool
+        Lay the labels out from the right edge when true; the default
+        ``False`` lays them out from the left.
 
     Returns
     -------
     str
+        The SVG fragment string for the menu strip.
     """
     body = rect(x, y, w, 29, fill=PAPER, stroke=None)
     body += line(x, y + 28.5, x + w, y + 28.5, stroke=LINE)
@@ -140,16 +155,29 @@ def status_bar(  # pylint: disable=too-many-arguments
 ) -> str:
     """Draw a status line with an optional live state.
 
+    The bar is 26 logical units high and carries a top edge line.
+
     Parameters
     ----------
-    x, y, w : float
+    x : float
+        The bar's left edge in logical units.
+    y : float
+        The bar's top edge in logical units.
+    w : float
+        The bar's width in logical units.
     message : str
+        The message text, drawn at 11 logical units.
     state : str | None
+        The state name whose chip is drawn on the bar, or ``None``, the
+        default, to draw no chip.
     rtl : bool
+        Draw the message from the right edge and the chip at the left when
+        true; the default ``False`` does the opposite.
 
     Returns
     -------
     str
+        The SVG fragment string for the status bar.
     """
     body = rect(x, y, w, 26, fill=PAPER, stroke=None)
     body += line(x, y + 0.5, x + w, y + 0.5, stroke=LINE)
@@ -163,31 +191,6 @@ def status_bar(  # pylint: disable=too-many-arguments
         if state:
             chip_body, _ = state_chip(x + w - 120, y + 1, state)
             body += chip_body
-    return body
-
-
-def pane_head(  # pylint: disable=too-many-arguments
-    x: float, y: float, w: float, title: str, *, right: str | None = None
-) -> str:
-    """Draw a pane header with an optional right-hand label.
-
-    Parameters
-    ----------
-    x, y, w : float
-    title : str
-    right : str | None
-
-    Returns
-    -------
-    str
-    """
-    body = rect(x, y, w, 28, fill=PAPER, stroke=None)
-    body += line(x, y + 27.5, x + w, y + 27.5, stroke=LINE)
-    body += txt(
-        x + 10, y + 18, title.upper(), size=10, fill=SOFT, weight="bold", spacing=0.8
-    )
-    if right:
-        body += txt(x + w - 10, y + 18, right, size=10, fill=SOFT, anchor="end")
     return body
 
 
@@ -206,17 +209,42 @@ def window_shell(  # pylint: disable=too-many-arguments
 ) -> str:
     """Draw a window shell with title bar, menu strip and status line.
 
+    The body is backed by a shadow offset 8 logical units right and down, the
+    title bar and menu strip occupy the top 60 logical units, and a divider
+    separates them from the content.
+
     Parameters
     ----------
-    x, y, w, h : float
+    x : float
+        The shell's left edge in logical units.
+    y : float
+        The shell's top edge in logical units.
+    w : float
+        The shell's width in logical units.
+    h : float
+        The shell's height in logical units; the status line sits at its
+        lower edge.
     title : str
+        The window title, passed to `titlebar`.
     menu : list[str]
-    active_menu, status, state : str | None
+        The menu labels, passed to `menu_strip`.
+    active_menu : str | None
+        The label of the menu to highlight, or ``None``, the default, to
+        highlight none.
+    status : str | None
+        The status message; ``None``, the default, omits the status line
+        entirely.
+    state : str | None
+        The state name shown as a chip on the status line, or ``None``, the
+        default, for no chip. It has no effect when ``status`` is ``None``.
     rtl : bool
+        Lay out the title, menu strip and status line right to left when
+        true; the default ``False`` lays them out from the left.
 
     Returns
     -------
     str
+        The SVG fragment string for the window shell.
     """
     body = rect(x + 8, y + 8, w, h, fill="#17201C20", stroke=None)
     body += rect(x, y, w, h, fill=HIGH, stroke=INK)
@@ -225,150 +253,4 @@ def window_shell(  # pylint: disable=too-many-arguments
     body += line(x, y + 60, x + w, y + 60, stroke=LINE)
     if status is not None:
         body += status_bar(x, y + h - 26, w, status, state=state, rtl=rtl)
-    return body
-
-
-def field(  # pylint: disable=too-many-arguments
-    x: float,
-    y: float,
-    w: float,
-    value: str,
-    *,
-    label: str | None = None,
-    height: float = 32,
-    focus: bool = False,
-) -> str:
-    """Draw a labelled text field, optionally focused.
-
-    Parameters
-    ----------
-    x, y, w : float
-    value : str
-    label : str | None
-    height : float
-    focus : bool
-
-    Returns
-    -------
-    str
-    """
-    body = ""
-    if label:
-        body += txt(x, y - 6, label, size=11, fill=SOFT)
-    body += rect(
-        x,
-        y,
-        w,
-        height,
-        fill=WHITE,
-        stroke=OXIDE if focus else LINE,
-        sw=2 if focus else 1,
-    )
-    body += txt(x + 10, y + height / 2 + 4, value, size=12, fill=INK)
-    return body
-
-
-def button(  # pylint: disable=too-many-arguments
-    x: float,
-    y: float,
-    w: float,
-    label: str,
-    *,
-    primary: bool = False,
-    destructive: bool = False,
-    height: float = 32,
-    disabled: bool = False,
-) -> str:
-    """Draw a button in primary, destructive or default form.
-
-    Parameters
-    ----------
-    x, y, w : float
-    label : str
-    primary, destructive, disabled : bool
-    height : float
-
-    Returns
-    -------
-    str
-    """
-    fill = PINE if primary else HIGH
-    stroke = PINE if primary else LINE
-    colour = WHITE if primary else (OXIDE if destructive else INK)
-    if disabled:
-        fill = PAPER
-        stroke = LINE
-        colour = SOFT
-    body = rect(x, y, w, height, fill=fill, stroke=stroke)
-    body += txt(
-        x + w / 2,
-        y + height / 2 + 4,
-        label,
-        size=12,
-        fill=colour,
-        weight="bold",
-        anchor="middle",
-    )
-    return body
-
-
-def checkbox(x: float, y: float, label: str, *, checked: bool = False) -> str:
-    """Draw a checkbox with its label.
-
-    Parameters
-    ----------
-    x, y : float
-    label : str
-    checked : bool
-
-    Returns
-    -------
-    str
-    """
-    body = rect(x, y - 13, 16, 16, fill=WHITE, stroke=INK)
-    if checked:
-        body += path(
-            f"M {x + 3} {y - 4} L {x + 7} {y} L {x + 14} {y - 9}", stroke=PINE2, sw=2.5
-        )
-    body += txt(x + 24, y, label, size=12, fill=INK)
-    return body
-
-
-def radio(x: float, y: float, label: str, *, selected: bool = False) -> str:
-    """Draw a radio button with its label.
-
-    Parameters
-    ----------
-    x, y : float
-    label : str
-    selected : bool
-
-    Returns
-    -------
-    str
-    """
-    body = circle(x + 8, y - 5, 8, fill=WHITE, stroke=INK)
-    if selected:
-        body += circle(x + 8, y - 5, 4, fill=PINE2, stroke=None)
-    body += txt(x + 24, y, label, size=12, fill=INK)
-    return body
-
-
-def inspector_row(  # pylint: disable=too-many-arguments
-    x: float, y: float, w: float, label: str, *, value: str, value_colour: str = INK
-) -> str:
-    """Draw one inspector row of label and value.
-
-    Parameters
-    ----------
-    x, y, w : float
-    label, value, value_colour : str
-
-    Returns
-    -------
-    str
-    """
-    body = txt(x, y, label.upper(), size=10, fill=SOFT, family=F_MONO, spacing=0.5)
-    body += txt(x + w, y, value, size=11, fill=value_colour, anchor="end")
-    body += line(x, y + 8, x + w, y + 8, stroke=LINE, sw=0.5)
     return body

@@ -1,10 +1,11 @@
 """Shared structural parsing for the book's Markdown checkers.
 
 The link checker and the requirement checker must agree about which headings
-create anchors and which Markdown destinations are links or images. This module
-is the single implementation they import. It removes HTML comments, fenced code
-blocks and, where appropriate, code spans before parsing, so text that a
-renderer would not display cannot satisfy a structural contract.
+create anchors and which text a renderer would display. This module is the
+single implementation of that cleaning they import. It removes HTML comments,
+fenced code blocks and, where appropriate, code spans before parsing, so text
+that a renderer would not display cannot satisfy a structural contract.
+Destination parsing builds on this module in :mod:`markdown_links`.
 
 Comments and fences are scanned together: a comment delimiter inside a fenced
 example is literal text, while a fence marker inside a comment is not a fence.
@@ -25,31 +26,29 @@ FENCE_OPEN_RE = re.compile(r"^\s{0,3}(`{3,}|~{3,})")
 HEADING_RE = re.compile(r"^#{1,6}\s+(.+?)\s*#*\s*$", re.MULTILINE)
 EXPLICIT_ANCHOR_RE = re.compile(r"<a\s+id=[\"']([^\"']+)[\"']")
 INLINE_CODE_RE = re.compile(r"(?<!`)(`+)(?!`)(.*?)(?<!`)\1(?!`)", re.DOTALL)
-TARGET_RE = re.compile(
-    r"(?P<image>!)?\[[^\]]*\]\(\s*(?P<target><[^>\n]*>|[^)\s]+)"
-    r"(?:\s+[\"'][^\"']*[\"'])?\s*\)"
-)
-REF_DEF_RE = re.compile(
-    r"^ {0,3}\[(?P<label>[^\]]+)\]:\s*(?P<target><[^>\n]*>|\S+)", re.MULTILINE
-)
-REF_LINK_RE = re.compile(r"(?P<image>!)?\[(?P<text>[^\]]*)\]\[(?P<label>[^\]]*)\]")
-SHORTCUT_RE = re.compile(r"(?P<image>!)?\[(?P<label>[^\]]+)\](?![\[(:])")
 CHECKLIST_ITEM_RE = re.compile(r"^ {0,3}- \[[ xX]\] ", re.MULTILINE)
 CODE_PLACEHOLDER_RE = re.compile(r"\x00([0-9]+)\x00")
 
 
 def slug(text: str) -> str:
-    """Return the anchor a common Markdown renderer gives a heading."""
+    """Return the anchor a common Markdown renderer gives a heading.
+
+    Parameters
+    ----------
+    text : str
+        The heading text. Leading and trailing whitespace is ignored.
+
+    Returns
+    -------
+    str
+        The anchor: the heading lower-cased, with characters other than
+        letters, digits, underscores, whitespace and hyphens removed, and
+        each run of whitespace replaced by a single hyphen. Repeated
+        headings are not disambiguated here.
+    """
     text = text.strip().lower()
     text = re.sub(r"[^\w\s-]", "", text, flags=re.UNICODE)
     return re.sub(r"\s+", "-", text)
-
-
-def _unwrap_target(target: str) -> str:
-    """Return a destination without the angle brackets CommonMark permits."""
-    if target.startswith("<") and target.endswith(">"):
-        return target[1:-1]
-    return target
 
 
 def _placeholder(index: int) -> str:
@@ -183,6 +182,17 @@ def strip_fences_and_comments(text: str) -> str:
     comment delimiter inside a span is not treated as a comment. Comment
     delimiters inside a fence remain literal, and a fence marker inside a
     comment does not open or close a fence.
+
+    Parameters
+    ----------
+    text : str
+        The Markdown source to process.
+
+    Returns
+    -------
+    str
+        The visible text, with comments and fenced blocks removed and the
+        masked inline code restored in place.
     """
     masked, spans = _mask_code_spans(text)
     kept: list[str] = []
@@ -212,17 +222,68 @@ def strip_fences_and_comments(text: str) -> str:
 
 
 def strip_code_and_comments(text: str) -> str:
-    """Remove comments, fenced blocks and code spans, including multi-line ones."""
+    """Remove comments, fenced blocks and code spans, including multi-line ones.
+
+    Parameters
+    ----------
+    text : str
+        The Markdown source to process.
+
+    Returns
+    -------
+    str
+        The text with fenced code blocks, HTML comments and inline code
+        spans removed.
+    """
     return INLINE_CODE_RE.sub("", strip_fences_and_comments(text))
 
 
 def checklist_items(text: str) -> list[str]:
-    """Split text into task-list item bodies, checked or unchecked."""
+    """Split text into task-list item bodies, checked or unchecked.
+
+    Parameters
+    ----------
+    text : str
+        The Markdown source to scan.
+
+    Returns
+    -------
+    list[str]
+        One entry per task-list marker at the start of a line, indented by
+        at most three spaces. The marker itself is discarded, so each entry
+        is the item body up to the next marker or the end of the text; a
+        multi-line item keeps its continuation lines. Any text before the
+        first marker is discarded too.
+    """
     return CHECKLIST_ITEM_RE.split(text)[1:]
 
 
 def anchors(path: Path) -> set[str]:
-    """Return every anchor a renderer would expose for the Markdown file."""
+    """Return every anchor a renderer would expose for the Markdown file.
+
+    ATX ``#`` headings are scanned outside fences and comments, and repeated
+    headings gain the usual ``-1``, ``-2`` suffixes. Explicit
+    ``<a id="...">`` anchors are collected from text outside fences,
+    comments and code spans.
+
+    Parameters
+    ----------
+    path : Path
+        The Markdown file to read as UTF-8.
+
+    Returns
+    -------
+    set[str]
+        The heading anchors and the explicit anchors, in no particular
+        order.
+
+    Raises
+    ------
+    OSError
+        If the file cannot be read.
+    UnicodeDecodeError
+        If the file is not valid UTF-8.
+    """
     text = path.read_text(encoding="utf-8")
     visible = strip_fences_and_comments(text)
     found: set[str] = set()
@@ -234,74 +295,3 @@ def anchors(path: Path) -> set[str]:
         seen[base] = count + 1
     found.update(EXPLICIT_ANCHOR_RE.findall(strip_code_and_comments(text)))
     return found
-
-
-def _normalise_label(label: str) -> str:
-    """Normalise a reference label for comparison."""
-    return re.sub(r"\s+", " ", label.strip()).casefold()
-
-
-def _reference_definitions(text: str) -> dict[str, str]:
-    """Collect the first definition of each reference label in a chapter."""
-    definitions: dict[str, str] = {}
-    for match in REF_DEF_RE.finditer(text):
-        label = _normalise_label(match.group("label"))
-        definitions.setdefault(label, _unwrap_target(match.group("target")))
-    return definitions
-
-
-def _wanted(*, is_image: bool, images: bool | None) -> bool:
-    """Return whether a destination of this kind belongs in the result."""
-    return images is None or images == is_image
-
-
-def _inside_span(position: int, spans: list[tuple[int, int]]) -> bool:
-    """Return whether a position lies inside one of the given spans."""
-    return any(start <= position < end for start, end in spans)
-
-
-def _reference_targets(
-    text: str, definitions: dict[str, str], *, images: bool | None
-) -> list[str]:
-    """Collect the reference targets used in a chapter."""
-    found: list[str] = []
-    consumed: list[tuple[int, int]] = []
-    for match in REF_LINK_RE.finditer(text):
-        consumed.append(match.span())
-        label = match.group("label") or match.group("text")
-        target = definitions.get(_normalise_label(label))
-        is_image = match.group("image") is not None
-        if target is not None and _wanted(is_image=is_image, images=images):
-            found.append(target)
-    for match in SHORTCUT_RE.finditer(text):
-        if _inside_span(match.start(), consumed):
-            continue
-        target = definitions.get(_normalise_label(match.group("label")))
-        is_image = match.group("image") is not None
-        if target is not None and _wanted(is_image=is_image, images=images):
-            found.append(target)
-    return found
-
-
-def targets(text: str, *, images: bool | None = None) -> list[str]:
-    """Return rendered Markdown destinations, optionally only images or links."""
-    clean = strip_code_and_comments(text)
-    found: list[str] = []
-    for match in TARGET_RE.finditer(clean):
-        is_image = match.group("image") is not None
-        if _wanted(is_image=is_image, images=images):
-            found.append(_unwrap_target(match.group("target")))
-    definitions = _reference_definitions(clean)
-    if definitions:
-        found.extend(_reference_targets(clean, definitions, images=images))
-    return found
-
-
-def link_targets(text: str) -> list[str]:
-    """Return destinations of ordinary links, excluding embedded images."""
-    return targets(text, images=False)
-
-
-def image_targets(text: str) -> list[str]:
-    """Return destinations of embedded images only."""
-    return targets(text, images=True)

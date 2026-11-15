@@ -13,7 +13,8 @@ if typ.TYPE_CHECKING:
     from pathlib import Path
 
 
-from markdown_structure import anchors, image_targets, link_targets, targets
+from markdown_links import image_targets, link_targets, targets
+from markdown_structure import anchors
 
 from linkcheck.contract import (
     BOOK,
