@@ -2,8 +2,8 @@
 
 Chapter 08 states its transitions as invariants rather than examples: a reply
 that does not match the in-flight request never changes the accepted value, a
-denied grant never projects anything but Denied, and every reachable fact set
-projects one of the declared states. These tests draw fact sets, reply
+denied grant never projects anything but Denied, and every prefix of an event
+sequence projects one of the declared states. These tests draw fact sets, reply
 identities and event sequences from the declared vocabulary.
 """
 
@@ -65,11 +65,12 @@ def step_for(event: str) -> st.SearchStrategy[Step]:
 def test_an_event_sequence_never_leaves_the_declared_states(
     steps: list[Step],
 ) -> None:
-    """Applying any sequence of declared events keeps a declared projection."""
+    """Every prefix of declared events keeps a declared projection."""
     facts = facts_for({"authorized": True})
+    assert project(facts) in STATE_NAMES
     for step in steps:
         apply(facts, step)
-    assert project(facts) in STATE_NAMES
+        assert project(facts) in STATE_NAMES
 
 
 @given(VECTORS, VECTORS, GENERATIONS, EPOCHS)

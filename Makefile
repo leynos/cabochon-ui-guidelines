@@ -28,7 +28,7 @@ fmt: ## Format Markdown tables and wrap prose
 	$(MDTABLEFIX) --git --include-untracked --in-place --wrap --renumber --breaks --ellipsis --fences
 
 markdownlint: ## Lint Markdown
-	$(MDLINT) "*.md" "book/**/*.md"
+	$(MDLINT) "*.md" "book/**/*.md" "docs/**/*.md"
 
 spelling: ## Check spelling with typos
 	$(TYPOS)

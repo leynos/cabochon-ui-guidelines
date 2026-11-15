@@ -29,12 +29,13 @@ Run `make help` for the same list. Each target is safe to run on its own.
 
 | Target             | Purpose                                                                                                 |
 | :----------------- | :------------------------------------------------------------------------------------------------------ |
+| `help`             | List every documented target and its purpose                                                            |
 | `figures`          | Regenerate every SVG from the figure generator                                                          |
 | `figures-check`    | Check each figure against its declared class and geometry                                               |
 | `validate-svg`     | Regenerate, validate the XML, render the proof sheet, and require the committed figures to be unchanged |
 | `check-fmt`        | Check Markdown table and paragraph formatting                                                           |
 | `fmt`              | Apply that formatting in place                                                                          |
-| `markdownlint`     | Lint the Markdown                                                                                       |
+| `markdownlint`     | Lint the root, `book/` and `docs/` Markdown                                                             |
 | `spelling`         | Check spelling with `typos`                                                                             |
 | `python-lint`      | Run ruff, interrogate and pylint over `tools/`                                                          |
 | `python-typecheck` | Type-check `tools/` with ty                                                                             |
@@ -98,11 +99,19 @@ exits non-zero on the first contract violation it reports.
 | `check-links.py`        | Links, heading anchors, figure embedding, and the chapter, owner, state and profile manifest       |
 | `check-requirements.py` | That the checklist and the structured requirement registry are the same set, with owned evidence   |
 
-Every checker accepts `--self-test`. A self-test applies named mutations to a
-temporary copy of the book or its data and requires each check to report the
-defect it exists to prevent; it also requires the unmodified baseline to pass.
-The Makefile runs both the plain check and its self-test for each checker, so a
-gate that silently stops checking anything fails the build.
+Every checker accepts `--self-test`. A self-test requires the unmodified
+baseline to pass and each named mutation to produce the diagnostic it exists to
+provoke. The Makefile runs both the plain check and its self-test for each
+checker, so a gate that silently stops checking anything fails the build.
+
+The mutations differ by checker. The figure checker copies the committed SVGs
+into a temporary directory and edits one copy at a time. The link checker copies
+the repository, and the requirement checker copies `book/`, into a temporary
+directory before editing it. The state, layout and keyboard checkers mutate
+in-memory copies of the declared transitions, tokens, table rows and facts
+instead of writing files. Two state probes compare a hand-written projection
+with the real one rather than mutating `project()`, so they guard the expected
+failures and the fixtures, not every branch of the projection itself.
 
 ## Shared Markdown parser
 
