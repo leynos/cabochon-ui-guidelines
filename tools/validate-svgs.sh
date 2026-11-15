@@ -13,6 +13,13 @@ STAMP="$(date +%s)"
 
 mkdir -p "${SHOTS}"
 
+# Close the browser session however this script exits, so a failed render
+# does not leave a session holding the proof sheet open.
+cleanup() {
+  agent-browser --session "${SESSION}" close >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+
 python3 -I "${ROOT}/tools/check-figures.py"
 python3 -I "${ROOT}/tools/check-figures.py" --self-test
 
@@ -102,5 +109,3 @@ HTML
   agent-browser --session "${SESSION}" screenshot --full "${SHOTS}/${name}.png" >/dev/null
 done
 echo "svg: ${#figures[@]} per-figure captures in ${SHOTS}"
-
-agent-browser --session "${SESSION}" close >/dev/null

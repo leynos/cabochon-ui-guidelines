@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import copy
 import json
-import re
 import sys
 from pathlib import Path
 
@@ -26,21 +25,24 @@ CHAPTER = ROOT / "book" / "14-spacing-metrics.md"
 
 
 def number(tokens: dict[str, int], value: object) -> int:
+    """Return a literal number, or resolve a named token against the table."""
     if isinstance(value, int):
         return value
     return tokens[str(value)]
 
 
 def bands(tokens: dict[str, int], profiles: dict[str, list[str]], name: str) -> int:
+    """Return the summed height of the profile's declared bands."""
     return sum(tokens[band] for band in profiles[name])
 
 
 def pane_width(tokens: dict[str, int], name: str) -> int:
-    """A collapsed strip includes its splitter; an expanded pane does not."""
+    """Return a pane's width; a collapsed strip includes its splitter."""
     return tokens[name]
 
 
 def side_width(tokens: dict[str, int], configuration: dict[str, object]) -> int:
+    """Return the width both side panes and their splitters consume."""
     total = 0
     for side in ("left", "right"):
         pane = str(configuration[side])
@@ -55,6 +57,7 @@ def derive(
     profiles: dict[str, list[str]],
     configuration: dict[str, object],
 ) -> tuple[int, int, int]:
+    """Derive the band total and the document plane for a configuration."""
     height = number(tokens, configuration["height"])
     width = number(tokens, configuration["width"])
     band_total = bands(tokens, profiles, str(configuration["profile"]))
@@ -63,16 +66,29 @@ def derive(
     return band_total, document_width, document_height
 
 
+def expected_plane(
+    tokens: dict[str, int], configuration: dict[str, object]
+) -> tuple[int, int]:
+    """Return the worked document plane that a configuration declares."""
+    declared = configuration["expected"]
+    if not isinstance(declared, list) or len(declared) != 2:
+        raise SystemExit(
+            f"layout contract: {configuration['name']}: expected plane is malformed"
+        )
+    return number(tokens, declared[0]), number(tokens, declared[1])
+
+
 def validate(
     configuration: dict[str, object],
     tokens: dict[str, int] | None = None,
     profiles: dict[str, list[str]] | None = None,
 ) -> list[str]:
+    """Validate one configuration against the declared tokens."""
     errors: list[str] = []
     tokens = BUDGETS["tokens"] if tokens is None else tokens
     profiles = BUDGETS["profiles"] if profiles is None else profiles
     band_total, width, height = derive(tokens, profiles, configuration)
-    expected_width, expected_height = configuration["expected"]
+    expected_width, expected_height = expected_plane(tokens, configuration)
     if (width, height) != (expected_width, expected_height):
         errors.append(
             f"{configuration['name']}: derives {width} × {height}, "
@@ -108,6 +124,7 @@ def validate(
 
 
 def check_chapter() -> list[str]:
+    """Check that chapter 14 states every worked document-plane size."""
     errors: list[str] = []
     text = CHAPTER.read_text(encoding="utf-8")
     for configuration in BUDGETS["configurations"]:
@@ -122,6 +139,7 @@ def check_chapter() -> list[str]:
 
 
 def run() -> list[str]:
+    """Validate every declared configuration and the chapter's worked values."""
     errors: list[str] = []
     for configuration in BUDGETS["configurations"]:
         errors.extend(validate(configuration))
@@ -130,6 +148,7 @@ def run() -> list[str]:
 
 
 def self_test() -> int:
+    """Prove that four deliberate token or value changes are detected."""
     failures: list[str] = []
     if run():
         failures.append("baseline budgets did not pass")
@@ -148,16 +167,14 @@ def self_test() -> int:
     narrow_document = copy.deepcopy(configuration)
     narrow_document["expected"] = [baseline[1] - 100, baseline[2]]
     if not any(
-        "derives" in error
-        for error in validate(narrow_document, tokens, profiles)
+        "derives" in error for error in validate(narrow_document, tokens, profiles)
     ):
         failures.append("a wrong worked width was not detected")
 
     big_floor = copy.deepcopy(tokens)
     big_floor["document_width_min"] += 1000
     if not any(
-        "below the" in error
-        for error in validate(configuration, big_floor, profiles)
+        "below the" in error for error in validate(configuration, big_floor, profiles)
     ):
         failures.append("a document below the width minimum was not detected")
 
@@ -175,6 +192,7 @@ def self_test() -> int:
 
 
 def main() -> int:
+    """Validate the layout budgets, or run the self-test when requested."""
     if "--self-test" in sys.argv:
         return self_test()
     errors = run()

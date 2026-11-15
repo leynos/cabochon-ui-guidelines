@@ -342,6 +342,61 @@
           "expected": "Broken"
         }
       ]
+    },
+    {
+      "name": "timeout then retry",
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_failed",
+          "generation": 1,
+          "epoch": 0,
+          "expected": "Broken"
+        },
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 2,
+          "epoch": 1,
+          "validated": { "rate": 1 },
+          "expected": "Current"
+        }
+      ]
+    },
+    {
+      "name": "accepted vector advances source knowledge",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 3 }
+      },
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_succeeded",
+          "generation": 1,
+          "epoch": 0,
+          "validated": { "rate": 3 },
+          "expected": "Current"
+        },
+        { "event": "source_advanced", "expected": "Stale" }
+      ]
+    },
+    {
+      "name": "failure invalidates freshness before recovery",
+      "facts": {
+        "accepted": true,
+        "accepted_validated": { "rate": 1 }
+      },
+      "events": [
+        { "event": "refresh_requested", "expected": "Refreshing" },
+        {
+          "event": "refresh_failed",
+          "generation": 1,
+          "epoch": 0,
+          "expected": "Broken"
+        },
+        { "event": "provider_recovered", "expected": "Stale" }
+      ]
     }
   ]
 }

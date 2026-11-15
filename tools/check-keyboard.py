@@ -17,6 +17,7 @@ from __future__ import annotations
 import copy
 import json
 import sys
+import typing as typ
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -26,7 +27,21 @@ FIXTURES = json.loads(
 FACT_KEYS = set(FIXTURES["defaults"])
 
 
-def validate_step(scenario: str, index: int, step: dict[str, object]) -> list[str]:
+class EscapeStep(typ.TypedDict):
+    """One Escape press and the facts that it must leave behind."""
+
+    expected: dict[str, object]
+
+
+class EscapeScenario(typ.TypedDict):
+    """One ordered Escape sequence over a fact set."""
+
+    name: str
+    steps: list[EscapeStep]
+    facts: typ.NotRequired[dict[str, object]]
+
+
+def validate_step(scenario: str, index: int, step: EscapeStep) -> list[str]:
     """Check that an expectation names known facts with the right types."""
     errors: list[str] = []
     expected = step.get("expected")
@@ -74,7 +89,7 @@ def apply_escape(
 
 
 def run_scenario(
-    scenario: dict[str, object],
+    scenario: EscapeScenario,
     *,
     completion_first: bool = True,
     clear_draft_on_completion: bool = False,
@@ -104,61 +119,68 @@ def run_scenario(
 
 
 def run_scenarios() -> list[str]:
+    """Run every ordered Escape fixture and return the accumulated errors."""
     errors: list[str] = []
     for scenario in FIXTURES["scenarios"]:
         errors.extend(run_scenario(scenario))
     return errors
 
 
+CENTRAL_SCENARIO = "first Escape dismisses completion before the draft"
+MUTATIONS = (
+    ("draft reverted before completion", {"completion_first": False}),
+    (
+        "draft cleared when completion is dismissed",
+        {"clear_draft_on_completion": True},
+    ),
+)
+
+
+def _central_scenario() -> EscapeScenario | None:
+    """Return the fixture that pins the completion-before-draft order."""
+    return next(
+        (
+            scenario
+            for scenario in FIXTURES["scenarios"]
+            if scenario["name"] == CENTRAL_SCENARIO
+        ),
+        None,
+    )
+
+
+def self_test() -> int:
+    """Prove the central fixture passes and both reversals are detected."""
+    scenario = _central_scenario()
+    if scenario is None:
+        print("keyboard self-test: central fixture is missing", file=sys.stderr)
+        return 1
+    failures: list[str] = []
+    checks = 1
+    if run_scenario(scenario):
+        failures.append("central completion-before-draft fixture does not pass")
+    for label, options in MUTATIONS:
+        checks += 1
+        if not run_scenario(scenario, **options):
+            failures.append(f"{label} was not detected")
+    if failures:
+        for failure in failures:
+            print(f"keyboard self-test: {failure}", file=sys.stderr)
+        return 1
+    print(f"keyboard: self-test detected all {checks} mutations")
+    return 0
+
+
 def main() -> int:
+    """Run the Escape fixtures, or the self-test when requested."""
     if "--self-test" in sys.argv:
-        failures: list[str] = []
-        checks = 0
-        scenario = next(
-            (
-                scenario
-                for scenario in FIXTURES["scenarios"]
-                if scenario["name"]
-                == "first Escape dismisses completion before the draft"
-            ),
-            None,
-        )
-        if scenario is None:
-            print(
-                "keyboard self-test: central fixture is missing",
-                file=sys.stderr,
-            )
-            return 1
-        if run_scenario(scenario):
-            failures.append("central completion-before-draft fixture does not pass")
-            checks += 1
-
-        for label, options in (
-            ("draft reverted before completion", {"completion_first": False}),
-            (
-                "draft cleared when completion is dismissed",
-                {"clear_draft_on_completion": True},
-            ),
-        ):
-            checks += 1
-            if not run_scenario(scenario, **options):
-                failures.append(f"{label} was not detected")
-
-        if failures:
-            for failure in failures:
-                print(f"keyboard self-test: {failure}", file=sys.stderr)
-            return 1
-        print(f"keyboard: self-test detected all {checks} mutations")
-        return 0
+        return self_test()
 
     errors = run_scenarios()
     if errors:
         for error in errors:
             print(f"keyboard: {error}", file=sys.stderr)
         return 1
-    print(
-        f"keyboard: ok ({len(FIXTURES['scenarios'])} ordered Escape scenarios)"
-    )
+    print(f"keyboard: ok ({len(FIXTURES['scenarios'])} ordered Escape scenarios)")
     return 0
 
 

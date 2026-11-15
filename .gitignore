@@ -5,3 +5,4 @@ tmp/
 build/
 .sites-runtime/
 __pycache__/
+.venv/
