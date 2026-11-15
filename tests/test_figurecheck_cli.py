@@ -25,7 +25,7 @@ def test_plain_run_checks_every_figure(
     """A bare invocation runs the contract checks and reports success."""
     assert _run(monkeypatch) == 0, "a bare run reports success"
     assert "figures satisfy" in capsys.readouterr().out, (
-        "the success line counts the checked figures"
+        "the success line reports that the figures satisfy the contract"
     )
 
 
@@ -35,7 +35,7 @@ def test_self_test_runs_the_mutations(
     """The self-test option selects the mutation self-test."""
     assert _run(monkeypatch, "--self-test") == 0, "the self-test reports success"
     assert "detected all" in capsys.readouterr().out, (
-        "the self-test line counts the detected mutations"
+        "the self-test line reports that every mutation was detected"
     )
 
 

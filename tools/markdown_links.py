@@ -11,11 +11,16 @@ is one-way, so there is no circular import.
 from __future__ import annotations
 
 import re
+import string
 
 from markdown_structure import strip_code_and_comments
 
+_ESCAPABLE = frozenset(string.punctuation)
+_ESCAPED_CHAR = "\ue000"
+_LITERAL_BACKSLASH = "\ue001"
+
 TARGET_RE = re.compile(
-    r"(?<!\\)(?P<image>!)?\[[^\]]*\]\(\s*"
+    r"(?P<image>!)?\[[^\]]*\]\(\s*"
     r"(?P<target><[^>\n]*>|(?:[^()\s]|\([^()\s]*\))+)"
     r"(?:\s+[\"'][^\"']*[\"'])?\s*\)"
 )
@@ -24,6 +29,46 @@ REF_DEF_RE = re.compile(
 )
 REF_LINK_RE = re.compile(r"(?P<image>!)?\[(?P<text>[^\]]*)\]\[(?P<label>[^\]]*)\]")
 SHORTCUT_RE = re.compile(r"(?P<image>!)?\[(?P<label>[^\]]+)\](?![\[(:])")
+
+
+def _neutralise_escapes(text: str) -> str:
+    """Return text with CommonMark backslash escapes made inert.
+
+    A run of backslashes before an escapable character renders as half as many
+    literal backslashes, and an odd run makes the character after it literal
+    punctuation that can neither open nor close a delimiter. Each is replaced
+    with a placeholder so the patterns above cannot read it as syntax.
+
+    Parameters
+    ----------
+    text : str
+        The cleaned Markdown source to prepare.
+
+    Returns
+    -------
+    str
+        The same text with every backslash run resolved.
+    """
+    out: list[str] = []
+    index = 0
+    while index < len(text):
+        if text[index] != "\\":
+            out.append(text[index])
+            index += 1
+            continue
+        end = index
+        while end < len(text) and text[end] == "\\":
+            end += 1
+        run = end - index
+        out.append(_LITERAL_BACKSLASH * (run // 2))
+        if run % 2:
+            if end < len(text) and text[end] in _ESCAPABLE:
+                out.append(_ESCAPED_CHAR)
+                end += 1
+            else:
+                out.append(_LITERAL_BACKSLASH)
+        index = end
+    return "".join(out)
 
 
 def _unwrap_target(target: str) -> str:
@@ -88,8 +133,10 @@ def targets(text: str, *, images: bool | None = None) -> list[str]:
     first, followed by reference links and shortcut references whose label
     has a definition in the text; the angle brackets CommonMark permits
     around a destination are removed. A destination may contain one level of
-    balanced parentheses, and a delimiter escaped by a backslash is literal
-    text rather than the start of a link.
+    balanced parentheses. A backslash before punctuation makes that character
+    literal text, and a backslash before a backslash makes the pair a literal
+    backslash, so only an odd run of backslashes can escape the delimiter that
+    follows it.
 
     Parameters
     ----------
@@ -106,7 +153,7 @@ def targets(text: str, *, images: bool | None = None) -> list[str]:
         ``[text][label]`` references, then shortcut ``[label]`` references.
         Duplicates are retained.
     """
-    clean = strip_code_and_comments(text)
+    clean = _neutralise_escapes(strip_code_and_comments(text))
     found: list[str] = []
     for match in TARGET_RE.finditer(clean):
         is_image = match.group("image") is not None

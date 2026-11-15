@@ -42,8 +42,9 @@ def title_block(x: float, y: float, heading: str, deck: str | None = None) -> st
     """Draw a heading with an optional deck.
 
     The deck is drawn as one line rather than wrapped. Its baseline is
-    ``y + 80``, while almost every figure begins its content between ``y + 150``
-    and ``y + 166``, so a wrapped deck would overlap the figure it introduces.
+    ``y + 80``, which is absolute y=150 for the ``y = 70`` origin every caller
+    passes. No caller reserves the height a second line would need, so a
+    wrapped deck would be drawn over the figure it introduces.
 
     Parameters
     ----------

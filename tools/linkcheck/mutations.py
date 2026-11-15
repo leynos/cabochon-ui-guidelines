@@ -268,6 +268,20 @@ def _mutation_cases() -> list[tuple[str, cabc.Callable[[Path], bool], str | None
             None,
         ),
         (
+            "even backslashes still open a link",
+            lambda root: append(
+                root / purpose, "\nAn even run \\\\[even](missing-even.md) links.\n"
+            ),
+            "missing link target missing-even.md",
+        ),
+        (
+            "escaped bang makes a link, not an image",
+            lambda root: append(
+                root / purpose, "\nEscaped \\![bang](missing-bang.md) is a link.\n"
+            ),
+            "missing link target missing-bang.md",
+        ),
+        (
             "parenthesised destination is not truncated",
             lambda root: append(
                 root / "book" / "01-purpose.md",
