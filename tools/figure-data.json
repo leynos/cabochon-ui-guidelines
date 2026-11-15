@@ -99,20 +99,23 @@
     {
       "id": "source-advanced",
       "from": [
-        "Current"
+        "Current",
+        "Stale",
+        "Broken"
       ],
-      "event": "The source reports a newer revision",
-      "to": "Stale",
-      "owner": "Provider"
+      "event": "The source reports a newer revision; a refresh is dispatched",
+      "to": "Refreshing",
+      "owner": "Provider then Application",
+      "note": "Only while authority permits and a provider is present."
     },
     {
       "id": "source-advanced-refreshing",
       "from": [
         "Refreshing"
       ],
-      "event": "The source reports a newer revision",
+      "event": "The source reports a newer revision; the request is superseded",
       "to": "Refreshing",
-      "owner": "Provider",
+      "owner": "Provider then Application",
       "note": "The in-flight request is superseded."
     },
     {

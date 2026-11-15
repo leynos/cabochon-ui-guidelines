@@ -78,19 +78,19 @@
         "accepted_validated": { "rate": 1 }
       },
       "events": [
-        { "event": "source_advanced", "expected": "Stale" },
+        { "event": "source_advanced", "expected": "Refreshing" },
         { "event": "refresh_requested", "expected": "Refreshing" },
         { "event": "source_advanced", "expected": "Refreshing" },
         {
           "event": "refresh_succeeded",
           "generation": 1,
           "epoch": 0,
-          "validated": { "rate": 2 },
+          "validated": { "rate": 3 },
           "expected": "Refreshing"
         },
         {
           "event": "refresh_succeeded",
-          "generation": 2,
+          "generation": 3,
           "epoch": 0,
           "validated": { "rate": 3 },
           "expected": "Current"
@@ -251,7 +251,7 @@
     {
       "name": "source notification while broken with a provider",
       "events": [
-        { "event": "source_advanced", "expected": "Broken" },
+        { "event": "source_advanced", "expected": "Refreshing" },
         { "event": "refresh_requested", "expected": "Refreshing" }
       ]
     },
@@ -302,7 +302,7 @@
         "accepted_validated": { "rate": 1 }
       },
       "events": [
-        { "event": "source_advanced", "expected": "Stale" }
+        { "event": "source_advanced", "expected": "Refreshing" }
       ]
     },
     {
@@ -378,7 +378,7 @@
           "validated": { "rate": 3 },
           "expected": "Current"
         },
-        { "event": "source_advanced", "expected": "Stale" }
+        { "event": "source_advanced", "expected": "Refreshing" }
       ]
     },
     {

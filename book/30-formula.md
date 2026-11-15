@@ -153,8 +153,9 @@ becomes **Copy result** and the reason is stated.
 
 ## Failure and recovery
 
-- If the source reports a newer revision, the value becomes **Stale** and keeps
-  its last result.
+- If the source reports a newer revision, the value dispatches a refresh and
+  becomes **Refreshing**, keeping its last result visible until a result is
+  accepted or the request fails.
 - If the grant is withdrawn or expires, the value becomes **Denied** immediately
   and hides its result, even if a refresh is in flight.
 - If the provider crashes or its transport is lost, the value becomes

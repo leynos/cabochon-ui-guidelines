@@ -32,9 +32,18 @@ EVENTS = NO_DATA_EVENTS | set(REPLY_FIELDS)
 PROVIDER_EVENTS = {"provider_lost", "provider_recovered"}
 
 
+def _is_integer(value: object, minimum: int) -> bool:
+    """Return whether a value is an integer, not a boolean, at least minimum."""
+    if isinstance(value, bool):
+        return False
+    if not isinstance(value, int):
+        return False
+    return value >= minimum
+
+
 def _is_source_value(value: object) -> bool:
     """Return whether a fixture source value is well formed."""
-    return isinstance(value, int) and value >= 0
+    return _is_integer(value, 0)
 
 
 def _valid_vector(value: object) -> bool:
@@ -61,7 +70,7 @@ def _validate_identity_field(
             )
         return
     minimum = 1 if field == "generation" else 0
-    if not isinstance(value, int) or value < minimum:
+    if not _is_integer(value, minimum):
         qualifier = "positive" if field == "generation" else "non-negative"
         errors.append(f"{where}: {field} is not a {qualifier} integer")
 
@@ -108,11 +117,11 @@ def _source_advanced(facts: Facts, step: Step) -> None:
         return
     for key in facts["known_source"]:
         facts["known_source"][key] += 1
-    if facts["request_active"]:
-        # The notification supersedes the in-flight generation. The
-        # replacement request covers the vector that has just arrived.
-        facts["request_generation"] += 1
-        facts["request_covers"] = dict(facts["known_source"])
+    # The notification supersedes any in-flight generation. When nothing is in
+    # flight it dispatches a refresh, exactly as an explicit request does.
+    facts["request_generation"] += 1
+    facts["request_active"] = True
+    facts["request_covers"] = dict(facts["known_source"])
 
 
 def request_allowed(facts: Facts) -> bool:

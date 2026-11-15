@@ -8,7 +8,7 @@ from `LIVE_STATES` and `LIVE_TRANSITIONS` in `figuregen.figdata`.
 
 from __future__ import annotations
 
-from figuregen.canvas import line, para, rect, svg_doc, txt
+from figuregen.canvas import attrs, line, para, rect, svg_doc, txt
 from figuregen.figdata import LIVE_STATES, LIVE_TRANSITIONS
 from figuregen.ornaments import mark_group, state_mark, title_block
 from figuregen.palette import (
@@ -127,11 +127,14 @@ def fig_state() -> str:
     for index, transition in enumerate(LIVE_TRANSITIONS):
         ty = 460 + index * 24
         source = ", ".join(transition["from"])
+        identifier = str(transition["id"])
+        body += f"<g {attrs(data_transition_id=identifier)}>"
         body += line(64, ty - 17, 1136, ty - 17, stroke=LINE, sw=0.5)
         body += txt(80, ty, source, size=11, fill=INK, family=F_MONO)
         body += txt(300, ty, transition["event"], size=11, fill=SOFT)
         body += txt(700, ty, transition["to"], size=11, fill=PINE2, family=F_MONO)
         body += txt(850, ty, transition["owner"], size=11, fill=SOFT, family=F_MONO)
+        body += "</g>"
     body += txt(
         64,
         840,

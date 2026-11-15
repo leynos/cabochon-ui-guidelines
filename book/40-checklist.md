@@ -169,8 +169,9 @@ shrinking the checklist.
 - [ ] **OBJ-08** — Live relationships render as **Current**, **Refreshing**,
       **Stale**, **Broken** or **Denied**. Owner:
       [Live relationships](08-live-relationships.md#the-five-states).
-- [ ] **OBJ-09** — Every transition in the state table is witnessed, and no
-      other transition occurs. Owner:
+- [ ] **OBJ-09** — Every transition in the state table is witnessed, including
+      the dispatch that follows a source notification with no request in
+      flight, and no other transition occurs. Owner:
       [Live relationships](08-live-relationships.md#transitions).
 - [ ] **OBJ-10** — Revocation, expiry and provider loss act from every
       reachable state without an intervening refresh, and a late reply cannot

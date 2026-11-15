@@ -166,26 +166,70 @@ def compare_chapter(transitions: list[LiveTransition]) -> list[str]:
     return errors
 
 
+def _transition_groups(
+    root: ElementTree.Element,
+) -> dict[str, list[ElementTree.Element]]:
+    """Index the figure's annotated transition rows by identifier."""
+    groups: dict[str, list[ElementTree.Element]] = {}
+    for element in root.iter(f"{SVG_NS}g"):
+        identifier = element.get("data-transition-id")
+        if identifier is not None:
+            groups.setdefault(identifier, []).append(element)
+    return groups
+
+
+def _row_labels(group: ElementTree.Element) -> set[str]:
+    """Return the text labels rendered inside one transition row."""
+    return {
+        (element.text or "").strip() for element in group.iter(f"{SVG_NS}text")
+    }
+
+
+def _check_figure_row(
+    record: LiveTransition,
+    groups: dict[str, list[ElementTree.Element]],
+    errors: list[str],
+) -> None:
+    """Check one transition against the row annotated with its identifier."""
+    identifier = record["id"]
+    elements = groups.get(identifier, [])
+    if not elements:
+        errors.append(f"figure does not render transition {identifier!r}")
+        return
+    if len(elements) > 1:
+        errors.append(f"figure renders transition {identifier!r} more than once")
+        return
+    labels = _row_labels(elements[0])
+    source = ", ".join(record["from"])
+    for field, value in (
+        ("event", record["event"]),
+        ("to", record["to"]),
+        ("owner", record["owner"]),
+    ):
+        if value not in labels:
+            errors.append(
+                f"figure does not render {field} of {identifier!r} "
+                f"in its row: {value!r}"
+            )
+    if source not in labels:
+        errors.append(
+            f"figure does not render source of {identifier!r} "
+            f"in its row: {source!r}"
+        )
+
+
 def compare_figure(transitions: list[LiveTransition]) -> list[str]:
     """Check that the rendered state figure labels every transition field."""
     errors: list[str] = []
     if not FIGURE.exists():
         return [f"{FIGURE.name} does not exist; run make figures"]
     root = ElementTree.parse(FIGURE).getroot()
-    labels = {(element.text or "").strip() for element in root.iter(f"{SVG_NS}text")}
+    groups = _transition_groups(root)
     for record in transitions:
-        source = ", ".join(record["from"])
-        for field, value in (
-            ("event", record["event"]),
-            ("to", record["to"]),
-            ("owner", record["owner"]),
-        ):
-            if value not in labels:
-                errors.append(
-                    f"figure does not render {field} of {record['id']!r}: {value!r}"
-                )
-        if source not in labels:
-            errors.append(
-                f"figure does not render source of {record['id']!r}: {source!r}"
-            )
+        _check_figure_row(record, groups, errors)
+    declared = {record["id"] for record in transitions}
+    errors.extend(
+        f"figure renders unknown transition {identifier!r}"
+        for identifier in sorted(set(groups) - declared)
+    )
     return errors

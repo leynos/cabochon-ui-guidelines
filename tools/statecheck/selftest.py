@@ -9,9 +9,16 @@ from __future__ import annotations
 
 import copy
 import sys
+import typing as typ
 
-from statecheck.contract import Facts, LiveTransition, defaults, transition_rows
-from statecheck.events import request_allowed
+from statecheck.contract import (
+    Facts,
+    LiveTransition,
+    Step,
+    defaults,
+    transition_rows,
+)
+from statecheck.events import request_allowed, validate_step
 from statecheck.projection import project, vector_at_least
 from statecheck.scenarios import run_scenario, scenario_named
 from statecheck.transitions import compare_chapter, compare_figure, validate_transitions
@@ -119,6 +126,33 @@ def _projection_mutations(checks: MutationChecks) -> None:
     )
 
 
+def _validation_mutations(checks: MutationChecks) -> None:
+    """Require malformed reply identity fields to be rejected."""
+    base: dict[str, object] = {
+        "event": "refresh_succeeded",
+        "expected": "Current",
+        "generation": 1,
+        "epoch": 0,
+        "validated": {"rate": 1},
+    }
+    checks.require(
+        not validate_step("self-test", 0, typ.cast("Step", base)),
+        "a well-formed reply identity was rejected",
+    )
+    for field in ("generation", "epoch"):
+        for invalid in (True, False):
+            step = typ.cast("Step", {**base, field: invalid})
+            checks.require(
+                bool(validate_step("self-test", 0, step)),
+                f"boolean {field} was not rejected",
+            )
+    vector_step = typ.cast("Step", {**base, "validated": {"rate": True}})
+    checks.require(
+        bool(validate_step("self-test", 0, vector_step)),
+        "boolean validated component was not rejected",
+    )
+
+
 def _fixture_mutations(checks: MutationChecks) -> None:
     """Yield mutations that break the event fixtures."""
     for name in (
@@ -127,6 +161,8 @@ def _fixture_mutations(checks: MutationChecks) -> None:
         "timeout then retry",
         "accepted vector advances source knowledge",
         "failure invalidates freshness before recovery",
+        "source notification while broken with a provider",
+        "source notification during Current",
     ):
         checks.require(
             not run_scenario(scenario_named(name)),
@@ -151,7 +187,7 @@ def _fixture_mutations(checks: MutationChecks) -> None:
 def _figure_mutation(
     checks: MutationChecks, transitions: list[LiveTransition]
 ) -> None:
-    """Yield the mutation that breaks a misplaced figure mark."""
+    """Yield the mutations that break a misplaced figure mark or label."""
     missing_event = copy.deepcopy(transitions)
     missing_event[0]["event"] = "An event the figure omits"
     checks.require(
@@ -162,6 +198,18 @@ def _figure_mutation(
         "figure drift from the typed source was not detected",
     )
 
+    drifted_target = copy.deepcopy(transitions)
+    for record in drifted_target:
+        if record["id"] == "refresh-current":
+            record["to"] = "Broken"
+    checks.require(
+        any(
+            "figure does not render to" in error
+            for error in compare_figure(drifted_target)
+        ),
+        "figure target drift to another rendered label was not detected",
+    )
+
 
 def self_test() -> int:
     """Prove that each projection, fact, reply and figure mutation is caught."""
@@ -169,6 +217,7 @@ def self_test() -> int:
     transitions = copy.deepcopy(transition_rows())
     _edge_mutations(checks, transitions)
     _projection_mutations(checks)
+    _validation_mutations(checks)
     _fixture_mutations(checks)
     _figure_mutation(checks, transitions)
     if checks.failures:

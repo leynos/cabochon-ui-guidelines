@@ -75,10 +75,11 @@ properties are independent and must not be collapsed into one "type" label.
   cell. Editing the definition updates the column object and commits a new
   revision; it does not allocate a fresh identity for each cell result.
 - A reference cell holds another object's identity and shows its name and its
-  relationship state. It is **Stale** when the referenced object's source
-  revision has advanced, **Broken** when the provider is unavailable and
-  **Denied** when the current grant does not permit reading it. Unavailable is
-  not stale, and the cell must not claim knowledge of a revision it cannot read.
+  relationship state. It is **Refreshing** when the referenced object's source
+  revision has advanced and a refresh has been dispatched, **Broken** when the
+  provider is unavailable and **Denied** when the current grant does not permit
+  reading it. Unavailable is not stale, and the cell must not claim knowledge of
+  a revision it cannot read.
 
 ## Formula bar
 

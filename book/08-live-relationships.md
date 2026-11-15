@@ -79,8 +79,10 @@ but it never invents a state.
 
 ## Authority and availability are events in their own right
 
-Authority and availability change on their own schedule. They are not refresh
-requests, and they do not wait for one.
+Authority and availability change on their own schedule. A revocation or a
+provider loss is not a refresh request and does not wait for one. A source
+notification is different: it advances the source record and schedules the
+refresh that reads the new revision.
 
 - A grant is revoked or expires. Every affected relationship moves to
   **Denied** immediately, from every state, including **Current**,
@@ -91,13 +93,14 @@ requests, and they do not wait for one.
   request generation in flight is terminated and its replies are discarded. The
   invalidation epoch advances, so a later recovery cannot assert **Current**
   from a value validated before the gap.
-- A source reports a newer revision. The known-source vector advances. A
-  **Current** relationship moves to **Stale**; a relationship already **Stale**
-  stays **Stale**. If **Refreshing**, the in-flight generation is superseded by
-  a new request and the relationship stays **Refreshing**. A **Broken**
-  relationship with no provider receives no notification, because no provider
-  is present to send one. A **Broken** relationship that has a provider but no
-  accepted value is still notified and schedules a refresh.
+- A source reports a newer revision. The known-source vector advances. When
+  authority permits and a provider is present, the notification is itself a
+  dispatch: the application allocates a new request generation that covers the
+  advanced vector, and the relationship moves to **Refreshing**. A generation
+  already in flight is superseded, and the relationship stays **Refreshing**.
+  A **Broken** relationship with no provider receives no notification, because
+  no provider is present to send one. A **Broken** relationship that has a
+  provider but no accepted value is still notified and dispatches a refresh.
 
 The runtime's capability broker owns the authority decision. A host-resource
 decision enters through the broker's adapter; it does not bypass the broker.
@@ -123,8 +126,8 @@ following transitions.
 | ----------------------- | -------------------------------------------------------------------------- | ---------- | --------------------------------------- |
 | Any state               | The grant is revoked or expires                                            | Denied     | Capability broker                       |
 | Any state except Denied | The provider or transport is lost                                          | Broken     | Runtime                                 |
-| Current                 | The source reports a newer revision                                        | Stale      | Provider                                |
-| Refreshing              | The source reports a newer revision                                        | Refreshing | Provider                                |
+| Current, Stale, Broken  | The source reports a newer revision; a refresh is dispatched               | Refreshing | Provider then Application               |
+| Refreshing              | The source reports a newer revision; the request is superseded             | Refreshing | Provider then Application               |
 | Broken                  | The provider returns; an accepted value exists                             | Stale      | Runtime                                 |
 | Denied                  | A grant is issued; an accepted value exists and a provider is present      | Stale      | Capability broker                       |
 | Denied                  | A grant is issued; no value has been accepted                              | Broken     | Capability broker                       |
@@ -141,8 +144,9 @@ A refresh enters **Refreshing** logically when an authorised request is
 dispatched, even when it completes within 200 milliseconds, too quickly to
 paint the chip. A relationship does not move from **Current** to **Broken** by
 inventing a refresh first: the availability event moves it directly. A
-**Broken** relationship does not become **Stale** through a notification,
-because no provider is present to report a newer revision.
+**Broken** relationship does not become **Stale** through a notification: with
+no provider it receives none, and with a provider it dispatches a refresh and
+becomes **Refreshing**.
 
 **Recomputed** and **No change** are outcomes, not sixth states. **Recomputed**
 means the request ends and the projection is evaluated again from the current
@@ -151,11 +155,10 @@ change** means the reply belongs to a superseded generation, carries a stale
 invalidation epoch or is behind the known source, and is discarded.
 
 A source notification is itself a scheduling event. When it arrives with no
-request in flight, the default is to dispatch a refresh. The relationship then
-moves to **Refreshing**, and the freshest accepted value remains visible. An
-instrument may instead expose **Stale** and wait for an explicit refresh, but
-only when its own chapter declares that policy and records it in the
-instrument's contract.
+request in flight, the application dispatches a refresh. The relationship then
+moves to **Refreshing**, and the freshest accepted value remains visible. The
+dispatch uses the same generation, coverage and cancellation rules as an
+explicit request.
 
 ## The logical refresh lifecycle
 
@@ -240,11 +243,14 @@ Rules for refresh:
 ## Stale
 
 Stale is the most commonly misunderstood state. It means the cached value is
-still readable, but it is not known to be current: either the source reports a
-newer revision, or a revocation or provider gap has invalidated an earlier
-validation. The user should decide whether to refresh. Stale is not an error,
-and it is not the same as a source becoming unavailable: a missing provider is
-**Broken**, not **Stale**.
+still readable, but it is not known to be current: the known-source vector is
+ahead of the value's validated vector, or a revocation or provider gap has
+invalidated an earlier validation. A source notification normally dispatches a
+refresh, so a relationship rests in Stale only while no request is in flight:
+after a cancelled refresh that followed a source advance, or after a recovery
+that has not yet been refreshed. When it rests in Stale, the user decides
+whether to refresh. Stale is not an error, and it is not the same as a source
+becoming unavailable: a missing provider is **Broken**, not **Stale**.
 
 - Use the stale role for the chip and its label at body size; it is the
   readable amber tint, not the decorative amber accent.
@@ -381,10 +387,11 @@ a denial and confirm that it does not publish.
 
 Exercise every transition in the table above. The fixture set in
 `tools/state-fixtures.json` covers first load without a cached value, a source
-advance during a refresh, cancellation after that advance, supersession by
-generation, a rejected reply vector, a reply from an older invalidation epoch,
-a timeout, a stale failure, a grant change during a request, provider loss
-while denied, recovery while denied and a late completion after denial.
+notification during **Current** and while **Broken**, a source advance during a
+refresh, cancellation after that advance, supersession by generation, a
+rejected reply vector, a reply from an older invalidation epoch, a timeout, a
+stale failure, a grant change during a request, provider loss while denied,
+recovery while denied and a late completion after denial.
 `make states` runs the fixtures and compares the chapter and figure with the
 typed transition source. The [checklist](40-checklist.md) lists the transitions
 that must be witnessed before release.
