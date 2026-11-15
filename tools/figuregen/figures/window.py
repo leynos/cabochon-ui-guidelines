@@ -8,6 +8,8 @@ shared `figuregen.palette` colours. `figuregen.cli` calls it to write
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import circle, line, para, rect, svg_doc, txt
 from figuregen.glyphs import tool_glyph
 from figuregen.ornaments import state_chip, title_block
@@ -24,6 +26,9 @@ from figuregen.palette import (
     WHITE,
 )
 from figuregen.widgets import checkbox, inspector_row, pane_head, window_shell
+
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import StateTables
 
 
 def _tool_strip(x: float, y: float, w: float) -> str:
@@ -69,7 +74,7 @@ def _tree_rows(x: float, y: float, tree_w: float) -> str:
     return body
 
 
-def _editor(y: float, splitter_1: float, splitter_2: float) -> str:
+def _editor(y: float, splitter_1: float, splitter_2: float, states: StateTables) -> str:
     """Draw the document pane."""
     width = splitter_2 - splitter_1
     body = pane_head(splitter_1, y + 90, width, "Document", right="Edited 14:02")
@@ -95,14 +100,14 @@ def _editor(y: float, splitter_1: float, splitter_2: float) -> str:
         fill=SOFT,
         family=F_MONO,
     )
-    state_body, _ = state_chip(splitter_2 - 100, y + 246, "Current")
+    state_body, _ = state_chip(splitter_2 - 100, y + 246, "Current", states)
     body += state_body
     body += rect(ex, y + 316, width - 44, 74, fill=HIGH, stroke=LINE)
     body += txt(ex + 12, y + 338, "Transition pathways", size=12, weight="bold")
     body += txt(
         ex + 12, y + 356, "Diagram · Mermaid source", size=10, fill=SOFT, family=F_MONO
     )
-    state_body, _ = state_chip(splitter_2 - 100, y + 332, "Stale")
+    state_body, _ = state_chip(splitter_2 - 100, y + 332, "Stale", states)
     body += state_body
     return body + para(
         ex,
@@ -205,8 +210,14 @@ def _legend() -> str:
     return body
 
 
-def fig_window() -> str:
+def fig_window(states: StateTables) -> str:
     """Draw window anatomy with labelled metrics.
+
+    Parameters
+    ----------
+    states : StateTables
+        The live and resolution state records passed to `window_shell` and
+        `state_chip`.
 
     Returns
     -------
@@ -224,6 +235,7 @@ def fig_window() -> str:
         y,
         w,
         h,
+        states=states,
         title="Facet Notes — North Sea transition",
         menu=["File", "Edit", "View", "Object", "Tools", "Window", "Help"],
         status="Refreshing currency… last value 14:02",
@@ -241,7 +253,7 @@ def fig_window() -> str:
     body += line(splitter_2, y + 90, splitter_2, y + h - 26, stroke=INK)
     body += rect(splitter_1 - 3, y + 300, 6, 42, fill=LINE, stroke=INK)
     body += rect(splitter_2 - 3, y + 300, 6, 42, fill=LINE, stroke=INK)
-    body += _editor(y, splitter_1, splitter_2)
+    body += _editor(y, splitter_1, splitter_2, states)
     body += _inspector(y, splitter_2, inspector_w)
     body += _callouts(x, y, w, h)
     body += _legend()

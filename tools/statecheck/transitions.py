@@ -9,18 +9,21 @@ them.
 from __future__ import annotations
 
 import re
+import typing as typ
 from xml.etree import ElementTree
 
 from statecheck.contract import (
     CHAPTER,
     EDGE_ID,
     FIGURE,
-    FROM_TOKENS,
-    STATES,
     SVG_NS,
-    TARGETS,
+    Contract,
+    ContractError,
     LiveTransition,
 )
+
+if typ.TYPE_CHECKING:
+    import collections.abc as cabc
 
 
 def _check_identifier(
@@ -36,7 +39,9 @@ def _check_identifier(
     return identifier
 
 
-def _check_sources(record: LiveTransition, errors: list[str]) -> None:
+def _check_sources(
+    record: LiveTransition, from_tokens: cabc.Set[str], errors: list[str]
+) -> None:
     """Check that a transition declares its source states."""
     identifier = str(record.get("id", ""))
     sources = record.get("from")
@@ -46,14 +51,16 @@ def _check_sources(record: LiveTransition, errors: list[str]) -> None:
     errors.extend(
         f"transition {identifier!r}: unknown source {source!r}"
         for source in sources
-        if source not in FROM_TOKENS
+        if source not in from_tokens
     )
 
 
-def _check_target_and_text(record: LiveTransition, errors: list[str]) -> None:
+def _check_target_and_text(
+    record: LiveTransition, targets: cabc.Set[str], errors: list[str]
+) -> None:
     """Check that a transition declares a target and a trigger."""
     identifier = str(record.get("id", ""))
-    if record.get("to") not in TARGETS:
+    if record.get("to") not in targets:
         target = record.get("to")
         errors.append(f"transition {identifier!r}: unknown target {target!r}")
     if not str(record.get("owner", "")).strip():
@@ -78,13 +85,13 @@ def _has_edge(
 
 
 def _check_state_coverage(
-    transitions: list[LiveTransition], errors: list[str]
+    transitions: list[LiveTransition], states: cabc.Set[str], errors: list[str]
 ) -> None:
     """Check that every live state appears in a transition."""
     targets = {record.get("to") for record in transitions}
     errors.extend(
         f"state {state!r} is not the target of any transition"
-        for state in sorted(STATES - targets)
+        for state in sorted(states - targets)
     )
 
 
@@ -100,15 +107,30 @@ def _check_special_edges(
         errors.append("a grant issued while the provider is absent is not modelled")
 
 
-def validate_transitions(transitions: list[LiveTransition]) -> list[str]:
-    """Check that the typed transition source is complete and well formed."""
+def validate_transitions(
+    transitions: list[LiveTransition], contract: Contract
+) -> list[str]:
+    """Check that the typed transition source is complete and well formed.
+
+    Parameters
+    ----------
+    transitions
+        The typed transition records to validate.
+    contract
+        The loaded contract that supplies the accepted state and token names.
+
+    Returns
+    -------
+    list[str]
+        Every defect the records declare, or an empty list.
+    """
     errors: list[str] = []
     seen: set[str] = set()
     for record in transitions:
         _check_identifier(record, seen, errors)
-        _check_sources(record, errors)
-        _check_target_and_text(record, errors)
-    _check_state_coverage(transitions, errors)
+        _check_sources(record, contract.from_tokens, errors)
+        _check_target_and_text(record, contract.targets, errors)
+    _check_state_coverage(transitions, contract.states, errors)
     _check_special_edges(transitions, errors)
     return errors
 
@@ -120,7 +142,7 @@ def chapter_rows() -> list[tuple[str, str, str, str]]:
         r"^## Transitions\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL
     )
     if match is None:
-        raise SystemExit("state contract: chapter 08 has no Transitions section")
+        raise ContractError("chapter 08 has no Transitions section")
     rows: list[tuple[str, str, str, str]] = []
     for raw in match.group(1).splitlines():
         line = raw.strip()

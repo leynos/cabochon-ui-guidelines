@@ -1,6 +1,6 @@
 """Prove that the layout checks detect the defects they exist to prevent.
 
-The `self_test` function runs eleven probes over changed tokens, worked values
+The `self_test` function runs twelve probes over changed tokens, worked values
 and table cells, requiring the matching diagnostic from the budget and chapter
 checks. `layoutcheck.cli` invokes it for `--self-test`.
 """
@@ -156,6 +156,48 @@ def probe_addend_operator() -> str | None:
     return None
 
 
+def probe_unguarded_totals() -> str | None:
+    """Return a failure if a cell without an integer total escapes the check."""
+    cells = (
+        (1, "160 - 6"),
+        (2, "210 - 6"),
+        (1, "160 + 6 ="),
+    )
+    for column, cell in cells:
+        errors = _worked_diagnostics(0, column, cell)
+        reported = [error for error in errors if "is not an integer" in error]
+        if len(reported) != 1:
+            return (
+                f"a worked cell {cell!r} without an integer total produced "
+                f"{len(reported)} diagnostics rather than one"
+            )
+    errors = _worked_diagnostics(0, 1, "160 + 6 =")
+    if any("do not sum" in error for error in errors):
+        return "an unparsable band total still had its addends checked"
+    rows = copy.deepcopy(table_with(chapter_text(), "Bands"))
+    rows[0][2] = "86 - 6"
+    errors = check_band_rows(rows, BUDGETS["tokens"], BUDGETS["profiles"])
+    reported = [error for error in errors if "is not an integer" in error]
+    if len(reported) != 1:
+        return "a band total without an integer was not reported once"
+    rows = copy.deepcopy(table_with(chapter_text(), "Document plane"))
+    rows[0][2] = "210 - 6"
+    rows[0][3] = "1 × 1"
+    rows[1][3] = "1 × 1"
+    errors = check_worked_rows(
+        rows,
+        BUDGETS["tokens"],
+        BUDGETS["profiles"],
+        BUDGETS["configurations"],
+    )
+    reported = [error for error in errors if "is not an integer" in error]
+    if len(reported) != 1:
+        return "a bad side allocation was not reported once"
+    if not any("document plane" in error for error in errors):
+        return "a bad side allocation stopped the remaining cells being checked"
+    return None
+
+
 PROBES = (
     probe_tool_strip,
     probe_wrong_width,
@@ -168,11 +210,12 @@ PROBES = (
     probe_band_addends,
     probe_plane_decimal,
     probe_addend_operator,
+    probe_unguarded_totals,
 )
 
 
 def self_test(baseline_errors: list[str]) -> int:
-    """Prove that eleven deliberate token, value or table changes are detected."""
+    """Prove that twelve deliberate token, value or table changes are detected."""
     failures = ["baseline budgets did not pass"] if baseline_errors else []
     failures.extend(failure for probe in PROBES if (failure := probe()))
 

@@ -38,21 +38,27 @@ def kicker(x: float, y: float, value: str, *, colour: str = OXIDE) -> str:
     )
 
 
-def title_block(  # pylint: disable=too-many-arguments
-    x: float, y: float, heading: str, deck: str | None = None, *, width: int = 520
-) -> str:
+def title_block(x: float, y: float, heading: str, deck: str | None = None) -> str:
     """Draw a heading with an optional deck.
+
+    The deck is drawn as one line rather than wrapped. Its baseline is
+    ``y + 80``, while almost every figure begins its content between ``y + 150``
+    and ``y + 166``, so a wrapped deck would overlap the figure it introduces.
 
     Parameters
     ----------
     x, y : float
+        The heading's left edge and baseline in logical units.
     heading : str
+        The display heading, drawn italic at 34 logical units.
     deck : str | None
-    width : int
+        The explanatory paragraph, drawn as one line of 13 logical units, or
+        ``None``, the default, to omit it.
 
     Returns
     -------
     str
+        The SVG fragment string for the kicker, heading and optional deck.
     """
     body = kicker(x, y, "Cabochon interface guidelines")
     body += txt(x, y + 48, heading, size=34, family=F_DISPLAY, style="italic")

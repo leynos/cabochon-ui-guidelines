@@ -10,10 +10,14 @@ window.
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import rect, txt
-from figuregen.figdata import LIVE_STATES, RESOLUTION_STATES
 from figuregen.ornaments.marks import mark_group, state_mark
 from figuregen.palette import F_MONO, HIGH, PINE2
+
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import StateTables
 
 
 def chip(  # pylint: disable=too-many-arguments
@@ -90,7 +94,7 @@ def chip(  # pylint: disable=too-many-arguments
     return body, width
 
 
-def state_chip(x: float, y: float, name: str) -> tuple[str, float]:
+def state_chip(x: float, y: float, name: str, states: StateTables) -> tuple[str, float]:
     """Draw a live or resolution state chip.
 
     The chip takes its label, colour, mark and role from the named state, and
@@ -106,6 +110,9 @@ def state_chip(x: float, y: float, name: str) -> tuple[str, float]:
     name : str
         The state name, looked up first among the live states and then among
         the resolution states.
+    states : StateTables
+        The live and resolution state records loaded from
+        ``tools/figure-data.json``.
 
     Returns
     -------
@@ -121,9 +128,9 @@ def state_chip(x: float, y: float, name: str) -> tuple[str, float]:
         ``Stale``, ``Broken`` and ``Denied``, and the known resolution states
         are ``Resolved``, ``Opaque``, ``Unavailable`` and ``Malformed``.
     """
-    state = LIVE_STATES.get(name) or RESOLUTION_STATES.get(name)
+    state = states.live.get(name) or states.resolution.get(name)
     if state is None:
-        known = sorted({*LIVE_STATES, *RESOLUTION_STATES})
+        known = sorted({*states.live, *states.resolution})
         raise ValueError(f"unknown figure state {name!r}; known states are {known}")
     mark = state.get("mark")
     if not mark:

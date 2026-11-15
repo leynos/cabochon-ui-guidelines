@@ -8,10 +8,13 @@ read, a file that is not valid UTF-8 and a file that is not valid JSON.
 
 from __future__ import annotations
 
-from pathlib import Path
+import typing as typ
 
 import pytest
 from requirementcheck.registry import load_registry
+
+if typ.TYPE_CHECKING:
+    from pathlib import Path
 
 UNREADABLE = "requirement registry is unreadable: "
 
@@ -20,31 +23,38 @@ def test_missing_file_is_recorded(tmp_path: Path) -> None:
     """A registry that does not exist is reported, not raised."""
     problems: list[str] = []
 
-    assert load_registry(tmp_path / "absent.json", problems) == {}
-    assert len(problems) == 1
-    assert problems[0].startswith(UNREADABLE)
+    assert load_registry(tmp_path / "absent.json", problems) == {}, (
+        "a missing registry yields no mapping"
+    )
+    assert len(problems) == 1, "a missing registry earns exactly one diagnostic"
+    assert problems[0].startswith(UNREADABLE), "the diagnostic names the registry"
 
 
-def test_invalid_utf8_is_recorded(tmp_path: Path) -> None:
-    """Bytes that are not UTF-8 are reported like any other unreadable file."""
+@pytest.mark.parametrize(
+    "payload",
+    [
+        pytest.param(b"", id="empty"),
+        pytest.param(b"{not json}", id="invalid-json"),
+        pytest.param(b'{"id": "\xff\xfe"}', id="invalid-utf8"),
+        pytest.param(b"\xf0\x28\x8c\x28", id="malformed-utf8"),
+    ],
+)
+def test_unreadable_payloads_are_recorded(tmp_path: Path, payload: bytes) -> None:
+    """Each unreadable payload earns one diagnostic and an empty mapping.
+
+    Empty input and invalid JSON fail while parsing; the two malformed byte
+    sequences fail while decoding UTF-8. Both paths record a single
+    ``UNREADABLE`` diagnostic rather than raising.
+    """
     path = tmp_path / "registry.json"
-    path.write_bytes(b'{"id": "\xff\xfe"}')
+    path.write_bytes(payload)
     problems: list[str] = []
 
-    assert load_registry(path, problems) == {}
-    assert len(problems) == 1
-    assert problems[0].startswith(UNREADABLE)
-
-
-def test_invalid_json_is_recorded(tmp_path: Path) -> None:
-    """A file that is not JSON is reported, not raised."""
-    path = tmp_path / "registry.json"
-    path.write_text("{not json}", encoding="utf-8")
-    problems: list[str] = []
-
-    assert load_registry(path, problems) == {}
-    assert len(problems) == 1
-    assert problems[0].startswith(UNREADABLE)
+    assert load_registry(path, problems) == {}, (
+        "an unreadable registry yields no mapping"
+    )
+    assert len(problems) == 1, "an unreadable registry earns exactly one diagnostic"
+    assert problems[0].startswith(UNREADABLE), "the diagnostic names the registry"
 
 
 def test_valid_registry_returns_its_document(tmp_path: Path) -> None:
@@ -53,16 +63,7 @@ def test_valid_registry_returns_its_document(tmp_path: Path) -> None:
     path.write_text('{"requirements": []}', encoding="utf-8")
     problems: list[str] = []
 
-    assert load_registry(path, problems) == {"requirements": []}
-    assert problems == []
-
-
-@pytest.mark.parametrize("payload", [b"", b"\xf0\x28\x8c\x28"])
-def test_decoding_failures_are_all_reported(tmp_path: Path, payload: bytes) -> None:
-    """Each undecodable payload earns exactly one diagnostic."""
-    path = tmp_path / "registry.json"
-    path.write_bytes(payload)
-    problems: list[str] = []
-
-    assert load_registry(path, problems) == {}
-    assert len(problems) == 1
+    assert load_registry(path, problems) == {"requirements": []}, (
+        "a readable registry yields its document"
+    )
+    assert problems == [], "a readable registry records no diagnostic"

@@ -11,6 +11,8 @@ the shared `figuregen.palette` colours. `figuregen.cli` calls it to write
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import line, para, rect, svg_doc, txt
 from figuregen.ornaments import state_chip, title_block
 from figuregen.palette import (
@@ -27,26 +29,37 @@ from figuregen.palette import (
 )
 from figuregen.widgets import inspector_row, pane_head, window_shell
 
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import StateTables
 
-def _chip_width(name: str) -> float:
+
+def _chip_width(name: str, states: StateTables) -> float:
     """Measure a state chip without keeping its drawing.
 
     Parameters
     ----------
     name : str
         State name.
+    states : StateTables
+        The live and resolution state records passed to `state_chip`.
 
     Returns
     -------
     float
         The chip's width in logical units, so a card can right-align it.
     """
-    _, width = state_chip(0, 0, name)
+    _, width = state_chip(0, 0, name, states)
     return width
 
 
-def fig_project() -> str:  # pylint: disable=too-many-locals
+def fig_project(states: StateTables) -> str:  # pylint: disable=too-many-locals
     """Draw the project window with tree, documents and identity panel.
+
+    Parameters
+    ----------
+    states : StateTables
+        The live and resolution state records passed to `window_shell` and
+        `state_chip`.
 
     Returns
     -------
@@ -64,6 +77,7 @@ def fig_project() -> str:  # pylint: disable=too-many-locals
         y,
         w,
         h,
+        states=states,
         title="Projects — North Sea transition",
         menu=["File", "Edit", "View", "Project", "Window", "Help"],
         status="3 documents · 8 objects · 2 links",
@@ -112,8 +126,8 @@ def fig_project() -> str:  # pylint: disable=too-many-locals
         body += txt(cx + 16, dy + 26, name, size=12, weight="bold")
         body += txt(cx + 16, dy + 46, identity, size=11, fill=SOFT, family=F_MONO)
         body += txt(cx + 16, dy + 64, detail, size=11, fill=SOFT)
-        chip_x = cx + card_w - 12 - _chip_width(state)
-        state_body, _ = state_chip(chip_x, dy + 14, state)
+        chip_x = cx + card_w - 12 - _chip_width(state, states)
+        state_body, _ = state_chip(chip_x, dy + 14, state, states)
         body += state_body
     body += para(
         cx,

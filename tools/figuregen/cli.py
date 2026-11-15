@@ -1,13 +1,20 @@
 """Register each figure name with its builder and write the SVG files.
 
-`main` checks its registry against `FIGURE_SPECS` from `tools/figure-data.json`,
-annotates every rendered figure with the metadata declared there, and writes
-`figures/*.svg`. `tools/make-figures.py` is the only caller.
+`main` loads the figure catalogue from `tools/figure-data.json`, checks its
+registry against the catalogue's figure specifications, annotates every
+rendered figure with the metadata declared there, and writes `figures/*.svg`.
+`tools/make-figures.py` is the only caller.
 """
 
 from __future__ import annotations
 
-from figuregen.figdata import FIGURE_SPECS, OUT
+import os
+import sys
+import tempfile
+import typing as typ
+from pathlib import Path
+
+from figuregen.figdata import DATA_PATH, OUT, ContractError, load_catalogue
 from figuregen.figures.accessibility import fig_accessibility
 from figuregen.figures.command_palette import fig_command_palette
 from figuregen.figures.controls import fig_controls
@@ -43,6 +50,64 @@ from figuregen.figures.type_scale import fig_type
 from figuregen.figures.window import fig_window
 from figuregen.production import annotate, fig_prod_chrome, fig_prod_control
 
+if typ.TYPE_CHECKING:
+    import collections.abc as cabc
+
+# Builders that read state records outside the shared helpers take the whole
+# catalogue; builders that only forward state tables take ``Catalogue.states``.
+CATALOGUE_BUILDERS = frozenset({fig_embed, fig_state})
+STATE_BUILDERS = frozenset({
+    fig_accessibility,
+    fig_draw,
+    fig_formula,
+    fig_hello,
+    fig_inspector,
+    fig_localization,
+    fig_menus,
+    fig_notes,
+    fig_press,
+    fig_project,
+    fig_table,
+    fig_toolbars,
+    fig_window,
+})
+
+
+def _write_svg(destination: Path, text: str) -> None:
+    """Write one complete SVG document through a unique scratch file.
+
+    A unique scratch name keeps concurrent runs from replacing the same file
+    twice, and the rename publishes the document atomically.
+
+    Parameters
+    ----------
+    destination : Path
+        The final SVG path, in an existing directory.
+    text : str
+        The complete SVG document, including its trailing newline.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    The scratch file is created beside the destination, given mode ``0o644``
+    and renamed over the destination. It is unlinked even when a write or the
+    rename fails.
+    """
+    descriptor, scratch_name = tempfile.mkstemp(
+        prefix=f".{destination.stem}.", suffix=".svg.tmp", dir=destination.parent
+    )
+    scratch = Path(scratch_name)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(text)
+        scratch.chmod(0o644)
+        scratch.replace(destination)
+    finally:
+        scratch.unlink(missing_ok=True)
+
 
 def main() -> int:
     """Write every figure and report the count.
@@ -50,9 +115,16 @@ def main() -> int:
     Returns
     -------
     int
+        0 once every figure is written, or 1 when the figure contract cannot
+        be loaded.
     """
+    try:
+        catalogue = load_catalogue(DATA_PATH)
+    except ContractError as error:
+        print(f"figure contract: {error}", file=sys.stderr)
+        return 1
     OUT.mkdir(exist_ok=True)
-    figures = {
+    figures: dict[str, cabc.Callable[..., str]] = {
         "fig-00-cover": fig_cover,
         "fig-01-map": fig_map,
         "fig-02-small-world": fig_small_world,
@@ -89,17 +161,21 @@ def main() -> int:
         "fig-prod-chrome": fig_prod_chrome,
         "fig-prod-control": fig_prod_control,
     }
-    missing = sorted(set(figures) - set(FIGURE_SPECS))
-    extra = sorted(set(FIGURE_SPECS) - set(figures))
+    missing = sorted(set(figures) - set(catalogue.figure_specs))
+    extra = sorted(set(catalogue.figure_specs) - set(figures))
     if missing or extra:
         raise SystemExit(
             f"figure-data.json does not match the generator: "
             f"missing={missing} extra={extra}"
         )
     for name, draw in figures.items():
-        destination = OUT / f"{name}.svg"
-        scratch = OUT / f".{name}.svg.tmp"
-        scratch.write_text(annotate(name, draw()) + "\n", encoding="utf-8")
-        scratch.replace(destination)
+        if draw in CATALOGUE_BUILDERS:
+            svg = draw(catalogue)
+        elif draw in STATE_BUILDERS:
+            svg = draw(catalogue.states)
+        else:
+            svg = draw()
+        text = annotate(name, svg, catalogue.figure_specs) + "\n"
+        _write_svg(OUT / f"{name}.svg", text)
     print(f"wrote {len(figures)} figures to {OUT}")
     return 0

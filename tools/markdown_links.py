@@ -15,7 +15,8 @@ import re
 from markdown_structure import strip_code_and_comments
 
 TARGET_RE = re.compile(
-    r"(?P<image>!)?\[[^\]]*\]\(\s*(?P<target><[^>\n]*>|[^)\s]+)"
+    r"(?<!\\)(?P<image>!)?\[[^\]]*\]\(\s*"
+    r"(?P<target><[^>\n]*>|(?:[^()\s]|\([^()\s]*\))+)"
     r"(?:\s+[\"'][^\"']*[\"'])?\s*\)"
 )
 REF_DEF_RE = re.compile(
@@ -86,7 +87,9 @@ def targets(text: str, *, images: bool | None = None) -> list[str]:
     destination inside them is ignored. Inline destinations are reported
     first, followed by reference links and shortcut references whose label
     has a definition in the text; the angle brackets CommonMark permits
-    around a destination are removed.
+    around a destination are removed. A destination may contain one level of
+    balanced parentheses, and a delimiter escaped by a backslash is literal
+    text rather than the start of a link.
 
     Parameters
     ----------

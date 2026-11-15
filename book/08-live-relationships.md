@@ -155,10 +155,10 @@ change** means the reply belongs to a superseded generation, carries a stale
 invalidation epoch or is behind the known source, and is discarded.
 
 A source notification is itself a scheduling event. When it arrives with no
-request in flight, the application dispatches a refresh. The relationship then
-moves to **Refreshing**, and the freshest accepted value remains visible. The
-dispatch uses the same generation, coverage and cancellation rules as an
-explicit request.
+request in flight, and authority permits and a provider is present, the
+application dispatches a refresh. The relationship then moves to **Refreshing**,
+and the freshest accepted value, if any, remains visible. The dispatch uses the
+same generation, coverage and cancellation rules as an explicit request.
 
 ## The logical refresh lifecycle
 

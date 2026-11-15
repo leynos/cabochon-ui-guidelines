@@ -126,6 +126,32 @@ def _code_only_owner(text: str) -> str:
     )
 
 
+def _owner_after_blank_line(text: str) -> str:
+    """Move the CON-01 owner into an unindented paragraph after a blank line."""
+    return text.replace(
+        "      from Escutcheon resources. Owner: "
+        "[Ecosystem map](03-ecosystem-map.md#the-substrate-components).\n"
+        "- [ ] **CON-02**",
+        "      from Escutcheon resources.\n\n"
+        "Owner: [Ecosystem map](03-ecosystem-map.md#the-substrate-components).\n\n"
+        "- [ ] **CON-02**",
+        1,
+    )
+
+
+def _indented_owner(text: str) -> str:
+    """Put the CON-01 owner on a six-space indented continuation line."""
+    return text.replace(
+        "      from Escutcheon resources. Owner: "
+        "[Ecosystem map](03-ecosystem-map.md#the-substrate-components).\n"
+        "- [ ] **CON-02**",
+        "      from Escutcheon resources.\n"
+        "      Owner: [Ecosystem map](03-ecosystem-map.md#the-substrate-components).\n"
+        "- [ ] **CON-02**",
+        1,
+    )
+
+
 def _checklist_cases() -> list[tuple[str, cabc.Callable[[str], str], str]]:
     """Return every checklist mutation with the diagnostic it must provoke."""
     return [
@@ -150,6 +176,14 @@ def _checklist_cases() -> list[tuple[str, cabc.Callable[[str], str], str]]:
         (
             "owner link inside a code span",
             _code_only_owner,
+            (
+                "CON-01: checklist owner disagrees with registry owner "
+                "'03-ecosystem-map.md#the-substrate-components'"
+            ),
+        ),
+        (
+            "owner outside the checklist item",
+            _owner_after_blank_line,
             (
                 "CON-01: checklist owner disagrees with registry owner "
                 "'03-ecosystem-map.md#the-substrate-components'"
@@ -245,6 +279,9 @@ def _benign_edit_failures(root: Path) -> list[str]:
     target.write_text(_apply_wording(original), encoding="utf-8")
     if run(root):
         failures.append("wording-only edit was rejected")
+    target.write_text(_indented_owner(original), encoding="utf-8")
+    if run(root):
+        failures.append("an owner on an indented continuation line was rejected")
     target.write_text(
         original + "\n<!--\n- [ ] **ZZZ-99** — Comment-only item.\n-->\n",
         encoding="utf-8",

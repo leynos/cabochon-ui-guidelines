@@ -23,7 +23,9 @@ def _parents(root: ElementTree.Element) -> Parents:
 
 def test_mixed_path_ignores_move_only_subpath() -> None:
     """A trailing move-only subpath contributes nothing to the bounds."""
-    assert path_bbox("M 0 0 L 1 1 M 20 20") == (0.0, 0.0, 1.0, 1.0)
+    assert path_bbox("M 0 0 L 1 1 M 20 20") == (0.0, 0.0, 1.0, 1.0), (
+        "only the drawn segment bounds the path"
+    )
 
 
 def test_move_only_path_has_no_segments() -> None:
@@ -46,7 +48,9 @@ def test_inline_style_zero_stroke_width_hides_line() -> None:
             "style": "stroke-width:0",
         },
     )
-    assert not paint_visible(line, {})
+    assert not paint_visible(line, {}), (
+        "an inline zero stroke width hides the line"
+    )
 
 
 def test_ancestor_zero_stroke_width_hides_line() -> None:
@@ -56,7 +60,9 @@ def test_ancestor_zero_stroke_width_hides_line() -> None:
         "line", {"x1": "0", "y1": "0", "x2": "1", "y2": "1", "stroke": "#000000"}
     )
     group.append(line)
-    assert not paint_visible(line, _parents(group))
+    assert not paint_visible(line, _parents(group)), (
+        "an inherited zero stroke width hides the line"
+    )
 
 
 def test_ancestor_inline_style_hides_line() -> None:
@@ -66,7 +72,9 @@ def test_ancestor_inline_style_hides_line() -> None:
         "line", {"x1": "0", "y1": "0", "x2": "1", "y2": "1", "stroke": "#000000"}
     )
     group.append(line)
-    assert not paint_visible(line, _parents(group))
+    assert not paint_visible(line, _parents(group)), (
+        "an ancestor's inline zero stroke width hides the line"
+    )
 
 
 def test_visible_paint_is_reported() -> None:
@@ -88,5 +96,5 @@ def test_visible_paint_is_reported() -> None:
     )
     root.extend([line, rect])
     parents = _parents(root)
-    assert paint_visible(line, parents)
-    assert paint_visible(rect, parents)
+    assert paint_visible(line, parents), "a stroked line paints visibly"
+    assert paint_visible(rect, parents), "a filled rectangle paints visibly"

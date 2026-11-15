@@ -8,14 +8,24 @@ exported `fig_inspector` function returns the SVG string, drawn from the shared
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import line, lines, para, rect, svg_doc, txt
 from figuregen.ornaments import state_chip, title_block
 from figuregen.palette import F_DISPLAY, F_MONO, INK, LINE, OXIDE, PAPER, PINE2, SOFT
 from figuregen.widgets import inspector_row, pane_head, radio
 
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import StateTables
 
-def fig_inspector() -> str:
+
+def fig_inspector(states: StateTables) -> str:
     """Draw the object inspector.
+
+    Parameters
+    ----------
+    states : StateTables
+        The live and resolution state records passed to `state_chip`.
 
     Returns
     -------
@@ -34,7 +44,7 @@ def fig_inspector() -> str:
     ix, iw = x + 16, w - 32
     body += txt(ix, y + 52, "Generation mix", size=18, family=F_DISPLAY, style="italic")
     body += txt(ix, y + 72, "Table · obj:8f3a", size=11, fill=SOFT, family=F_MONO)
-    state_body, _ = state_chip(x + w - 110, y + 38, "Current")
+    state_body, _ = state_chip(x + w - 110, y + 38, "Current", states)
     body += state_body
     body += txt(
         ix,
@@ -78,7 +88,7 @@ def fig_inspector() -> str:
         weight="bold",
         spacing=0.7,
     )
-    state_body, _ = state_chip(ix, y + 368, "Current")
+    state_body, _ = state_chip(ix, y + 368, "Current", states)
     body += state_body
     body += txt(ix, y + 406, "Last refresh", size=11, fill=INK)
     body += txt(

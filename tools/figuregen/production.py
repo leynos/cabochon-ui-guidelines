@@ -15,20 +15,20 @@ import json
 from html import escape
 
 from figuregen.canvas import attrs, rect, svg_doc, txt
-from figuregen.figdata import FIGURE_SPECS
 from figuregen.palette import F_MONO, HIGH, INK
 
 
-def annotate(name: str, svg: str) -> str:
+def annotate(name: str, svg: str, specs: dict[str, dict[str, object]]) -> str:
     """Attach the figure's declared class, scale, profile and components.
 
     Parameters
     ----------
     name : str
-        The figure name, which must have an entry in
-        ``tools/figure-data.json``.
+        The figure name, which must have an entry in ``specs``.
     svg : str
         The rendered SVG document to annotate.
+    specs : dict[str, dict[str, object]]
+        The figure specifications loaded from ``tools/figure-data.json``.
 
     Returns
     -------
@@ -40,11 +40,10 @@ def annotate(name: str, svg: str) -> str:
     Raises
     ------
     ValueError
-        If ``name`` has no entry in ``tools/figure-data.json``, or if that
-        entry declares a class other than ``schematic``, ``editorial`` or
-        ``production``.
+        If ``name`` has no entry in ``specs``, or if that entry declares a
+        class other than ``schematic``, ``editorial`` or ``production``.
     """
-    spec = FIGURE_SPECS.get(name)
+    spec = specs.get(name)
     if spec is None:
         raise ValueError(f"figure {name!r} has no entry in tools/figure-data.json")
     figure_class = str(spec["class"])

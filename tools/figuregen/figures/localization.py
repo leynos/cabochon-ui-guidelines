@@ -8,14 +8,24 @@ Two windows show expanded en-XA text and mirrored ar-XB layout. The exported
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import para, svg_doc, txt
 from figuregen.ornaments import title_block
 from figuregen.palette import F_DISPLAY, F_MONO, OXIDE, PINE2, SOFT
 from figuregen.widgets import button, window_shell
 
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import StateTables
 
-def fig_localization() -> str:
+
+def fig_localization(states: StateTables) -> str:
     """Draw pseudo-localized left-to-right and right-to-left windows.
+
+    Parameters
+    ----------
+    states : StateTables
+        The live and resolution state records passed to `window_shell`.
 
     Returns
     -------
@@ -44,6 +54,7 @@ def fig_localization() -> str:
         y,
         w,
         h,
+        states=states,
         title="Facet Notes — ⟦Ŵöŕļď ťŕáńšîťîöń ··⟧",
         menu=["⟦Fîļé⟧", "⟦Édîť⟧", "⟦Vîéŵ⟧", "⟦Héļþ⟧"],
         status="⟦Ŝávéď · 3 émбédš ····⟧",
@@ -92,6 +103,7 @@ def fig_localization() -> str:
         y,
         480,
         h,
+        states=states,
         title="مفكرة الأوجه — انتقال بحر الشمال",
         menu=["ملف", "تحرير", "عرض", "مساعدة"],
         status="محفوظ · ٣ كائنات",

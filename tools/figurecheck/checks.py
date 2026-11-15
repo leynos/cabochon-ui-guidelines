@@ -12,7 +12,7 @@ import typing as typ
 from xml.etree import ElementTree
 
 from figurecheck.annotation import check_annotation
-from figurecheck.contract import DATA
+from figurecheck.contract import component_catalogue, figure_specs
 from figurecheck.production import check_production_geometry
 from figurecheck.states import check_states
 
@@ -20,10 +20,30 @@ if typ.TYPE_CHECKING:
     from pathlib import Path
 
 
-def run(figures: Path) -> list[str]:
-    """Run every figure check and return the failure report."""
+def run(
+    figures: Path,
+    data: dict[str, object],
+    records: dict[str, dict[str, str]],
+) -> list[str]:
+    """Run every figure check and return the failure report.
+
+    Parameters
+    ----------
+    figures
+        The directory that holds the generated SVG figures.
+    data
+        The decoded figure contract document.
+    records
+        The validated state records keyed by identity.
+
+    Returns
+    -------
+    list[str]
+        Every defect the checks found, or an empty list.
+    """
     errors: list[str] = []
-    specs: dict[str, dict[str, object]] = DATA["figures"]
+    specs = figure_specs(data)
+    catalogue = component_catalogue(data)
     present = {path.stem for path in figures.glob("*.svg")}
     errors.extend(
         f"{name}: declared in figure-data.json but not generated"
@@ -43,6 +63,6 @@ def run(figures: Path) -> list[str]:
             continue
         spec = specs[name]
         errors.extend(check_annotation(name, root, spec))
-        errors.extend(check_states(name, root, spec))
-        errors.extend(check_production_geometry(name, root, spec))
+        errors.extend(check_states(name, root, spec, records))
+        errors.extend(check_production_geometry(name, root, spec, catalogue))
     return errors

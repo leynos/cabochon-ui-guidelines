@@ -170,28 +170,29 @@ becomes **Copy result** and the reason is stated.
 
 ## Keyboard
 
-| Key           | Action                                                                                                                     |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Enter         | Activate the current primary action; insert the live value only when the destination accepts it, otherwise copy the result |
-| Escape        | Dismiss a completion, then cancel and restore the selection                                                                |
-| Control+Space | Offer selector completions                                                                                                 |
-| Tab           | Move between expression, sources and actions                                                                               |
+| Key           | Action                                                                                                                                                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Enter         | Accept the highlighted selector completion while one is open; otherwise activate the current primary action, inserting the live value only when the destination accepts it and copying the result when it does not |
+| Escape        | Dismiss a completion, then cancel and restore the selection                                                                                                                                                        |
+| Control+Space | Offer selector completions                                                                                                                                                                                         |
+| Tab           | Move between expression, sources and actions                                                                                                                                                                       |
 
 The expression field supports the usual editing keys and must not swallow Tab,
-so that the user can reach the actions without a pointer. Enter activates the
+so that the user can reach the actions without a pointer. Enter accepts the
+highlighted selector completion while one is open. Otherwise it activates the
 current primary action. When the expression field has focus and the destination
-accepts a live value, that action inserts the value; when the destination
-cannot accept it, the action is **Copy result** and Enter copies. Enter while
-another control has focus activates that control and does not insert the value.
-While an input-method composition is active, Enter commits the composition
-first. The input-mode rules are those of
-[Focus and keyboard](18-focus-keyboard.md).
+accepts a live value, that action inserts the value; when the destination cannot
+accept it, the action is **Copy result** and Enter copies. Enter while another
+control has focus activates that control and does not insert the value. While an
+input-method composition is active, Enter commits the composition first, and an
+open completion is accepted only when no composition is active. The input-mode
+rules are those of [Focus and keyboard](18-focus-keyboard.md).
 
 A selector completion lives inside the expression field and never traps focus.
 The first Escape dismisses an open completion and leaves the expression
-unchanged; only a second Escape cancels the operation. Arrow keys move within
-the completion list while it is open, and the list closes without invoking
-anything when focus leaves the field.
+unchanged; the next Escape reverts the draft and leaves the innermost mode.
+Arrow keys move within the completion list while it is open, and the list closes
+without invoking anything when focus leaves the field.
 
 ## What the tool is not
 

@@ -8,14 +8,24 @@ from the shared `figuregen.palette` colours. `figuregen.cli` calls it to write
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import line, lines, para, rect, svg_doc, txt
 from figuregen.ornaments import title_block
 from figuregen.palette import F_MONO, HIGH, INK, LINE, OXIDE, PINE2, SOFT
 from figuregen.widgets import window_shell
 
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import StateTables
 
-def fig_menus() -> str:
+
+def fig_menus(states: StateTables) -> str:
     """Draw a menu bar with an open File menu.
+
+    Parameters
+    ----------
+    states : StateTables
+        The live and resolution state records passed to `window_shell`.
 
     Returns
     -------
@@ -33,6 +43,7 @@ def fig_menus() -> str:
         y,
         w,
         h,
+        states=states,
         title="Facet Notes — North Sea transition",
         menu=["File", "Edit", "View", "Object", "Tools", "Window", "Help"],
         active_menu="File",

@@ -23,16 +23,20 @@ def test_plain_run_checks_every_figure(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     """A bare invocation runs the contract checks and reports success."""
-    assert _run(monkeypatch) == 0
-    assert "figures satisfy" in capsys.readouterr().out
+    assert _run(monkeypatch) == 0, "a bare run reports success"
+    assert "figures satisfy" in capsys.readouterr().out, (
+        "the success line counts the checked figures"
+    )
 
 
 def test_self_test_runs_the_mutations(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     """The self-test option selects the mutation self-test."""
-    assert _run(monkeypatch, "--self-test") == 0
-    assert "detected all" in capsys.readouterr().out
+    assert _run(monkeypatch, "--self-test") == 0, "the self-test reports success"
+    assert "detected all" in capsys.readouterr().out, (
+        "the self-test line counts the detected mutations"
+    )
 
 
 def test_help_prints_usage_and_exits(
@@ -41,8 +45,10 @@ def test_help_prints_usage_and_exits(
     """The help option prints usage and exits successfully."""
     with pytest.raises(SystemExit) as exit_info:
         _run(monkeypatch, "--help")
-    assert exit_info.value.code == 0
-    assert "--self-test" in capsys.readouterr().out
+    assert exit_info.value.code == 0, "help exits successfully"
+    assert "--self-test" in capsys.readouterr().out, (
+        "the usage lists the self-test option"
+    )
 
 
 def test_unknown_option_is_rejected(
@@ -51,5 +57,7 @@ def test_unknown_option_is_rejected(
     """An abbreviated or unknown option exits with the usage error status."""
     with pytest.raises(SystemExit) as exit_info:
         _run(monkeypatch, "--self-tes")
-    assert exit_info.value.code == 2
-    assert "unrecognized arguments" in capsys.readouterr().err
+    assert exit_info.value.code == 2, "an unknown option exits with the usage status"
+    assert "unrecognized arguments" in capsys.readouterr().err, (
+        "the error names the rejected argument"
+    )

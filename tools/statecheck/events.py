@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import typing as typ
 
-from statecheck.contract import STATES, Facts, Step
+from statecheck.contract import ContractError, Facts, Step
 from statecheck.projection import vector_at_least
 
 if typ.TYPE_CHECKING:
@@ -75,14 +75,33 @@ def _validate_identity_field(
         errors.append(f"{where}: {field} is not a {qualifier} integer")
 
 
-def validate_step(scenario: str, index: int, step: Step) -> list[str]:
-    """Check that a fixture step carries exactly the data its event needs."""
+def validate_step(
+    scenario: str, index: int, step: Step, states: cabc.Set[str]
+) -> list[str]:
+    """Check that a fixture step carries exactly the data its event needs.
+
+    Parameters
+    ----------
+    scenario
+        The fixture name, repeated in every message.
+    index
+        The zero-based position of the step within its fixture.
+    step
+        The fixture step to validate.
+    states
+        The live state names the contract declares.
+
+    Returns
+    -------
+    list[str]
+        Every defect the step declares, or an empty list.
+    """
     errors: list[str] = []
     event = step.get("event")
     where = f"scenario {scenario!r} step {index + 1}"
     if event not in EVENTS:
         return [f"{where}: unknown event {event!r}"]
-    if step.get("expected") not in STATES:
+    if step.get("expected") not in states:
         errors.append(f"{where}: invalid expected state {step.get('expected')!r}")
     fields = REPLY_FIELDS.get(str(event), ())
     allowed = {"event", "expected"} | set(fields)
@@ -269,5 +288,5 @@ def apply(
         return
     handler = REPLY_HANDLERS.get(event)
     if handler is None:
-        raise SystemExit(f"state contract: unknown fixture event {event!r}")
+        raise ContractError(f"unknown fixture event {event!r}")
     handler(facts, step, check_reply_identity=check_reply_identity)

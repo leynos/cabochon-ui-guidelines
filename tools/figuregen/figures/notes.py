@@ -11,6 +11,8 @@ write `fig-22-notes.svg` under `figures/`.
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import circle, line, para, rect, svg_doc, txt
 from figuregen.ornaments import state_chip, title_block
 from figuregen.palette import (
@@ -28,6 +30,9 @@ from figuregen.palette import (
     WHITE,
 )
 from figuregen.widgets import pane_head, window_shell
+
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import StateTables
 
 
 def _note_tree(x: float, y: float, tree_w: float, h: float) -> str:
@@ -64,13 +69,14 @@ def _embed_card(  # pylint: disable=too-many-arguments
     title: str,
     meta: str,
     state: str,
+    states: StateTables,
 ) -> str:
     """Draw one embed card with its identity and state."""
     body = rect(ex, y + top, ew, height, fill=HIGH, stroke=LINE)
     body += rect(ex, y + top, 4, height, fill=colour, stroke=None)
     body += txt(ex + 16, y + top + 26, title, size=12, weight="bold")
     body += txt(ex + 16, y + top + 44, meta, size=10, fill=SOFT, family=F_MONO)
-    state_body, _ = state_chip(ex + ew - 104, y + top + 18, state)
+    state_body, _ = state_chip(ex + ew - 104, y + top + 18, state, states)
     return body + state_body
 
 
@@ -100,7 +106,7 @@ def _embed_diagram(ex: float, y: float) -> str:
     return body + circle(ex + 168, y + 398, 10, fill=HIGH, stroke=PINE2, sw=2)
 
 
-def _embeds(ex: float, y: float, ew: float) -> str:
+def _embeds(ex: float, y: float, ew: float, states: StateTables) -> str:
     """Draw the three live embeds."""
     body = _embed_card(
         ex,
@@ -112,6 +118,7 @@ def _embeds(ex: float, y: float, ew: float) -> str:
         title="Generation mix",
         meta="Table · 12 rows · 4 columns · obj:8f3a",
         state="Current",
+        states=states,
     )
     body += _embed_grid(ex, y)
     body += _embed_card(
@@ -124,6 +131,7 @@ def _embeds(ex: float, y: float, ew: float) -> str:
         title="Transition pathways",
         meta="Diagram · Mermaid source · obj:1b90",
         state="Stale",
+        states=states,
     )
     body += _embed_diagram(ex, y)
     return body + _embed_card(
@@ -136,6 +144,7 @@ def _embeds(ex: float, y: float, ew: float) -> str:
         title="North Sea currency",
         meta="Currency · GBP · last read 14:02",
         state="Refreshing",
+        states=states,
     )
 
 
@@ -187,8 +196,14 @@ def _relations(bx: float, y: float, back_w: float) -> str:
     )
 
 
-def fig_notes() -> str:
+def fig_notes(states: StateTables) -> str:
     """Draw Facet Notes with a note tree, live embeds and relations.
+
+    Parameters
+    ----------
+    states : StateTables
+        The live and resolution state records passed to `window_shell` and
+        `state_chip`.
 
     Returns
     -------
@@ -206,6 +221,7 @@ def fig_notes() -> str:
         y,
         w,
         h,
+        states=states,
         title="Facet Notes — North Sea transition",
         menu=["File", "Edit", "View", "Object", "Tools", "Window", "Help"],
         status="Saved · 3 embeds · 1 stale relationship",
@@ -236,7 +252,7 @@ def fig_notes() -> str:
         size=12,
         leading=19,
     )
-    body += _embeds(ex, y, ew)
+    body += _embeds(ex, y, ew, states)
     body += _relations(x + w - back_w, y, back_w)
     return svg_doc(
         1200,

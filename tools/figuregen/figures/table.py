@@ -8,10 +8,15 @@ colours. `figuregen.cli` calls it to write `fig-25-table.svg` under `figures/`.
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import line, para, rect, svg_doc, txt
 from figuregen.ornaments import title_block
 from figuregen.palette import F_MONO, HIGH, INK, LINE, OXIDE, PAPER, PINE2, SOFT, WHITE
 from figuregen.widgets import inspector_row, pane_head, window_shell
+
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import StateTables
 
 _COLS = ["Source", "Capacity", "Output", "Share"]
 _WIDTHS = [228, 130, 130, 110]
@@ -199,8 +204,13 @@ def _cell_inspector(ix: float, y: float, h: float) -> str:
     )
 
 
-def fig_table() -> str:
+def fig_table(states: StateTables) -> str:
     """Draw Enfilade Table with categories, grid and cell inspector.
+
+    Parameters
+    ----------
+    states : StateTables
+        The live and resolution state records passed to `window_shell`.
 
     Returns
     -------
@@ -218,6 +228,7 @@ def fig_table() -> str:
         y,
         w,
         h,
+        states=states,
         title="Enfilade Table — Generation mix",
         menu=["File", "Edit", "View", "Data", "Object", "Window", "Help"],
         status=(

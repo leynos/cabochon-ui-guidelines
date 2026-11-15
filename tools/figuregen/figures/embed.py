@@ -2,22 +2,32 @@
 
 The figure shows a note embed resolving to its provider, with the resolved,
 opaque, unavailable and malformed outcomes below. The exported `fig_embed`
-function returns the SVG string, drawn from the `RESOLUTION_STATES` records in
-`figuregen.figdata`. `figuregen.cli` calls it to write `fig-29-embed.svg`
-under `figures/`.
+function returns the SVG string, drawn from the resolution state records of
+the `figuregen.figdata` catalogue. `figuregen.cli` calls it to write
+`fig-29-embed.svg` under `figures/`.
 """
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import line, para, path, rect, svg_doc, txt
-from figuregen.figdata import RESOLUTION_STATES
 from figuregen.ornaments import mark_group, state_chip, state_mark, title_block
 from figuregen.palette import F_DISPLAY, F_MONO, HIGH, INK, LINE, OXIDE, PAPER, SOFT
 from figuregen.widgets import inspector_row, pane_head
 
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import Catalogue
 
-def fig_embed() -> str:
+
+def fig_embed(catalogue: Catalogue) -> str:
     """Draw the embed envelope, provider and failure states.
+
+    Parameters
+    ----------
+    catalogue : Catalogue
+        The figure catalogue, which supplies the resolution state records and
+        the state tables.
 
     Returns
     -------
@@ -52,7 +62,7 @@ def fig_embed() -> str:
     body += rect(dx + 18, dy + 150, dw - 36, 120, fill=PAPER, stroke=LINE)
     body += txt(dx + 32, dy + 176, "Generation mix", size=12, weight="bold")
     body += txt(dx + 32, dy + 194, "Table · 12 rows", size=10, fill=SOFT, family=F_MONO)
-    state_body, _ = state_chip(dx + dw - 122, dy + 166, "Current")
+    state_body, _ = state_chip(dx + dw - 122, dy + 166, "Current", catalogue.states)
     body += state_body
     for row in range(3):
         body += line(
@@ -117,7 +127,7 @@ def fig_embed() -> str:
     ]
     for index, (name, detail) in enumerate(states):
         sx = 64 + index * 216
-        state = RESOLUTION_STATES[name]
+        state = catalogue.resolution_states[name]
         colour = str(state["colour"])
         mark = str(state["mark"])
         body += '<g data-state-card="true">'

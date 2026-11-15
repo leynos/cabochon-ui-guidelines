@@ -83,7 +83,9 @@ def test_one_escape_clears_only_the_first_applicable_layer(
     elif layers["tool_gesture"]:
         expected["tool_gesture"] = False
     KEYBOARD.apply_escape(facts)
-    assert facts == expected
+    assert facts == expected, (
+        "Escape consumes exactly the highest-priority layer and leaves the rest"
+    )
 
 
 @given(LAYERS)
@@ -96,8 +98,12 @@ def test_dismissing_a_completion_leaves_the_draft_alone(
     dirty = copy.deepcopy(facts["draft_dirty"])
     KEYBOARD.apply_escape(facts)
     if layers["completion_open"] and not layers["composition"]:
-        assert facts["draft"] == draft
-        assert facts["draft_dirty"] is dirty
+        assert facts["draft"] == draft, (
+            "dismissing a completion leaves the draft text unchanged"
+        )
+        assert facts["draft_dirty"] is dirty, (
+            "dismissing a completion leaves the draft's dirty flag unchanged"
+        )
 
 
 def test_escape_with_no_open_layer_is_a_no_op() -> None:
@@ -114,4 +120,4 @@ def test_escape_with_no_open_layer_is_a_no_op() -> None:
     )
     before = copy.deepcopy(facts)
     KEYBOARD.apply_escape(facts)
-    assert facts == before
+    assert facts == before, "Escape with no open layer leaves every fact unchanged"

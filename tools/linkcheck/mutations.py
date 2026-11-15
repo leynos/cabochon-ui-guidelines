@@ -260,6 +260,22 @@ def _mutation_cases() -> list[tuple[str, cabc.Callable[[Path], bool], str | None
             None,
         ),
         (
+            "escaped bracket is literal text",
+            lambda root: append(
+                root / "book" / "01-purpose.md",
+                "\nEscaped \\[example](missing.md) is literal text.\n",
+            ),
+            None,
+        ),
+        (
+            "parenthesised destination is not truncated",
+            lambda root: append(
+                root / "book" / "01-purpose.md",
+                "\n[paren](no-such-file(v2).md)\n",
+            ),
+            "missing link target no-such-file(v2).md",
+        ),
+        (
             "angle-bracket destinations",
             lambda root: append(
                 root / purpose,
@@ -344,5 +360,27 @@ def _mutation_cases() -> list[tuple[str, cabc.Callable[[Path], bool], str | None
                 "(03-ecosystem-map.md#the-substrate-components)`\n",
             ),
             "requirement CON-99 names no owner",
+        ),
+        (
+            "owner outside a checklist item",
+            lambda root: append(
+                root / "book" / "40-checklist.md",
+                "\nA closing paragraph outside the list. "
+                "Owner: [Gone](../figures/fig-01-map.svg#no-such-anchor).\n",
+            ),
+            None,
+        ),
+        (
+            "indented owner inside an item is read",
+            lambda root: replace(
+                root / "book" / "40-checklist.md",
+                "from Escutcheon resources. Owner: "
+                "[Ecosystem map](03-ecosystem-map.md#the-substrate-components).",
+                "from Escutcheon resources. Owner: "
+                "[Ecosystem map](03-ecosystem-map.md#the-substrate-components).\n"
+                "      Owner: [Gone](../figures/fig-01-map.svg#no-such-anchor).",
+                1,
+            ),
+            "missing owner anchor ../figures/fig-01-map.svg#no-such-anchor",
         ),
     ]

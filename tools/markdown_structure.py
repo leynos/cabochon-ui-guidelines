@@ -238,8 +238,27 @@ def strip_code_and_comments(text: str) -> str:
     return INLINE_CODE_RE.sub("", strip_fences_and_comments(text))
 
 
+def _item_body(text: str, start: int, end: int) -> str:
+    """Return an item's first line and its indented continuation lines."""
+    lines = text[start:end].splitlines()
+    kept = lines[:1]
+    for line in lines[1:]:
+        if line.strip() and not line[:1].isspace():
+            break
+        kept.append(line)
+    while kept and not kept[-1].strip():
+        kept.pop()
+    return "\n".join(kept)
+
+
 def checklist_items(text: str) -> list[str]:
     """Split text into task-list item bodies, checked or unchecked.
+
+    An item runs to the next marker, the first line that is neither blank nor
+    indented, or the end of the text, whichever comes first. CommonMark's lazy
+    continuation, where an unindented line immediately after item text and
+    with no blank line still belongs to the item, is not followed; no current
+    item relies on it.
 
     Parameters
     ----------
@@ -251,11 +270,18 @@ def checklist_items(text: str) -> list[str]:
     list[str]
         One entry per task-list marker at the start of a line, indented by
         at most three spaces. The marker itself is discarded, so each entry
-        is the item body up to the next marker or the end of the text; a
-        multi-line item keeps its continuation lines. Any text before the
-        first marker is discarded too.
+        is the item body; a multi-line item keeps its indented continuation
+        lines. Any text before the first marker is discarded too.
     """
-    return CHECKLIST_ITEM_RE.split(text)[1:]
+    markers = list(CHECKLIST_ITEM_RE.finditer(text))
+    return [
+        _item_body(
+            text,
+            marker.end(),
+            markers[index + 1].start() if index + 1 < len(markers) else len(text),
+        )
+        for index, marker in enumerate(markers)
+    ]
 
 
 def anchors(path: Path) -> set[str]:

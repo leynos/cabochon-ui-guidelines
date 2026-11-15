@@ -14,11 +14,22 @@ import typing as typ
 
 from hypothesis import given
 from hypothesis import strategies as st
-from statecheck.contract import DATA, Facts, Step, defaults
+from statecheck.contract import (
+    DATA_PATH,
+    FIXTURES_PATH,
+    Facts,
+    Step,
+    defaults,
+    load_document,
+    states,
+)
 from statecheck.events import EVENTS, PROVIDER_EVENTS, apply
 from statecheck.projection import project
 
-STATE_NAMES = set(DATA["live_states"])
+DATA = load_document(DATA_PATH)
+FIXTURES = load_document(FIXTURES_PATH)
+DEFAULT_FACTS = defaults(FIXTURES)
+STATE_NAMES = states(DATA)
 VECTORS = st.dictionaries(
     st.sampled_from(["document", "profile", "rate"]),
     st.integers(min_value=0, max_value=8),
@@ -32,7 +43,7 @@ AVAILABILITY = st.sampled_from(sorted({"present", "uncertain", "lost"}))
 
 def facts_for(overrides: dict[str, object]) -> Facts:
     """Return a complete fact set with the drawn facts applied."""
-    facts: Facts = copy.deepcopy(defaults())
+    facts: Facts = copy.deepcopy(DEFAULT_FACTS)
     facts.update(overrides)  # type: ignore[typeddict-item]
     return facts
 
@@ -67,10 +78,14 @@ def test_an_event_sequence_never_leaves_the_declared_states(
 ) -> None:
     """Every prefix of declared events keeps a declared projection."""
     facts = facts_for({"authorized": True})
-    assert project(facts) in STATE_NAMES
+    assert project(facts) in STATE_NAMES, (
+        "the starting facts project to a declared state"
+    )
     for step in steps:
         apply(facts, step)
-        assert project(facts) in STATE_NAMES
+        assert project(facts) in STATE_NAMES, (
+            "every event prefix keeps a declared projection"
+        )
 
 
 @given(VECTORS, VECTORS, GENERATIONS, EPOCHS)
@@ -104,7 +119,9 @@ def test_a_reply_from_another_generation_never_changes_the_accepted_value(
             "validated": reply,
         },
     )
-    assert facts == before
+    assert facts == before, (
+        "a reply from another generation changes no accepted fact"
+    )
 
 
 @given(VECTORS, VECTORS, GENERATIONS, EPOCHS)
@@ -138,7 +155,9 @@ def test_a_reply_from_another_epoch_never_changes_the_accepted_value(
             "validated": reply,
         },
     )
-    assert facts == before
+    assert facts == before, (
+        "a reply invalidated since the request changes no accepted fact"
+    )
 
 
 @given(st.sampled_from(sorted(PROVIDER_EVENTS)), AVAILABILITY)
@@ -148,7 +167,9 @@ def test_a_provider_change_while_denied_leaves_the_grant_denied(
     """Observing the provider cannot restore a revoked grant."""
     facts = facts_for({"authorized": False, "availability": availability})
     apply(facts, {"event": event, "expected": "Denied"})
-    assert project(facts) == "Denied"
+    assert project(facts) == "Denied", (
+        "a provider change cannot restore a revoked grant"
+    )
 
 
 @given(GENERATIONS, EPOCHS, VECTORS)
@@ -175,8 +196,8 @@ def test_a_success_while_denied_is_ignored(
             "validated": validated,
         },
     )
-    assert facts == before
-    assert project(facts) == "Denied"
+    assert facts == before, "a success while denied changes no fact"
+    assert project(facts) == "Denied", "the grant stays denied"
 
 
 @given(st.integers(min_value=1, max_value=8), GENERATIONS, EPOCHS)
@@ -202,7 +223,9 @@ def test_a_matching_success_accepts_the_reply(
             "validated": {"rate": rate},
         },
     )
-    assert facts["accepted"] is True
-    assert facts["accepted_validated"] == {"rate": rate}
-    assert facts["request_active"] is False
-    assert project(facts) == "Current"
+    assert facts["accepted"] is True, "the matching reply becomes the accepted value"
+    assert facts["accepted_validated"] == {"rate": rate}, (
+        "the accepted vector is the reply's own vector"
+    )
+    assert facts["request_active"] is False, "the request is no longer in flight"
+    assert project(facts) == "Current", "the accepted reply projects Current"

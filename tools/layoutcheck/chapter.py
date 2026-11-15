@@ -23,6 +23,15 @@ from layoutcheck.contract import (
 )
 
 
+def _stated_total(cell: str, label: str, errors: list[str]) -> int | None:
+    """Return the cell's stated total, or record that it is not an integer."""
+    try:
+        return stated_total(cell)
+    except ValueError:
+        errors.append(f"{label} {cell!r} is not an integer")
+        return None
+
+
 def _complete_number(value: int) -> str:
     """Return a pattern matching a whole number, not part of a longer one.
 
@@ -81,9 +90,14 @@ def check_band_rows(
             )
             continue
         matched.update(names)
+        total = _stated_total(
+            row[2], f"band table row {row[0]!r}: total", errors
+        )
+        if total is None:
+            continue
         for name in names:
             expected = bands(tokens, profiles, name)
-            if stated_total(row[2]) != expected:
+            if total != expected:
                 errors.append(
                     f"band table row {row[0]!r}: total {row[2]!r} is not "
                     f"the derived {expected}"
@@ -166,6 +180,36 @@ def _check_addends(name: str, cell: str, total: int) -> list[str]:
     return []
 
 
+def _check_stated_bands(name: str, cell: str, expected: int) -> list[str]:
+    """Check a worked band cell's stated total and, when stated, its addends.
+
+    Parameters
+    ----------
+    name : str
+        The configuration name, used in diagnostics.
+    cell : str
+        The row's stated-bands cell.
+    expected : int
+        The band total that the configuration derives.
+
+    Returns
+    -------
+    list[str]
+        A diagnostic when the stated total is not an integer or does not
+        match the derived total, plus one when its addends do not sum to it.
+    """
+    errors: list[str] = []
+    total = _stated_total(cell, f"worked table row {name!r}: bands", errors)
+    if total is not None and total != expected:
+        errors.append(
+            f"worked table row {name!r}: bands {cell!r} are not "
+            f"the derived {expected}"
+        )
+    if "=" in cell and total is not None:
+        errors.extend(_check_addends(name, cell, total))
+    return errors
+
+
 def _check_worked_side(
     configuration: dict[str, object], side: str, expected: int
 ) -> list[str]:
@@ -187,13 +231,15 @@ def _check_worked_side(
     """
     errors: list[str] = []
     name = str(configuration["name"])
-    total = stated_total(side)
-    if total != expected:
+    total = _stated_total(
+        side, f"worked table row {name!r}: side allocation", errors
+    )
+    if total is not None and total != expected:
         errors.append(
             f"worked table row {name!r}: side allocation {side!r} is not "
             f"the derived {expected}"
         )
-    if "=" in side:
+    if "=" in side and total is not None:
         errors.extend(_check_addends(name, side, total))
     return errors
 
@@ -268,15 +314,7 @@ def check_worked_row(
     window, stated_bands, side, plane = row
     name = str(configuration["name"])
     errors = _check_worked_window(configuration, window, tokens)
-    if stated_total(stated_bands) != band_total:
-        errors.append(
-            f"worked table row {name!r}: bands {stated_bands!r} are not "
-            f"the derived {band_total}"
-        )
-    if "=" in stated_bands:
-        errors.extend(
-            _check_addends(name, stated_bands, stated_total(stated_bands))
-        )
+    errors.extend(_check_stated_bands(name, stated_bands, band_total))
     declared_width = number(tokens, configuration["width"])
     errors.extend(_check_worked_side(configuration, side, declared_width - width))
     errors.extend(_check_worked_plane(configuration, plane, (width, height), tokens))

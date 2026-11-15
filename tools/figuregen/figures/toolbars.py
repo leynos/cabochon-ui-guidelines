@@ -8,6 +8,8 @@ write `fig-15-toolbars.svg` under `figures/`.
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import line, para, rect, svg_doc, txt
 from figuregen.glyphs import tool_glyph
 from figuregen.ornaments import state_chip, title_block
@@ -26,9 +28,17 @@ from figuregen.palette import (
 )
 from figuregen.widgets import titlebar
 
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import StateTables
 
-def fig_toolbars() -> str:
+
+def fig_toolbars(states: StateTables) -> str:
     """Draw the tool strip, status line and target sizes.
+
+    Parameters
+    ----------
+    states : StateTables
+        The live and resolution state records passed to `state_chip`.
 
     Returns
     -------
@@ -67,7 +77,7 @@ def fig_toolbars() -> str:
         size=12,
         fill=INK,
     )
-    state_body, _ = state_chip(x + w - 130, sy + 3, "Current")
+    state_body, _ = state_chip(x + w - 130, sy + 3, "Current", states)
     body += state_body
     body += txt(
         x + w - 150,

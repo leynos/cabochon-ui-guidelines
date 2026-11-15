@@ -2,14 +2,16 @@
 
 The figure pairs five state cards with the table of legal transitions and
 their owners. The exported `fig_state` function returns the SVG string, drawn
-from `LIVE_STATES` and `LIVE_TRANSITIONS` in `figuregen.figdata`.
-`figuregen.cli` calls it to write `fig-06-state.svg` under `figures/`.
+from the live state and transition records of the `figuregen.figdata`
+catalogue. `figuregen.cli` calls it to write `fig-06-state.svg` under
+`figures/`.
 """
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import attrs, line, para, rect, svg_doc, txt
-from figuregen.figdata import LIVE_STATES, LIVE_TRANSITIONS
 from figuregen.ornaments import mark_group, state_mark, title_block
 from figuregen.palette import (
     AMBER_INK,
@@ -24,9 +26,24 @@ from figuregen.palette import (
     TEAL_INK,
 )
 
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import Catalogue
 
-def fig_state() -> str:
-    """Draw the five live states and their legal transitions."""
+
+def fig_state(catalogue: Catalogue) -> str:
+    """Draw the five live states and their legal transitions.
+
+    Parameters
+    ----------
+    catalogue : Catalogue
+        The figure catalogue, which supplies the live state and transition
+        records.
+
+    Returns
+    -------
+    str
+        The SVG document for the state figure.
+    """
     body = title_block(
         64,
         70,
@@ -67,7 +84,7 @@ def fig_state() -> str:
     ]
     for index, (name, colour, text, action) in enumerate(states):
         x = 64 + index * 220
-        record = LIVE_STATES[name]
+        record = catalogue.live_states[name]
         mark = str(record["mark"])
         body += '<g data-state-card="true">'
         body += rect(
@@ -124,7 +141,7 @@ def fig_state() -> str:
     body += txt(
         850, 430, "OWNER", size=9, fill=OXIDE, family=F_MONO, weight="bold", spacing=0.6
     )
-    for index, transition in enumerate(LIVE_TRANSITIONS):
+    for index, transition in enumerate(catalogue.live_transitions):
         ty = 460 + index * 24
         source = ", ".join(transition["from"])
         identifier = str(transition["id"])

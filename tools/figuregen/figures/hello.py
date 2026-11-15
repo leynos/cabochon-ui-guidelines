@@ -8,14 +8,24 @@ write `fig-27-hello-window.svg` under `figures/`.
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import line, para, rect, svg_doc, txt
 from figuregen.ornaments import title_block
 from figuregen.palette import F_DISPLAY, F_MONO, HIGH, INK, LINE, OXIDE, PINE2, SOFT
 from figuregen.widgets import button, window_shell
 
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import StateTables
 
-def fig_hello() -> str:
+
+def fig_hello(states: StateTables) -> str:
     """Draw the hello-window application and its export bundle.
+
+    Parameters
+    ----------
+    states : StateTables
+        The live and resolution state records passed to `window_shell`.
 
     Returns
     -------
@@ -33,6 +43,7 @@ def fig_hello() -> str:
         y,
         w,
         h,
+        states=states,
         title="hello-window",
         menu=["File", "View", "Help"],
         status="1 document · exported 14:02",

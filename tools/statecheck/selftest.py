@@ -12,11 +12,14 @@ import sys
 import typing as typ
 
 from statecheck.contract import (
+    DATA_PATH,
+    FIXTURES_PATH,
+    Contract,
     Facts,
     LiveTransition,
     Step,
     defaults,
-    transition_rows,
+    load_contract,
 )
 from statecheck.events import request_allowed, validate_step
 from statecheck.projection import project, vector_at_least
@@ -63,7 +66,7 @@ class MutationChecks:
 
 
 def _edge_mutations(
-    checks: MutationChecks, transitions: list[LiveTransition]
+    checks: MutationChecks, transitions: list[LiveTransition], contract: Contract
 ) -> None:
     """Yield mutations that break the declared edges."""
     without_revocation = [
@@ -72,7 +75,7 @@ def _edge_mutations(
     checks.require(
         any(
             "revocation is not available" in error
-            for error in validate_transitions(without_revocation)
+            for error in validate_transitions(without_revocation, contract)
         ),
         "missing revocation edge was not detected",
     )
@@ -85,7 +88,7 @@ def _edge_mutations(
     checks.require(
         any(
             "provider is absent is not modelled" in error
-            for error in validate_transitions(without_absent_grant)
+            for error in validate_transitions(without_absent_grant, contract)
         ),
         "missing provider-absent grant edge was not detected",
     )
@@ -100,16 +103,16 @@ def _edge_mutations(
     )
 
 
-def _projection_mutations(checks: MutationChecks) -> None:
+def _projection_mutations(checks: MutationChecks, contract: Contract) -> None:
     """Yield mutations that break the projection order."""
-    first_load: Facts = copy.deepcopy(defaults())
+    first_load: Facts = copy.deepcopy(defaults(contract.fixtures))
     first_load["request_active"] = True
     checks.require(
         _broken_first(first_load) != project(first_load),
         "Broken no-cache projection was not detected",
     )
 
-    recovered: Facts = copy.deepcopy(defaults())
+    recovered: Facts = copy.deepcopy(defaults(contract.fixtures))
     recovered["accepted"] = True
     recovered["accepted_validated"] = {"rate": 1}
     recovered["invalidation_epoch"] = 1
@@ -118,7 +121,7 @@ def _projection_mutations(checks: MutationChecks) -> None:
         "ignored invalidation epoch was not detected",
     )
 
-    after_failure: Facts = copy.deepcopy(defaults())
+    after_failure: Facts = copy.deepcopy(defaults(contract.fixtures))
     after_failure["availability"] = "uncertain"
     checks.require(
         _present_only_request(after_failure) != request_allowed(after_failure),
@@ -126,7 +129,7 @@ def _projection_mutations(checks: MutationChecks) -> None:
     )
 
 
-def _validation_mutations(checks: MutationChecks) -> None:
+def _validation_mutations(checks: MutationChecks, contract: Contract) -> None:
     """Require malformed reply identity fields to be rejected."""
     base: dict[str, object] = {
         "event": "refresh_succeeded",
@@ -136,24 +139,24 @@ def _validation_mutations(checks: MutationChecks) -> None:
         "validated": {"rate": 1},
     }
     checks.require(
-        not validate_step("self-test", 0, typ.cast("Step", base)),
+        not validate_step("self-test", 0, typ.cast("Step", base), contract.states),
         "a well-formed reply identity was rejected",
     )
     for field in ("generation", "epoch"):
         for invalid in (True, False):
             step = typ.cast("Step", {**base, field: invalid})
             checks.require(
-                bool(validate_step("self-test", 0, step)),
+                bool(validate_step("self-test", 0, step, contract.states)),
                 f"boolean {field} was not rejected",
             )
     vector_step = typ.cast("Step", {**base, "validated": {"rate": True}})
     checks.require(
-        bool(validate_step("self-test", 0, vector_step)),
+        bool(validate_step("self-test", 0, vector_step, contract.states)),
         "boolean validated component was not rejected",
     )
 
 
-def _fixture_mutations(checks: MutationChecks) -> None:
+def _fixture_mutations(checks: MutationChecks, contract: Contract) -> None:
     """Yield mutations that break the event fixtures."""
     for name in (
         "provider loss while denied is remembered",
@@ -165,19 +168,25 @@ def _fixture_mutations(checks: MutationChecks) -> None:
         "source notification during Current",
     ):
         checks.require(
-            not run_scenario(scenario_named(name)),
+            not run_scenario(
+                scenario_named(name, contract.fixtures), contract
+            ),
             f"{name} fixture does not pass",
         )
     checks.require(
         run_scenario(
-            scenario_named("provider loss while denied is remembered"),
+            scenario_named(
+                "provider loss while denied is remembered", contract.fixtures
+            ),
+            contract,
             observe_provider_while_denied=False,
         ),
         "provider facts ignored while denied were not detected",
     )
     checks.require(
         run_scenario(
-            scenario_named("superseded reply is discarded"),
+            scenario_named("superseded reply is discarded", contract.fixtures),
+            contract,
             check_reply_identity=False,
         ),
         "ignored reply identity was not detected",
@@ -214,11 +223,12 @@ def _figure_mutation(
 def self_test() -> int:
     """Prove that each projection, fact, reply and figure mutation is caught."""
     checks = MutationChecks()
-    transitions = copy.deepcopy(transition_rows())
-    _edge_mutations(checks, transitions)
-    _projection_mutations(checks)
-    _validation_mutations(checks)
-    _fixture_mutations(checks)
+    contract = load_contract(DATA_PATH, FIXTURES_PATH)
+    transitions = copy.deepcopy(contract.transitions)
+    _edge_mutations(checks, transitions, contract)
+    _projection_mutations(checks, contract)
+    _validation_mutations(checks, contract)
+    _fixture_mutations(checks, contract)
     _figure_mutation(checks, transitions)
     if checks.failures:
         for failure in checks.failures:

@@ -9,9 +9,14 @@ The `figuregen.widgets` package re-exports these functions for the
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import line, rect, txt
 from figuregen.ornaments import state_chip
 from figuregen.palette import HIGH, INK, LINE, PAPER, PINE2, SOFT, WHITE
+
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import StateTables
 
 
 def titlebar(  # pylint: disable=too-many-arguments
@@ -150,6 +155,7 @@ def status_bar(  # pylint: disable=too-many-arguments
     w: float,
     message: str,
     *,
+    states: StateTables,
     state: str | None = None,
     rtl: bool = False,
 ) -> str:
@@ -167,6 +173,9 @@ def status_bar(  # pylint: disable=too-many-arguments
         The bar's width in logical units.
     message : str
         The message text, drawn at 11 logical units.
+    states : StateTables
+        The live and resolution state records passed to
+        `figuregen.ornaments.state_chip`.
     state : str | None
         The state name whose chip is drawn on the bar, or ``None``, the
         default, to draw no chip.
@@ -184,12 +193,12 @@ def status_bar(  # pylint: disable=too-many-arguments
     if rtl:
         body += txt(x + w - 10, y + 17, message, size=11, fill=SOFT, anchor="end")
         if state:
-            chip_body, _ = state_chip(x + 10, y + 1, state)
+            chip_body, _ = state_chip(x + 10, y + 1, state, states)
             body += chip_body
     else:
         body += txt(x + 10, y + 17, message, size=11, fill=SOFT)
         if state:
-            chip_body, _ = state_chip(x + w - 120, y + 1, state)
+            chip_body, _ = state_chip(x + w - 120, y + 1, state, states)
             body += chip_body
     return body
 
@@ -200,6 +209,7 @@ def window_shell(  # pylint: disable=too-many-arguments
     w: float,
     h: float,
     *,
+    states: StateTables,
     title: str,
     menu: list[str],
     active_menu: str | None = None,
@@ -224,6 +234,9 @@ def window_shell(  # pylint: disable=too-many-arguments
     h : float
         The shell's height in logical units; the status line sits at its
         lower edge.
+    states : StateTables
+        The live and resolution state records passed to `status_bar` and on to
+        `figuregen.ornaments.state_chip`.
     title : str
         The window title, passed to `titlebar`.
     menu : list[str]
@@ -252,5 +265,7 @@ def window_shell(  # pylint: disable=too-many-arguments
     body += menu_strip(x, y + 31, w, menu, active=active_menu, rtl=rtl)
     body += line(x, y + 60, x + w, y + 60, stroke=LINE)
     if status is not None:
-        body += status_bar(x, y + h - 26, w, status, state=state, rtl=rtl)
+        body += status_bar(
+            x, y + h - 26, w, status, states=states, state=state, rtl=rtl
+        )
     return body

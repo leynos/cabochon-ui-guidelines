@@ -9,6 +9,8 @@ colours. `figuregen.cli` calls it to write `fig-32-accessibility.svg` under
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import circle, line, para, rect, svg_doc, txt
 from figuregen.ornaments import title_block
 from figuregen.palette import (
@@ -24,9 +26,17 @@ from figuregen.palette import (
 )
 from figuregen.widgets import pane_head, window_shell
 
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import StateTables
 
-def fig_accessibility() -> str:
+
+def fig_accessibility(states: StateTables) -> str:
     """Draw the accessibility tree, focus order and target sizes.
+
+    Parameters
+    ----------
+    states : StateTables
+        The live and resolution state records passed to `window_shell`.
 
     Returns
     -------
@@ -45,6 +55,7 @@ def fig_accessibility() -> str:
         y,
         w,
         h,
+        states=states,
         title="Facet Notes — North Sea transition",
         menu=["File", "Edit", "View", "Object", "Tools", "Window", "Help"],
         status="North Sea transition · 1 embed selected",

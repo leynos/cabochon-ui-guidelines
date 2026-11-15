@@ -8,6 +8,8 @@ the shared `figuregen.palette` colours. `figuregen.cli` calls it to write
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import ellipse, line, path, rect, svg_doc, txt
 from figuregen.ornaments import title_block
 from figuregen.palette import (
@@ -23,6 +25,9 @@ from figuregen.palette import (
     WHITE,
 )
 from figuregen.widgets import checkbox, inspector_row, pane_head, window_shell
+
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import StateTables
 
 
 def _tool_select(cx: float, cy: float, colour: str) -> str:
@@ -212,8 +217,13 @@ def _inspector(ix: float, y: float, width: float) -> str:
     )
 
 
-def fig_draw() -> str:
+def fig_draw(states: StateTables) -> str:
     """Draw Burin Draw with rulers, guides and the tool palette.
+
+    Parameters
+    ----------
+    states : StateTables
+        The live and resolution state records passed to `window_shell`.
 
     Returns
     -------
@@ -231,6 +241,7 @@ def fig_draw() -> str:
         y,
         w,
         h,
+        states=states,
         title="Burin Draw — Currency plate",
         menu=["File", "Edit", "View", "Object", "Tools", "Window", "Help"],
         status="Pen · 2 px · 14 objects · 100%",

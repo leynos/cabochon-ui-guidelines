@@ -1,8 +1,9 @@
 """Command-line entry point for the figure contract checks.
 
-The `main` function runs the checks from `figurecheck.checks` over the
-`figures/` directory and selects `figurecheck.selftest` when `--self-test` is
-given. The `tools/check-figures.py` script imports and calls it.
+The `main` function loads `tools/figure-data.json`, validates the state records
+and runs the checks from `figurecheck.checks` over the `figures/` directory. It
+selects `figurecheck.selftest` when `--self-test` is given. The
+`tools/check-figures.py` script imports and calls it.
 """
 
 from __future__ import annotations
@@ -11,7 +12,13 @@ import argparse
 import sys
 
 from figurecheck.checks import run
-from figurecheck.contract import FIGURES
+from figurecheck.contract import (
+    DATA_PATH,
+    FIGURES,
+    ContractError,
+    load_document,
+    state_records,
+)
 from figurecheck.selftest import self_test
 
 
@@ -33,9 +40,19 @@ def _parser() -> argparse.ArgumentParser:
 def main() -> int:
     """Run the figure checks and report the result."""
     arguments = _parser().parse_args()
-    if arguments.self_test:
-        return self_test()
-    errors = run(FIGURES)
+    try:
+        if arguments.self_test:
+            return self_test()
+        data = load_document(DATA_PATH)
+        records, messages = state_records(data)
+    except ContractError as error:
+        print(f"figure contract: {error}", file=sys.stderr)
+        return 1
+    if messages:
+        for message in messages:
+            print(f"figure contract: {message}", file=sys.stderr)
+        return 1
+    errors = run(FIGURES, data, records)
     if errors:
         for error in errors:
             print(f"figure contract: {error}", file=sys.stderr)

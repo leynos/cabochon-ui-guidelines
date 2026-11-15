@@ -8,6 +8,8 @@ calls it to write `fig-26-formula.svg` under `figures/`.
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import line, lines, para, rect, svg_doc, txt
 from figuregen.ornaments import chip, state_chip, title_block
 from figuregen.palette import (
@@ -23,9 +25,17 @@ from figuregen.palette import (
 )
 from figuregen.widgets import button, titlebar
 
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import StateTables
 
-def fig_formula() -> str:
+
+def fig_formula(states: StateTables) -> str:
     """Draw the formula tool popover over selected cells.
+
+    Parameters
+    ----------
+    states : StateTables
+        The live and resolution state records passed to `state_chip`.
 
     Returns
     -------
@@ -126,7 +136,7 @@ def fig_formula() -> str:
         family=F_MONO,
         weight="bold",
     )
-    state_body, _ = state_chip(x + w - 104, y + 242, "Current")
+    state_body, _ = state_chip(x + w - 104, y + 242, "Current", states)
     body += state_body
     body += button(x + 18, y + 268, 150, "Insert live value", primary=True, height=30)
     body += button(x + 180, y + 268, 92, "Cancel", height=30)

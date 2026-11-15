@@ -1,9 +1,8 @@
 """Verify the live-state inventory and the marks each figure draws.
 
 The `check_states` function matches each figure's labels and mark groups
-against `STATE_RECORDS` from `tools/figure-data.json` and checks the declared
-inventory. `figurecheck.checks` calls it, and it in turn uses
-`figurecheck.marks`.
+against the validated state records and checks the declared inventory.
+`figurecheck.checks` calls it, and it in turn uses `figurecheck.marks`.
 """
 
 from __future__ import annotations
@@ -11,7 +10,7 @@ from __future__ import annotations
 import typing as typ
 from collections import Counter
 
-from figurecheck.contract import STATE_RECORDS, SVG_NS, GeometryError
+from figurecheck.contract import SVG_NS, GeometryError
 from figurecheck.geometry import (
     clip_used,
     hidden_reason,
@@ -183,7 +182,10 @@ def _check_card(
 
 
 def _check_inventory(
-    figure: _Figure, spec: dict[str, object], counts: Counter[str]
+    figure: _Figure,
+    spec: dict[str, object],
+    counts: Counter[str],
+    records: dict[str, dict[str, str]],
 ) -> None:
     """Check that the drawn states match the declared inventory."""
     expected = spec.get("states")
@@ -191,7 +193,7 @@ def _check_inventory(
         figure.errors.append(f"{figure.name}: missing state inventory")
         return
     for identifier, count in expected.items():
-        if identifier not in STATE_RECORDS:
+        if identifier not in records:
             figure.errors.append(
                 f"{figure.name}: inventory names unknown state {identifier!r}"
             )
@@ -211,16 +213,36 @@ def _check_inventory(
 
 
 def check_states(
-    name: str, root: ElementTree.Element, spec: dict[str, object]
+    name: str,
+    root: ElementTree.Element,
+    spec: dict[str, object],
+    records: dict[str, dict[str, str]],
 ) -> list[str]:
-    """Check that every figure carries the declared state marks."""
+    """Check that every figure carries the declared state marks.
+
+    Parameters
+    ----------
+    name
+        The figure name, repeated in every message.
+    root
+        The parsed figure document.
+    spec
+        The figure specification that declares its state inventory.
+    records
+        The validated state records keyed by identity.
+
+    Returns
+    -------
+    list[str]
+        Every defect the figure declares, or an empty list.
+    """
     parents = {child: parent for parent in root.iter() for child in parent}
     figure = _Figure(name=name, root=root, parents=parents, errors=[])
     counts: Counter[str] = Counter()
     for element in _state_texts(root):
         identifier = element.get("data-state") or ""
         counts[identifier] += 1
-        record = STATE_RECORDS.get(identifier)
+        record = records.get(identifier)
         if record is None:
             figure.errors.append(
                 f"{name}: unknown state identity {identifier!r}"
@@ -228,5 +250,5 @@ def check_states(
             continue
         _check_label(figure, element, record)
         _check_card(figure, element, identifier, record)
-    _check_inventory(figure, spec, counts)
+    _check_inventory(figure, spec, counts, records)
     return figure.errors

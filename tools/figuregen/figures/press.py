@@ -11,6 +11,8 @@ write `fig-24-press.svg` under `figures/`.
 
 from __future__ import annotations
 
+import typing as typ
+
 from figuregen.canvas import line, para, rect, svg_doc, txt
 from figuregen.ornaments import title_block
 from figuregen.palette import (
@@ -29,9 +31,17 @@ from figuregen.palette import (
 )
 from figuregen.widgets import button, pane_head, window_shell
 
+if typ.TYPE_CHECKING:
+    from figuregen.figdata import StateTables
 
-def fig_press() -> str:  # pylint: disable=too-many-locals
+
+def fig_press(states: StateTables) -> str:  # pylint: disable=too-many-locals
     """Draw Cabochon Press with pages and preflight.
+
+    Parameters
+    ----------
+    states : StateTables
+        The live and resolution state records passed to `window_shell`.
 
     Returns
     -------
@@ -49,6 +59,7 @@ def fig_press() -> str:  # pylint: disable=too-many-locals
         y,
         w,
         h,
+        states=states,
         title="Cabochon Press — Currency brief",
         menu=["File", "Edit", "View", "Page", "Object", "Window", "Help"],
         status="Page 2 of 6 · PDF/X-4 · 3 mm bleed",

@@ -12,7 +12,7 @@ import math
 import typing as typ
 from itertools import starmap
 
-from figurecheck.contract import DATA, NUMBER_RE, GeometryError
+from figurecheck.contract import NUMBER_RE, GeometryError
 from figurecheck.geometry import hidden_reason, parse_number, rendered_bbox
 
 if typ.TYPE_CHECKING:
@@ -190,9 +190,29 @@ def _check_components(context: _Context, declared: list[str]) -> None:
 
 
 def check_production_geometry(
-    name: str, root: ElementTree.Element, spec: dict[str, object]
+    name: str,
+    root: ElementTree.Element,
+    spec: dict[str, object],
+    catalogue: dict[str, dict[str, float]],
 ) -> list[str]:
-    """Check the production fixtures against the catalogue."""
+    """Check the production fixtures against the catalogue.
+
+    Parameters
+    ----------
+    name
+        The figure name, repeated in every message.
+    root
+        The parsed figure document.
+    spec
+        The figure specification that declares its components and bounds.
+    catalogue
+        The component catalogue that declares each rendered height.
+
+    Returns
+    -------
+    list[str]
+        Every defect the figure declares, or an empty list.
+    """
     errors: list[str] = []
     if not _check_figure_class(name, spec, errors):
         return errors
@@ -213,7 +233,7 @@ def check_production_geometry(
         name=name,
         root=root,
         parents={child: parent for parent in root.iter() for child in parent},
-        catalogue=DATA["component_catalogue"],
+        catalogue=catalogue,
         bounds=bounds if isinstance(bounds, dict) else {},
         errors=errors,
     )
