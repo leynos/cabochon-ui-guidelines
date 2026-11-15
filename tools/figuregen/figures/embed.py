@@ -17,7 +17,12 @@ from figuregen.widgets import inspector_row, pane_head
 
 
 def fig_embed() -> str:
-    """Draw the embed envelope, provider and failure states."""
+    """Draw the embed envelope, provider and failure states.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,
@@ -138,7 +143,7 @@ def fig_embed() -> str:
         944,
         638,
         192,
-        "Only a resolved embed carries a live state: Current, Refreshing, Stale, Broken or Denied.",
+        "Resolved embeds only: Current · Refreshing · Stale · Broken · Denied",
         size=10,
         leading=15,
     )

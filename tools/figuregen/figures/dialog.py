@@ -15,7 +15,12 @@ from figuregen.widgets import button, checkbox, titlebar
 
 
 def fig_dialog() -> str:
-    """Draw the destructive confirmation dialog for replacing a table."""
+    """Draw the destructive confirmation dialog for replacing a table.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

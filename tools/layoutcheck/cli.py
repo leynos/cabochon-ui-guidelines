@@ -16,7 +16,13 @@ from layoutcheck.selftest import self_test
 
 
 def run() -> list[str]:
-    """Validate every declared configuration and the chapter's worked values."""
+    """Validate every declared configuration and the chapter's worked values.
+
+    Returns
+    -------
+    list[str]
+        One diagnostic per configuration or chapter value that fails.
+    """
     errors: list[str] = []
     for configuration in BUDGETS["configurations"]:
         errors.extend(validate(configuration))
@@ -25,7 +31,13 @@ def run() -> list[str]:
 
 
 def main() -> int:
-    """Validate the layout budgets, or run the self-test when requested."""
+    """Validate the layout budgets, or run the self-test when requested.
+
+    Returns
+    -------
+    int
+        The process exit status: zero on success, one on failure.
+    """
     errors = run()
     if "--self-test" in sys.argv:
         return self_test(errors)

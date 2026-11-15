@@ -35,7 +35,12 @@ from figuregen.palette import (
 
 
 def fig_palette() -> str:
-    """Draw the material palette in light and dark."""
+    """Draw the material palette in light and dark.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

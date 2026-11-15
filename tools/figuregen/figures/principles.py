@@ -55,7 +55,12 @@ def _object_spokes(gx: float, gy: float) -> str:
 
 
 def fig_principles() -> str:
-    """Draw the four principles as cards."""
+    """Draw the four principles as cards.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

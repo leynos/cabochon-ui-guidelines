@@ -8,7 +8,6 @@ state chips from `figuregen.ornaments`.
 
 # The drawing primitives take geometry and style arguments positionally; see
 # the matching ruff exemption for tools/figuregen in pyproject.toml.
-# pylint: disable=too-many-arguments
 
 from __future__ import annotations
 
@@ -28,7 +27,7 @@ from figuregen.palette import (
 )
 
 
-def titlebar(
+def titlebar(  # pylint: disable=too-many-arguments
     x: float,
     y: float,
     w: float,
@@ -37,7 +36,18 @@ def titlebar(
     rtl: bool = False,
     controls: bool = True,
 ) -> str:
-    """Draw a window title bar with optional window controls."""
+    """Draw a window title bar with optional window controls.
+
+    Parameters
+    ----------
+    x, y, w : float
+    title : str
+    rtl, controls : bool
+
+    Returns
+    -------
+    str
+    """
     body = rect(x, y, w, 31, fill=PAPER, stroke=None)
     body += line(x, y + 30.5, x + w, y + 30.5, stroke=LINE)
     if rtl:
@@ -58,7 +68,7 @@ def titlebar(
     return body
 
 
-def menu_strip(
+def menu_strip(  # pylint: disable=too-many-arguments
     x: float,
     y: float,
     w: float,
@@ -67,7 +77,19 @@ def menu_strip(
     active: str | None = None,
     rtl: bool = False,
 ) -> str:
-    """Draw a menu strip with one active menu."""
+    """Draw a menu strip with one active menu.
+
+    Parameters
+    ----------
+    x, y, w : float
+    items : list[str]
+    active : str | None
+    rtl : bool
+
+    Returns
+    -------
+    str
+    """
     body = rect(x, y, w, 29, fill=PAPER, stroke=None)
     body += line(x, y + 28.5, x + w, y + 28.5, stroke=LINE)
     cursor = x + w - 15 if rtl else x + 10
@@ -107,7 +129,7 @@ def menu_strip(
     return body
 
 
-def status_bar(
+def status_bar(  # pylint: disable=too-many-arguments
     x: float,
     y: float,
     w: float,
@@ -116,7 +138,19 @@ def status_bar(
     state: str | None = None,
     rtl: bool = False,
 ) -> str:
-    """Draw a status line with an optional live state."""
+    """Draw a status line with an optional live state.
+
+    Parameters
+    ----------
+    x, y, w : float
+    message : str
+    state : str | None
+    rtl : bool
+
+    Returns
+    -------
+    str
+    """
     body = rect(x, y, w, 26, fill=PAPER, stroke=None)
     body += line(x, y + 0.5, x + w, y + 0.5, stroke=LINE)
     if rtl:
@@ -132,10 +166,21 @@ def status_bar(
     return body
 
 
-def pane_head(
+def pane_head(  # pylint: disable=too-many-arguments
     x: float, y: float, w: float, title: str, *, right: str | None = None
 ) -> str:
-    """Draw a pane header with an optional right-hand label."""
+    """Draw a pane header with an optional right-hand label.
+
+    Parameters
+    ----------
+    x, y, w : float
+    title : str
+    right : str | None
+
+    Returns
+    -------
+    str
+    """
     body = rect(x, y, w, 28, fill=PAPER, stroke=None)
     body += line(x, y + 27.5, x + w, y + 27.5, stroke=LINE)
     body += txt(
@@ -146,7 +191,7 @@ def pane_head(
     return body
 
 
-def window_shell(
+def window_shell(  # pylint: disable=too-many-arguments
     x: float,
     y: float,
     w: float,
@@ -159,7 +204,20 @@ def window_shell(
     state: str | None = None,
     rtl: bool = False,
 ) -> str:
-    """Draw a window shell with title bar, menu strip and status line."""
+    """Draw a window shell with title bar, menu strip and status line.
+
+    Parameters
+    ----------
+    x, y, w, h : float
+    title : str
+    menu : list[str]
+    active_menu, status, state : str | None
+    rtl : bool
+
+    Returns
+    -------
+    str
+    """
     body = rect(x + 8, y + 8, w, h, fill="#17201C20", stroke=None)
     body += rect(x, y, w, h, fill=HIGH, stroke=INK)
     body += titlebar(x, y, w, title, rtl=rtl)
@@ -170,7 +228,7 @@ def window_shell(
     return body
 
 
-def field(
+def field(  # pylint: disable=too-many-arguments
     x: float,
     y: float,
     w: float,
@@ -180,7 +238,20 @@ def field(
     height: float = 32,
     focus: bool = False,
 ) -> str:
-    """Draw a labelled text field, optionally focused."""
+    """Draw a labelled text field, optionally focused.
+
+    Parameters
+    ----------
+    x, y, w : float
+    value : str
+    label : str | None
+    height : float
+    focus : bool
+
+    Returns
+    -------
+    str
+    """
     body = ""
     if label:
         body += txt(x, y - 6, label, size=11, fill=SOFT)
@@ -197,7 +268,7 @@ def field(
     return body
 
 
-def button(
+def button(  # pylint: disable=too-many-arguments
     x: float,
     y: float,
     w: float,
@@ -208,7 +279,19 @@ def button(
     height: float = 32,
     disabled: bool = False,
 ) -> str:
-    """Draw a button in primary, destructive or default form."""
+    """Draw a button in primary, destructive or default form.
+
+    Parameters
+    ----------
+    x, y, w : float
+    label : str
+    primary, destructive, disabled : bool
+    height : float
+
+    Returns
+    -------
+    str
+    """
     fill = PINE if primary else HIGH
     stroke = PINE if primary else LINE
     colour = WHITE if primary else (OXIDE if destructive else INK)
@@ -230,7 +313,18 @@ def button(
 
 
 def checkbox(x: float, y: float, label: str, *, checked: bool = False) -> str:
-    """Draw a checkbox with its label."""
+    """Draw a checkbox with its label.
+
+    Parameters
+    ----------
+    x, y : float
+    label : str
+    checked : bool
+
+    Returns
+    -------
+    str
+    """
     body = rect(x, y - 13, 16, 16, fill=WHITE, stroke=INK)
     if checked:
         body += path(
@@ -241,7 +335,18 @@ def checkbox(x: float, y: float, label: str, *, checked: bool = False) -> str:
 
 
 def radio(x: float, y: float, label: str, *, selected: bool = False) -> str:
-    """Draw a radio button with its label."""
+    """Draw a radio button with its label.
+
+    Parameters
+    ----------
+    x, y : float
+    label : str
+    selected : bool
+
+    Returns
+    -------
+    str
+    """
     body = circle(x + 8, y - 5, 8, fill=WHITE, stroke=INK)
     if selected:
         body += circle(x + 8, y - 5, 4, fill=PINE2, stroke=None)
@@ -249,10 +354,20 @@ def radio(x: float, y: float, label: str, *, selected: bool = False) -> str:
     return body
 
 
-def inspector_row(
+def inspector_row(  # pylint: disable=too-many-arguments
     x: float, y: float, w: float, label: str, *, value: str, value_colour: str = INK
 ) -> str:
-    """Draw one inspector row of label and value."""
+    """Draw one inspector row of label and value.
+
+    Parameters
+    ----------
+    x, y, w : float
+    label, value, value_colour : str
+
+    Returns
+    -------
+    str
+    """
     body = txt(x, y, label.upper(), size=10, fill=SOFT, family=F_MONO, spacing=0.5)
     body += txt(x + w, y, value, size=11, fill=value_colour, anchor="end")
     body += line(x, y + 8, x + w, y + 8, stroke=LINE, sw=0.5)

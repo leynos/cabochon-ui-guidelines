@@ -110,7 +110,12 @@ _SPECIMENS = {
 
 
 def fig_small_world() -> str:
-    """Draw the four structural choices of the Cabochon character."""
+    """Draw the four structural choices of the Cabochon character.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

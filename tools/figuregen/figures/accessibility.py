@@ -26,7 +26,12 @@ from figuregen.widgets import pane_head, window_shell
 
 
 def fig_accessibility() -> str:
-    """Draw the accessibility tree, focus order and target sizes."""
+    """Draw the accessibility tree, focus order and target sizes.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

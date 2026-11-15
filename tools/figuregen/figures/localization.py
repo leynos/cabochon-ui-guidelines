@@ -15,7 +15,12 @@ from figuregen.widgets import button, window_shell
 
 
 def fig_localization() -> str:
-    """Draw pseudo-localized left-to-right and right-to-left windows."""
+    """Draw pseudo-localized left-to-right and right-to-left windows.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

@@ -15,7 +15,12 @@ from figuregen.widgets import field
 
 
 def fig_command_palette() -> str:
-    """Draw the command palette over a document."""
+    """Draw the command palette over a document.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

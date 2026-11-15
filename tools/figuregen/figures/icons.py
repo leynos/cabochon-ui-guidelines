@@ -14,7 +14,12 @@ from figuregen.palette import AMBER_INK, F_MONO, HIGH, INK, LINE, OXIDE, SOFT
 
 
 def fig_icons() -> str:
-    """Draw the icon grid, sizes and states."""
+    """Draw the icon grid, sizes and states.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

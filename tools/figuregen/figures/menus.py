@@ -15,7 +15,12 @@ from figuregen.widgets import window_shell
 
 
 def fig_menus() -> str:
-    """Draw a menu bar with an open File menu."""
+    """Draw a menu bar with an open File menu.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

@@ -15,7 +15,12 @@ from figuregen.widgets import pane_head
 
 
 def fig_panes() -> str:
-    """Draw the pane layout with minimum widths and splitters."""
+    """Draw the pane layout with minimum widths and splitters.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

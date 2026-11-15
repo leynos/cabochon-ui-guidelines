@@ -96,23 +96,24 @@ consumed is not also delivered to a lower level. The following table is the one
 routing decision table; a chapter that describes a field, composite or surface
 defers to it.
 
-| Focus and state                    | Tab                                  | Enter or Return                                     | Escape                                           |
-| ---------------------------------- | ------------------------------------ | --------------------------------------------------- | ------------------------------------------------ |
-| Composition active                 | Consumed by the composition          | Consumed by the composition                         | Cancels the composition                          |
-| Text field with completion         | Completes the highlighted completion | Accepts the highlighted completion                  | Dismisses the completion                         |
-| Text field, no completion          | Leaves the field                     | Commits the field's own action, never the default   | Reverts the draft and leaves the innermost mode  |
-| Composite in navigation            | Leaves the composite                 | Activates the focused item                          | Leaves the composite, then dismisses its surface |
-| Focused button                     | Moves to the next stop               | Activates that button, even when it is destructive  | Dismisses the surface without acting             |
-| Navigation, no activatable control | Moves to the next stop               | Activates the surface's default, if it has one      | Dismisses the surface                            |
-| Canvas tool, no text field         | Moves to the next chrome stop        | Commits the pending gesture; otherwise not consumed | Cancels the pending gesture                      |
-| Modal surface                      | Cycles within the surface            | Follows the focused-control rows above              | Performs the surface's declared safe exit        |
+| Focus and state                    | Tab                                  | Enter or Return                                                   | Escape                                                |
+| ---------------------------------- | ------------------------------------ | ----------------------------------------------------------------- | ----------------------------------------------------- |
+| Composition active                 | Consumed by the composition          | Consumed by the composition                                       | Cancels the composition                               |
+| Text field with completion         | Completes the highlighted completion | Accepts the highlighted completion                                | Dismisses the completion                              |
+| Text field, no completion          | Leaves the field                     | Commits the field's own action, never the default                 | Reverts the draft and leaves the innermost mode       |
+| Composite in navigation            | Leaves the composite                 | Activates the focused item                                        | Leaves the composite, then dismisses its surface      |
+| Focused button                     | Moves to the next stop               | Activates that button, even when it is destructive                | Dismisses the surface without acting                  |
+| Navigation, no activatable control | Moves to the next stop               | Activates the surface's default, if it has one                    | Dismisses the surface                                 |
+| Canvas tool, no text field         | Moves to the next chrome stop        | Commits the pending gesture or text draft; otherwise not consumed | Cancels the pending gesture or reverts the text draft |
+| Modal surface                      | Cycles within the surface            | Follows the focused-control rows above                            | Performs the surface's declared safe exit             |
 
 **Enter and Return are the same activation event.** The default action is not a
 global key handler that overrides focus: it applies only when no activatable
-control has focus and focus is not in a text field or a composite that consumes
-the key. A destructive button is never the default, but when it is deliberately
-focused, Enter or Return activates it. Space presses a button or toggles a
-checkbox in navigation mode and types a space in a text field.
+control has focus and focus is not in a text field, a composite that consumes
+the key or an uncommitted canvas text draft. A destructive button is never the
+default, but when it is deliberately focused, Enter or Return activates it.
+Space presses a button or toggles a checkbox in navigation mode and types a
+space in a text field.
 
 Inside a grid, Tab commits the cell edit and moves right only while the grid is
 in cell-edit mode; Escape leaves cell-edit mode, and the next Tab leaves the
@@ -120,7 +121,7 @@ grid. A grid never cycles Tab indefinitely without an escape. A completion list
 consumes Up, Down, Enter and Escape while it is open. Tab completes only when a
 completion is offered; otherwise it leaves the field. A canvas tool's
 single-letter shortcuts apply only while the canvas has focus and no text field
-is active.
+or uncommitted canvas text draft is active.
 
 Escape cancels the innermost mode in this order: composition, completion, cell
 edit or text draft, transient surface, tool. Dismissing a completion leaves the
@@ -131,8 +132,8 @@ focus-return chain below.
 
 Every composite declares its exit. A menu closes on Escape and on Left or
 Right; a tree leaves on Tab; a grid leaves on Tab in navigation mode; a tab bar
-leaves on Tab; a canvas tool leaves on Escape or on switching tools. A
-composite with no declared exit is a defect.
+leaves on Tab; a canvas tool leaves on Escape after its inner modes consume it,
+or on switching tools. A composite with no declared exit is a defect.
 
 ## Focus memory and the focus-return chain
 

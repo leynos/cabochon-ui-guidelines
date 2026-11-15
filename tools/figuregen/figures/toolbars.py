@@ -28,7 +28,12 @@ from figuregen.widgets import titlebar
 
 
 def fig_toolbars() -> str:
-    """Draw the tool strip, status line and target sizes."""
+    """Draw the tool strip, status line and target sizes.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

@@ -85,6 +85,12 @@ with the source.
 - Pytest runs with a 30-second timeout per test. Hypothesis property tests live
   under `tests/`.
 
+Public checker interfaces are documented in NumPy style: a one-line summary,
+then `Parameters` and `Returns` or `Raises` sections wherever a function has
+parameters or a return value. This is a documentation convention rather than a
+lint-enforced rule, because `D417` is suppressed by the declared NumPy
+convention.
+
 ## Checkers
 
 Each checker is a `tools/check-*.py` script that prints a one-line summary and

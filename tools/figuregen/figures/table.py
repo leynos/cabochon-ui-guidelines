@@ -180,7 +180,12 @@ def _cell_inspector(ix: float, y: float, h: float) -> str:
 
 
 def fig_table() -> str:
-    """Draw Enfilade Table with categories, grid and cell inspector."""
+    """Draw Enfilade Table with categories, grid and cell inspector.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,
@@ -195,7 +200,7 @@ def fig_table() -> str:
         h,
         title="Enfilade Table — Generation mix",
         menu=["File", "Edit", "View", "Data", "Object", "Window", "Help"],
-        status="Sum 1,284 GWh · 12 rows · 4 columns",
+        status="Sum 37,840 GWh · 5 rows · 4 columns",
         state="Current",
     )
     cat_w = 210

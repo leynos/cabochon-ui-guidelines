@@ -25,7 +25,12 @@ from figuregen.palette import (
 
 
 def fig_first_batch() -> str:
-    """Draw the first batch as now, next and later bands."""
+    """Draw the first batch as now, next and later bands.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,
@@ -76,10 +81,10 @@ def fig_first_batch() -> str:
             spacing=1.2,
         )
         body += txt(64, y + 48, name, size=24, family=F_DISPLAY, style="italic")
-        body += line(64, y + 64, 1136, y + 64, stroke=LINE)
+        body += line(64, y + 56, 1136, y + 56, stroke=LINE)
         for tool_index, tool in enumerate(tools):
             x = 300 + (tool_index % 4) * 208
-            yy = y + 4 + (tool_index // 4) * 46
+            yy = y + 4 + (tool_index // 4) * 56
             body += rect(
                 x,
                 yy,

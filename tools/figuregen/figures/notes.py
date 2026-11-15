@@ -8,7 +8,6 @@ write `fig-22-notes.svg` under `figures/`.
 
 # The drawing primitives take geometry and style arguments positionally; see
 # the matching ruff exemption for tools/figuregen in pyproject.toml.
-# pylint: disable=too-many-arguments
 
 from __future__ import annotations
 
@@ -54,7 +53,7 @@ def _note_tree(x: float, y: float, tree_w: float, h: float) -> str:
     return body
 
 
-def _embed_card(
+def _embed_card(  # pylint: disable=too-many-arguments
     ex: float,
     y: float,
     ew: float,
@@ -189,7 +188,12 @@ def _relations(bx: float, y: float, back_w: float) -> str:
 
 
 def fig_notes() -> str:
-    """Draw Facet Notes with a note tree, live embeds and relations."""
+    """Draw Facet Notes with a note tree, live embeds and relations.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

@@ -25,7 +25,12 @@ from figuregen.widgets import button, titlebar
 
 
 def fig_formula() -> str:
-    """Draw the formula tool popover over selected cells."""
+    """Draw the formula tool popover over selected cells.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,
@@ -61,7 +66,7 @@ def fig_formula() -> str:
     body += txt(404, 310, "Output", size=10, fill=SOFT, family=F_MONO)
     body += txt(554, 310, "Share", size=10, fill=SOFT, family=F_MONO)
     # Formula popover.
-    x, y, w, h = 470, 340, 430, 300
+    x, y, w, h = 400, 340, 420, 300
     body += rect(x + 8, y + 8, w, h, fill="#17201C30", stroke=None)
     body += rect(x, y, w, h, fill=HIGH, stroke=INK)
     body += txt(

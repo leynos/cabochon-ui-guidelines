@@ -14,7 +14,12 @@ from figuregen.palette import F_DISPLAY, F_MONO, HIGH, INK, LINE, OXIDE, PAPER, 
 
 
 def fig_map() -> str:
-    """Draw the two-plane Cabochon ecosystem map."""
+    """Draw the two-plane Cabochon ecosystem map.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

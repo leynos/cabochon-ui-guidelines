@@ -15,7 +15,12 @@ from figuregen.widgets import inspector_row, pane_head, radio
 
 
 def fig_inspector() -> str:
-    """Draw the object inspector."""
+    """Draw the object inspector.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

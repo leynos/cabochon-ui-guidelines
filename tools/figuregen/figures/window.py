@@ -206,7 +206,12 @@ def _legend() -> str:
 
 
 def fig_window() -> str:
-    """Draw window anatomy with labelled metrics."""
+    """Draw window anatomy with labelled metrics.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

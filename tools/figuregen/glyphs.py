@@ -16,7 +16,6 @@ from figuregen.canvas import ellipse, line, path, rect, txt
 
 # The drawing primitives take geometry and style arguments positionally; see
 # the matching ruff exemption for tools/figuregen in pyproject.toml.
-# pylint: disable=too-many-arguments
 
 
 def _select(cx: float, cy: float, colour: str) -> str:
@@ -71,13 +70,23 @@ _SHAPES: dict[str, cabc.Callable[[float, float, str], str]] = {
 }
 
 
-def tool_glyph(
+def tool_glyph(  # pylint: disable=too-many-arguments
     kind: str, cx: float, cy: float, colour: str, *, text_size: float = 14
 ) -> str:
     """Draw the tool glyph for ``kind`` centred on ``cx`` and ``cy``.
 
-    The text tool is the only glyph whose size a strip varies, so it takes an
-    explicit ``text_size``. An unknown glyph is a generation failure.
+    Parameters
+    ----------
+    kind : str
+        Glyph name.
+    cx, cy : float
+        Centre.
+    colour : str
+    text_size : float
+
+    Returns
+    -------
+    str
     """
     if kind == "text":
         return txt(

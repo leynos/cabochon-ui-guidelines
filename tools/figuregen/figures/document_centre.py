@@ -25,7 +25,12 @@ from figuregen.palette import (
 
 
 def fig_document_centre() -> str:
-    """Draw one object with its four presentations."""
+    """Draw one object with its four presentations.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,
@@ -56,8 +61,8 @@ def fig_document_centre() -> str:
     frames = [
         (64, 166, "NOTE", "prose"),
         (896, 166, "TABLE", "data"),
-        (64, 570, "REPORT", "card"),
-        (896, 570, "PROOF", "page"),
+        (64, 470, "REPORT", "card"),
+        (896, 470, "PROOF", "page"),
     ]
     for x, y, label, kind in frames:
         body += rect(x, y, 240, 170, fill=HIGH, stroke=INK)

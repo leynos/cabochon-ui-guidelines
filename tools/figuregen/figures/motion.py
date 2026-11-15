@@ -14,7 +14,12 @@ from figuregen.palette import F_DISPLAY, F_MONO, HIGH, INK, OXIDE, PINE2, SOFT, 
 
 
 def fig_motion() -> str:
-    """Draw the motion timing chart."""
+    """Draw the motion timing chart.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

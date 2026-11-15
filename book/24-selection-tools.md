@@ -67,17 +67,17 @@ because it is also contextual.
 
 The three kinds also differ in how they end.
 
-| Kind                               | Ends when                                 | Result shape                     |
-| ---------------------------------- | ----------------------------------------- | -------------------------------- |
-| Canvas tool                        | Its gesture ends, or the tool is switched | One content transaction or none  |
-| Read-only inspection               | The user closes it or looks elsewhere     | No mutation                      |
-| Transactional contextual operation | Its primary action or its cancel action   | One atomic object change or none |
+| Kind                               | Ends when                                          | Result shape                     |
+| ---------------------------------- | -------------------------------------------------- | -------------------------------- |
+| Canvas tool                        | Its gesture or draft ends, or the tool is switched | One content transaction or none  |
+| Read-only inspection               | The user closes it or looks elsewhere              | No mutation                      |
+| Transactional contextual operation | Its primary action or its cancel action            | One atomic object change or none |
 
 A read-only inspection is not modal. It may stay open while the user inspects
 another object, and it does not acquire a primary action merely because it has
-a surface. A canvas tool has no **Insert** button; its effect is the gesture it
-completes. A transactional operation has no canvas gesture; its effect is the
-commit its primary action performs.
+a surface. A canvas tool has no **Insert** button; its effect is the gesture or
+draft it completes. A transactional operation has no canvas gesture; its effect
+is the commit its primary action performs.
 
 A source inspection opened from a transactional popover is a pinned read-only
 inspection. It suspends the popover rather than dismissing it, keeps the
@@ -111,28 +111,36 @@ cursor.
 Each canvas tool class declares its outcome for every interruption route in one
 table. The route never changes the content or history result for that class.
 
-| Tool class           | Pointer release           | Escape                       | Focus loss                   | Pointer-capture loss         | Switch by button or menu                    | Switch by shortcut |
-| -------------------- | ------------------------- | ---------------------------- | ---------------------------- | ---------------------------- | ------------------------------------------- | ------------------ |
-| Selection or pan     | Ends; no content revision | Cancels; no content revision | Cancels; no content revision | Cancels; no content revision | Cancels pending, then switches; no revision | Same as button     |
-| Read-only inspection | Samples once; no revision | Closes; no revision          | Stays open; no pending state | Not applicable               | Closes, then switches; no revision          | Same as button     |
-| Content tool         | Commits one transaction   | Cancels and restores         | Cancels and restores         | Cancels and restores         | Cancels pending, then switches              | Same as button     |
+| Tool class           | Pointer release                         | Escape                       | Focus loss                        | Pointer-capture loss              | Switch by button or menu                                         | Switch by shortcut |
+| -------------------- | --------------------------------------- | ---------------------------- | --------------------------------- | --------------------------------- | ---------------------------------------------------------------- | ------------------ |
+| Selection or pan     | Ends; no content revision               | Cancels; no content revision | Cancels; no content revision      | Cancels; no content revision      | Cancels pending, then switches; no revision                      | Same as button     |
+| Read-only inspection | Samples once; no revision               | Closes; no revision          | Stays open; no pending state      | Not applicable                    | Closes, then switches; no revision                               | Same as button     |
+| Content tool         | Commits a stroke, or opens a text draft | Cancels and restores         | Cancels a stroke; commits a draft | Cancels a stroke; commits a draft | Cancels a pending stroke, or commits a text draft, then switches | Same as button     |
 
 The rules that follow are binding.
 
 - Selection, pan and read-only inspection are non-mutating classes. No route
   creates a content revision or an undo entry for them.
-- A content tool commits only on pointer release. Every other route cancels an
-  incomplete gesture and restores the content from before it. No route asks a
+- A content tool commits only at a boundary the table declares for the route.
+  Any other route cancels an incomplete gesture and restores the content from
+  before it. Pointer release is the boundary for a stroke tool, and
+  [Bitmaps](29-bitmaps.md) states the text tool's boundaries. No route asks a
   question, because an interruption must not become a modal decision.
 - Focus loss and pointer-capture loss are the same event for this purpose:
-  the gesture cannot continue. A gesture that has already committed on pointer
-  release is not split, repeated or retroactively cancelled by either event.
+  the gesture cannot continue. A half-applied stroke is cancelled and the
+  content restored, while an open text draft is committed, matching the switch
+  rule; no route asks a question. A gesture that has already committed on
+  pointer release is not split, repeated or retroactively cancelled by either
+  event.
 - Explicit switching and shortcut switching invoke the same command record and
-  produce the same outcome. Both end the pending gesture before the new tool
-  becomes active.
+  produce the same outcome. Both end the pending gesture, or commit the text
+  draft, before the new tool becomes active.
 - A tool that cannot complete because the object changed says so and keeps the
   object's last committed state. That report is not an undo entry.
-- Escape cancels the pending operation and returns to the select tool.
+- Escape cancels the pending operation and returns to the select tool. The text
+  tool is the exception: the first Escape reverts a text draft and the next
+  leaves the text tool, while every other canvas tool leaves on the first
+  Escape.
 - A committed tool session is undoable as one transaction, not as a series of
   invisible steps.
 

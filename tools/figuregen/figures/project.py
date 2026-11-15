@@ -8,7 +8,6 @@ the shared `figuregen.palette` colours. `figuregen.cli` calls it to write
 
 # Figure builders hold one local per drawing coordinate; see the matching
 # ruff exemption for tools/figuregen in pyproject.toml.
-# pylint: disable=too-many-locals
 
 from __future__ import annotations
 
@@ -29,8 +28,13 @@ from figuregen.palette import (
 from figuregen.widgets import inspector_row, pane_head, window_shell
 
 
-def fig_project() -> str:
-    """Draw the project window with tree, documents and identity panel."""
+def fig_project() -> str:  # pylint: disable=too-many-locals
+    """Draw the project window with tree, documents and identity panel.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,
@@ -84,7 +88,7 @@ def fig_project() -> str:
     ]
     for index, (name, identity, detail, state) in enumerate(docs):
         dy = y + 120 + index * 92
-        body += rect(cx, dy, 520, 76, fill=HIGH, stroke=LINE)
+        body += rect(cx, dy, 508, 76, fill=HIGH, stroke=LINE)
         body += txt(cx + 16, dy + 26, name, size=12, weight="bold")
         body += txt(cx + 16, dy + 46, identity, size=11, fill=SOFT, family=F_MONO)
         body += txt(cx + 16, dy + 64, detail, size=11, fill=SOFT)
@@ -93,7 +97,7 @@ def fig_project() -> str:
     body += para(
         cx,
         y + 430,
-        520,
+        508,
         "A project remembers which views were open, which panes were collapsed and which objects were pinned. It does not own the objects inside it.",
         size=11,
         leading=17,

@@ -14,7 +14,12 @@ from figuregen.palette import DARK_MUTED, F_MONO, HIGH, INK, LINE, PINE, SOFT, W
 
 
 def fig_output() -> str:
-    """Draw the scene-to-output workstations."""
+    """Draw the scene-to-output workstations.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

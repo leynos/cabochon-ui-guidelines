@@ -213,7 +213,12 @@ def _inspector(ix: float, y: float, width: float) -> str:
 
 
 def fig_draw() -> str:
-    """Draw Burin Draw with rulers, guides and the tool palette."""
+    """Draw Burin Draw with rulers, guides and the tool palette.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

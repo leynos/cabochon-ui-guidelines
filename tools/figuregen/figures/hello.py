@@ -15,7 +15,12 @@ from figuregen.widgets import button, window_shell
 
 
 def fig_hello() -> str:
-    """Draw the hello-window application and its export bundle."""
+    """Draw the hello-window application and its export bundle.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

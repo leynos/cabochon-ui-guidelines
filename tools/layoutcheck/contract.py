@@ -25,17 +25,40 @@ class MalformedCellError(ValueError):
     """A worked cell is not a sum of integers joined by ``+``."""
 
     def __init__(self, cell: str) -> None:
-        """Describe the cell that is not a plain sum."""
+        """Describe the cell that is not a plain sum.
+
+        Parameters
+        ----------
+        cell : str
+            The worked cell that could not be parsed as a sum.
+        """
         super().__init__(f"{cell!r} is not a sum of integers joined by '+'")
 
 
 def chapter_text() -> str:
-    """Return the chapter's Markdown source."""
+    """Return the chapter's Markdown source.
+
+    Returns
+    -------
+    str
+        The full text of chapter 14.
+    """
     return CHAPTER.read_text(encoding="utf-8")
 
 
 def tables(text: str) -> list[list[list[str]]]:
-    """Return every Markdown table as rows of stripped cells."""
+    """Return every Markdown table as rows of stripped cells.
+
+    Parameters
+    ----------
+    text : str
+        The Markdown source to scan.
+
+    Returns
+    -------
+    list[list[list[str]]]
+        Each table as its rows, with each row as its stripped cells.
+    """
     found: list[list[list[str]]] = []
     rows: list[list[str]] = []
     for raw in text.splitlines():
@@ -51,14 +74,43 @@ def tables(text: str) -> list[list[list[str]]]:
 
 
 def is_rule(cells: list[str]) -> bool:
-    """Return whether a table row is a separator rule."""
+    """Return whether a table row is a separator rule.
+
+    Parameters
+    ----------
+    cells : list[str]
+        The row's stripped cells.
+
+    Returns
+    -------
+    bool
+        Whether every cell contains only hyphens or colons.
+    """
     return bool(cells) and all(
         bool(cell) and set(cell) <= {"-", ":"} for cell in cells
     )
 
 
 def table_with(text: str, header: str) -> list[list[str]]:
-    """Return the data rows of the table whose header names a column."""
+    """Return the data rows of the table whose header names a column.
+
+    Parameters
+    ----------
+    text : str
+        The Markdown source to scan.
+    header : str
+        The column header that identifies the table.
+
+    Returns
+    -------
+    list[list[str]]
+        The table's data rows, excluding its separator rule.
+
+    Raises
+    ------
+    SystemExit
+        If no table has a column with the requested header.
+    """
     for table in tables(text):
         if header in table[0]:
             return [row for row in table[1:] if not is_rule(row)]
@@ -73,6 +125,16 @@ def addends(cell: str) -> list[int]:
     Only ``+`` may join the addends. Any other operator, or a term that is not
     an integer, raises `MalformedCellError` instead of extracting numbers from a
     malformed cell.
+
+    Parameters
+    ----------
+    cell : str
+        The worked arithmetic cell.
+
+    Returns
+    -------
+    list[int]
+        The addends that precede any stated total.
     """
     try:
         return [int(term) for term in cell.split("=")[0].split("+")]
@@ -81,12 +143,35 @@ def addends(cell: str) -> list[int]:
 
 
 def stated_total(cell: str) -> int:
-    """Return the total that a worked arithmetic cell states."""
+    """Return the total that a worked arithmetic cell states.
+
+    Parameters
+    ----------
+    cell : str
+        The worked arithmetic cell.
+
+    Returns
+    -------
+    int
+        The total that follows the equals sign.
+    """
     return int(cell.split("=")[-1])
 
 
 def plane_size(cell: str) -> tuple[int, int] | None:
-    """Return the complete width and height that a plane cell states."""
+    """Return the complete width and height that a plane cell states.
+
+    Parameters
+    ----------
+    cell : str
+        The document-plane cell.
+
+    Returns
+    -------
+    tuple[int, int] | None
+        The width and height, or ``None`` when the cell does not state a
+        complete size.
+    """
     match = PLANE_RE.match(cell)
     if match is None:
         return None
@@ -94,7 +179,20 @@ def plane_size(cell: str) -> tuple[int, int] | None:
 
 
 def number(tokens: dict[str, int], value: object) -> int:
-    """Return a literal number, or resolve a named token against the table."""
+    """Return a literal number, or resolve a named token against the table.
+
+    Parameters
+    ----------
+    tokens : dict[str, int]
+        The declared token table, keyed by token name.
+    value : object
+        A literal integer or the name of a token.
+
+    Returns
+    -------
+    int
+        The literal value, or the token's declared value.
+    """
     if isinstance(value, int):
         return value
     return tokens[str(value)]

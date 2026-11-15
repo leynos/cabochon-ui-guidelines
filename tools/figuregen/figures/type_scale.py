@@ -14,7 +14,12 @@ from figuregen.palette import F_DISPLAY, F_MONO, HIGH, INK, LINE, OXIDE, SOFT
 
 
 def fig_type() -> str:
-    """Draw the three typographic voices and the type scale."""
+    """Draw the three typographic voices and the type scale.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

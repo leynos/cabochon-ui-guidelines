@@ -15,7 +15,12 @@ from figuregen.widgets import button, checkbox, field, radio
 
 
 def fig_controls() -> str:
-    """Draw the control gallery with buttons, fields and selections."""
+    """Draw the control gallery with buttons, fields and selections.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,
@@ -90,7 +95,7 @@ def fig_controls() -> str:
         leading=17,
     )
     # Targets.
-    body += line(64, 600, 1136, 600, stroke=LINE)
+    body += line(64, 614, 1136, 614, stroke=LINE)
     body += txt(
         64,
         630,

@@ -25,7 +25,12 @@ from figuregen.widgets import button
 
 
 def fig_focus() -> str:
-    """Draw the focus ring, tab order and keyboard map."""
+    """Draw the focus ring, tab order and keyboard map.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

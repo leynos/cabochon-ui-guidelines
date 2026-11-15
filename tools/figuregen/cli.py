@@ -45,7 +45,12 @@ from figuregen.production import annotate, fig_prod_chrome, fig_prod_control
 
 
 def main() -> int:
-    """Write every figure and report the count."""
+    """Write every figure and report the count.
+
+    Returns
+    -------
+    int
+    """
     OUT.mkdir(exist_ok=True)
     figures = {
         "fig-00-cover": fig_cover,
@@ -92,8 +97,9 @@ def main() -> int:
             f"missing={missing} extra={extra}"
         )
     for name, draw in figures.items():
-        (OUT / f"{name}.svg").write_text(
-            annotate(name, draw()) + "\n", encoding="utf-8"
-        )
+        destination = OUT / f"{name}.svg"
+        scratch = OUT / f".{name}.svg.tmp"
+        scratch.write_text(annotate(name, draw()) + "\n", encoding="utf-8")
+        scratch.replace(destination)
     print(f"wrote {len(figures)} figures to {OUT}")
     return 0

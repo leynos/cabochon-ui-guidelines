@@ -187,11 +187,14 @@ Validation rules belong to the column, not to individual cells.
 
 ## Sorting and filtering
 
-Sorting changes the view, not the stored order, unless the table declares an
-ordered column. Filtering hides rows and reports how many are hidden when the
-disclosure policy permits that count; otherwise it reports only that rows are
-hidden. Both actions are reversible and are recorded in the view, not in the
-object.
+Sorting changes the view, not the stored order. Filtering hides rows and
+reports how many are hidden when the disclosure policy permits that count;
+otherwise it reports only that rows are hidden. Both actions are reversible and
+are recorded in the view, not in the object.
+
+A durable order is a column value the user edits rather than a sort, so
+changing it is an ordinary cell edit that creates a new revision; sorting
+itself never writes to the object.
 
 A filter that removes the selected row moves the selection to the nearest
 visible row and says so in the status line.

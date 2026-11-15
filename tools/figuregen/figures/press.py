@@ -8,7 +8,6 @@ write `fig-24-press.svg` under `figures/`.
 
 # Figure builders hold one local per drawing coordinate; see the matching
 # ruff exemption for tools/figuregen in pyproject.toml.
-# pylint: disable=too-many-locals
 
 from __future__ import annotations
 
@@ -31,8 +30,13 @@ from figuregen.palette import (
 from figuregen.widgets import button, pane_head, window_shell
 
 
-def fig_press() -> str:
-    """Draw Cabochon Press with pages and preflight."""
+def fig_press() -> str:  # pylint: disable=too-many-locals
+    """Draw Cabochon Press with pages and preflight.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

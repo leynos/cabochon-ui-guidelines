@@ -26,7 +26,18 @@ if typ.TYPE_CHECKING:
 
 
 def run_checker(root: Path) -> tuple[int, str]:
-    """Run the checker in ``root`` as an isolated subprocess and capture output."""
+    """Run the checker in ``root`` as an isolated subprocess and capture output.
+
+    Parameters
+    ----------
+    root : Path
+        The repository copy in which to run the checker.
+
+    Returns
+    -------
+    tuple[int, str]
+        The process exit status and its combined output.
+    """
     script = root / "tools" / "check-links.py"
     # The argument vector is built here from the running interpreter and a
     # path inside a freshly copied worktree; no shell or untrusted input is
@@ -41,7 +52,18 @@ def run_checker(root: Path) -> tuple[int, str]:
 
 
 def fresh_copy(tmp: str) -> Path:
-    """Copy the repository into a temporary directory for mutation testing."""
+    """Copy the repository into a temporary directory for mutation testing.
+
+    Parameters
+    ----------
+    tmp : str
+        The temporary directory that receives the copy.
+
+    Returns
+    -------
+    Path
+        The copied repository's root.
+    """
     copy = Path(tmp) / "repo"
     shutil.copytree(ROOT, copy, ignore=shutil.ignore_patterns(".git", "build"))
     return copy
@@ -59,7 +81,25 @@ def _baseline_failures() -> list[str]:
 def _judge_mutation(
     label: str, code: int, output: str, expected: str | None
 ) -> str | None:
-    """Return the failure description for one mutation outcome, if any."""
+    """Return the failure description for one mutation outcome, if any.
+
+    Parameters
+    ----------
+    label : str
+        The mutation's name, used in diagnostics.
+    code : int
+        The checker's exit status after the mutation.
+    output : str
+        The checker's combined output.
+    expected : str | None
+        The diagnostic the mutation should provoke, or ``None`` when the
+        mutated baseline should pass.
+
+    Returns
+    -------
+    str | None
+        A failure description, or ``None`` when the outcome is expected.
+    """
     if expected is None:
         if code != 0:
             return f"self-test: {label} should pass, got {output.strip()[:300]}"
@@ -74,7 +114,24 @@ def _judge_mutation(
 def _run_mutation(
     label: str, edit: cabc.Callable[[Path], bool], expected: str | None
 ) -> tuple[str | None, str | None]:
-    """Apply one mutation in a fresh copy and classify its outcome."""
+    """Apply one mutation in a fresh copy and classify its outcome.
+
+    Parameters
+    ----------
+    label : str
+        The mutation's name, used in diagnostics.
+    edit : cabc.Callable[[Path], bool]
+        The mutation to apply to the copied repository.
+    expected : str | None
+        The diagnostic the mutation should provoke, or ``None`` when the
+        mutated baseline should pass.
+
+    Returns
+    -------
+    tuple[str | None, str | None]
+        A failure description and the outcome kind, either of which may be
+        ``None``.
+    """
     with tempfile.TemporaryDirectory() as tmp:
         root = fresh_copy(tmp)
         if not edit(root):
@@ -108,7 +165,14 @@ def _unrelated_failure_check() -> list[str]:
 
 
 def self_test() -> int:
-    """Require a clean baseline and the expected diagnostic per mutation."""
+    """Require a clean baseline and the expected diagnostic per mutation.
+
+    Returns
+    -------
+    int
+        The process exit status: zero when every mutation behaves, one
+        otherwise.
+    """
     failures = _baseline_failures() + _unrelated_failure_check()
     counts = {"detecting": 0, "passing": 0}
     for label, edit, expected in _mutation_cases():

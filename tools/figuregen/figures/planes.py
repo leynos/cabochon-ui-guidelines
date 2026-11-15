@@ -14,7 +14,12 @@ from figuregen.palette import F_DISPLAY, F_MONO, HIGH, INK, LINE, OXIDE, PAPER, 
 
 
 def fig_planes() -> str:
-    """Draw the four interface planes and their borders."""
+    """Draw the four interface planes and their borders.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,
@@ -30,7 +35,8 @@ def fig_planes() -> str:
     for name, colour, dx, dy, note in planes:
         x = 220 + dx
         y = 200 + dy
-        body += rect(x + 12, y + 14, 420, 210, fill="#17201C18", stroke=None)
+        if name == "OVERLAY":
+            body += rect(x + 12, y + 14, 420, 210, fill="#17201C18", stroke=None)
         body += rect(
             x, y, 420, 210, fill=colour, stroke=INK, sw=1.5 if name == "OVERLAY" else 1
         )

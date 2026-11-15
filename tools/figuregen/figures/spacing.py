@@ -25,7 +25,12 @@ from figuregen.palette import (
 
 
 def fig_spacing() -> str:
-    """Draw the spacing scale and the measured tool strip."""
+    """Draw the spacing scale and the measured tool strip.
+
+    Returns
+    -------
+    str
+    """
     body = title_block(
         64,
         70,

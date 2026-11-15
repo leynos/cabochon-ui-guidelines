@@ -8,7 +8,6 @@ catalogue-height fixtures. `figuregen.cli` imports `annotate` and both fixtures.
 
 # The drawing primitives take geometry and style arguments positionally; see
 # the matching ruff exemption for tools/figuregen in pyproject.toml.
-# pylint: disable=too-many-arguments
 
 from __future__ import annotations
 
@@ -23,8 +22,16 @@ from figuregen.palette import F_MONO, HIGH, INK
 def annotate(name: str, svg: str) -> str:
     """Attach the figure's declared class, scale, profile and components.
 
-    The annotation is machine-readable so that a checker can compare it with
-    the rendered geometry instead of trusting a caption.
+    Parameters
+    ----------
+    name : str
+        Figure name.
+    svg : str
+        Rendered SVG document.
+
+    Returns
+    -------
+    str
     """
     spec = FIGURE_SPECS.get(name)
     if spec is None:
@@ -60,14 +67,19 @@ def annotate(name: str, svg: str) -> str:
     return svg[:index] + f"  <metadata>{payload}</metadata>\n" + svg[index:]
 
 
-def production_component(
+def production_component(  # pylint: disable=too-many-arguments
     x: float, y: float, w: float, h: float, *, kind: str, label: str
 ) -> str:
-    """Draw one component at its catalogue height for the production fixtures.
+    """Draw one component at its catalogue height.
 
-    The group carries its identity and measured height, but the checker derives
-    the rendered bounds from the geometry and transforms rather than trusting
-    the annotation.
+    Parameters
+    ----------
+    x, y, w, h : float
+    kind, label : str
+
+    Returns
+    -------
+    str
     """
     attributes = attrs(data_component=kind, data_height=h)
     body = f"<g {attributes}>"
@@ -78,7 +90,12 @@ def production_component(
 
 
 def fig_prod_chrome() -> str:
-    """Draw the production chrome fixture at catalogue heights."""
+    """Draw the production chrome fixture at catalogue heights.
+
+    Returns
+    -------
+    str
+    """
     body = production_component(
         0, 0, 320, 31, kind="title_bar", label="TITLE BAR · 31 lu"
     )
@@ -101,7 +118,12 @@ def fig_prod_chrome() -> str:
 
 
 def fig_prod_control() -> str:
-    """Draw the production control fixture at catalogue heights."""
+    """Draw the production control fixture at catalogue heights.
+
+    Returns
+    -------
+    str
+    """
     body = production_component(
         8, 8, 120, 36, kind="primary_action", label="PRIMARY · 36 lu"
     )

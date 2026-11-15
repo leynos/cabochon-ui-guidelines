@@ -24,7 +24,12 @@ from figuregen.palette import (
 
 
 def fig_cover() -> str:
-    """Draw the cover plate with the cabochon and its four instruments."""
+    """Draw the cover plate with the cabochon and its four instruments.
+
+    Returns
+    -------
+    str
+    """
     body = ""
     body += txt(
         72,

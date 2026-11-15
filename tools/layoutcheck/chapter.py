@@ -24,14 +24,41 @@ from layoutcheck.contract import (
 
 
 def _complete_number(value: int) -> str:
-    """Return a pattern matching a whole number, not part of a longer one."""
+    """Return a pattern matching a whole number, not part of a longer one.
+
+    Parameters
+    ----------
+    value : int
+        The whole number to match.
+
+    Returns
+    -------
+    str
+        A regular expression that matches the number on its own.
+    """
     return rf"(?<![\d.]){value}(?![\d.])"
 
 
 def check_band_rows(
     rows: list[list[str]], tokens: dict[str, int], profiles: dict[str, list[str]]
 ) -> list[str]:
-    """Check that each band table row sums to its stated total."""
+    """Check that each band table row sums to its stated total.
+
+    Parameters
+    ----------
+    rows : list[list[str]]
+        The band table's data rows.
+    tokens : dict[str, int]
+        The declared token table, keyed by token name.
+    profiles : dict[str, list[str]]
+        The declared band profiles, keyed by profile name.
+
+    Returns
+    -------
+    list[str]
+        One diagnostic per row that does not match a profile, plus one for
+        each declared profile the table omits.
+    """
     errors: list[str] = []
     matched: set[str] = set()
     for row in rows:
@@ -72,7 +99,22 @@ def check_band_rows(
 def _check_worked_window(
     configuration: dict[str, object], window: str, tokens: dict[str, int]
 ) -> list[str]:
-    """Check the window cell against the declared window and pane widths."""
+    """Check the window cell against the declared window and pane widths.
+
+    Parameters
+    ----------
+    configuration : dict[str, object]
+        The configuration that the row describes.
+    window : str
+        The row's window cell.
+    tokens : dict[str, int]
+        The declared token table, keyed by token name.
+
+    Returns
+    -------
+    list[str]
+        One diagnostic per value the cell omits.
+    """
     errors: list[str] = []
     name = str(configuration["name"])
     declared_width = number(tokens, configuration["width"])
@@ -96,7 +138,23 @@ def _check_worked_window(
 
 
 def _check_addends(name: str, cell: str, total: int) -> list[str]:
-    """Check that a worked cell's addends sum to its stated total."""
+    """Check that a worked cell's addends sum to its stated total.
+
+    Parameters
+    ----------
+    name : str
+        The configuration name, used in diagnostics.
+    cell : str
+        The worked arithmetic cell.
+    total : int
+        The total that the cell states.
+
+    Returns
+    -------
+    list[str]
+        A diagnostic when the addends are malformed or do not sum to the
+        total.
+    """
     try:
         values = addends(cell)
     except MalformedCellError as error:
@@ -111,7 +169,22 @@ def _check_addends(name: str, cell: str, total: int) -> list[str]:
 def _check_worked_side(
     configuration: dict[str, object], side: str, expected: int
 ) -> list[str]:
-    """Check the side-allocation cell against its derived total."""
+    """Check the side-allocation cell against its derived total.
+
+    Parameters
+    ----------
+    configuration : dict[str, object]
+        The configuration that the row describes.
+    side : str
+        The row's side-allocation cell.
+    expected : int
+        The side allocation that the configuration derives.
+
+    Returns
+    -------
+    list[str]
+        One diagnostic per value the cell states incorrectly.
+    """
     errors: list[str] = []
     name = str(configuration["name"])
     total = stated_total(side)
@@ -131,7 +204,24 @@ def _check_worked_plane(
     derived: tuple[int, int],
     tokens: dict[str, int],
 ) -> list[str]:
-    """Check the document-plane cell against its derived size."""
+    """Check the document-plane cell against its derived size.
+
+    Parameters
+    ----------
+    configuration : dict[str, object]
+        The configuration that the row describes.
+    plane : str
+        The row's document-plane cell.
+    derived : tuple[int, int]
+        The document width and height that the configuration derives.
+    tokens : dict[str, int]
+        The declared token table, keyed by token name.
+
+    Returns
+    -------
+    list[str]
+        One diagnostic per value the cell states incorrectly.
+    """
     errors: list[str] = []
     name = str(configuration["name"])
     width, height = derived
@@ -156,7 +246,24 @@ def check_worked_row(
     tokens: dict[str, int],
     profiles: dict[str, list[str]],
 ) -> list[str]:
-    """Check one worked table row against its configuration."""
+    """Check one worked table row against its configuration.
+
+    Parameters
+    ----------
+    configuration : dict[str, object]
+        The configuration that the row describes.
+    row : list[str]
+        The worked table row.
+    tokens : dict[str, int]
+        The declared token table, keyed by token name.
+    profiles : dict[str, list[str]]
+        The declared band profiles, keyed by profile name.
+
+    Returns
+    -------
+    list[str]
+        One diagnostic per value the row states incorrectly.
+    """
     band_total, width, height = derive(tokens, profiles, configuration)
     window, stated_bands, side, plane = row
     name = str(configuration["name"])
@@ -182,7 +289,24 @@ def check_worked_rows(
     profiles: dict[str, list[str]],
     configurations: list[dict[str, object]],
 ) -> list[str]:
-    """Check every worked table row against its configuration."""
+    """Check every worked table row against its configuration.
+
+    Parameters
+    ----------
+    rows : list[list[str]]
+        The worked table's data rows.
+    tokens : dict[str, int]
+        The declared token table, keyed by token name.
+    profiles : dict[str, list[str]]
+        The declared band profiles, keyed by profile name.
+    configurations : list[dict[str, object]]
+        The configurations that the rows should describe, in order.
+
+    Returns
+    -------
+    list[str]
+        One diagnostic per row and per count mismatch.
+    """
     errors: list[str] = []
     if len(rows) != len(configurations):
         errors.append(
@@ -198,7 +322,20 @@ def check_worked_rows(
 
 
 def check_chapter(text: str | None = None) -> list[str]:
-    """Check that chapter 14's tables state the derived worked values."""
+    """Check that chapter 14's tables state the derived worked values.
+
+    Parameters
+    ----------
+    text : str | None
+        The chapter source to check; the committed chapter is read when
+        this is ``None``.
+
+    Returns
+    -------
+    list[str]
+        One diagnostic per table value that does not match the derived
+        budgets.
+    """
     source = chapter_text() if text is None else text
     tokens = BUDGETS["tokens"]
     profiles = BUDGETS["profiles"]

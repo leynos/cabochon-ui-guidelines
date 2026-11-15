@@ -62,9 +62,10 @@ eyedropper and text. Each tool:
 - has a 30-unit button, a 16-unit glyph and a tooltip naming its shortcut;
 - shows its options in the tool strip or the inspector, not in a floating
   palette;
-- commits its stroke as one transaction when the pointer is released, for every
-  content tool that mutates pixels;
-- cancels cleanly on Escape, restoring the pixels from before the stroke.
+- commits its stroke as one transaction when the pointer is released; the text
+  tool commits as [Text entry](#text-entry) describes;
+- cancels cleanly on Escape, restoring the pixels from before the stroke, for
+  every stroke tool.
 
 A tool must not leave a half-applied stroke when the user switches tools, the
 window loses focus or the tool is switched by shortcut. The commit boundary is
@@ -73,10 +74,35 @@ create no content mutation.
 
 Every content tool in this palette is a **canvas tool** in the sense of
 [Selection and tools](24-selection-tools.md). It has no **Insert** action and
-no **Cancel** button of its own; its effect is the gesture it completes, and
-Escape cancels the pending gesture. Select and pan create no content mutation,
-and a read-only inspection such as the eyedropper's sampled-colour report is
-not a canvas tool and commits no pixels.
+no **Cancel** button of its own; its effect is the gesture or draft it
+completes, and Escape cancels the pending stroke. Select and pan create no
+content mutation, and a read-only inspection such as the eyedropper's
+sampled-colour report is not a canvas tool and commits no pixels.
+
+## Text entry
+
+The text tool commits on a different boundary, because its characters do not
+exist when the pointer is released.
+
+- The pointer release places the insertion point and opens a text draft. It
+  commits nothing, because the release ends the gesture that positioned the
+  caret.
+- Typed characters accumulate in the draft and are drawn on the canvas. The
+  draft is not part of the image: it is not saved, exported or counted in a
+  revision until it is committed. The inspector names it as a draft that has not
+  been committed, as [Inspector](21-inspector.md) requires.
+- Return commits the draft as one transaction: one revision entry and one undo
+  step.
+- Pressing the pointer elsewhere on the canvas commits the draft and opens a
+  new one at the new position.
+- Escape reverts the draft and leaves the insertion point in place, and never
+  commits. A second Escape leaves the text tool, following the ordered Escape
+  routing in [Focus and keyboard](18-focus-keyboard.md).
+- Switching tools, including by shortcut, commits the draft, so the
+  deterministic switch rule holds and no committed text is lost.
+- The text tool remains a canvas tool under
+  [Selection and tools](24-selection-tools.md): it has no **Insert** action and
+  no **Cancel** button of its own.
 
 ## Zoom and pan
 
