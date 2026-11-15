@@ -100,16 +100,25 @@ def state_mark(cx: float, cy: float, kind: str, colour: str) -> str:
 
     Parameters
     ----------
-    cx, cy : float
-        Centre.
+    cx : float
+        The mark's centre, in logical units from the figure's left edge.
+    cy : float
+        The mark's centre, in logical units from the figure's top edge.
     kind : str
-        Mark name.
+        The mark name, one of ``dot``, ``arc``, ``triangle``, ``broken``,
+        ``lock``, ``hatch``, ``dashed`` or ``crossed``.
     colour : str
-        Mark colour.
+        The colour applied to the mark's fill or stroke.
 
     Returns
     -------
     str
+        The SVG fragment that draws the mark, with no surrounding group.
+
+    Raises
+    ------
+    ValueError
+        If `kind` names no declared mark.
     """
     builder = _MARKS.get(kind)
     if builder is None:

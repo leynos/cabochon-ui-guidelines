@@ -27,7 +27,8 @@ def load_registry(path: Path, problems: list[str]) -> dict[str, object]:
         The JSON registry to read as UTF-8.
     problems : list[str]
         Diagnostics collected for the caller. The list is appended to in
-        place and never cleared. A file that cannot be read or decoded adds
+        place and never cleared. A file that cannot be read, is not valid
+        UTF-8 or is not valid JSON adds
         ``"requirement registry is unreadable: <error>"``, where ``<error>``
         is the exception's message.
 
@@ -35,12 +36,12 @@ def load_registry(path: Path, problems: list[str]) -> dict[str, object]:
     -------
     dict[str, object]
         The decoded JSON document, normally an object, or an empty
-        dictionary when the file cannot be read or decoded. Later checks
-        treat an empty result as a missing registry.
+        dictionary when the file cannot be read, decoded or parsed. Later
+        checks treat an empty result as a missing registry.
     """
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as error:
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
         problems.append(f"requirement registry is unreadable: {error}")
         return {}
 

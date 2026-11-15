@@ -51,7 +51,7 @@ def chip(  # pylint: disable=too-many-arguments
         ``None`` to record none.
     mark : str
         The mark name, which selects the non-colour mark drawn beside the
-        label.
+        label and is passed to `figuregen.ornaments.marks.state_mark`.
     role : str
         The colour role recorded alongside the mark.
 
@@ -61,6 +61,11 @@ def chip(  # pylint: disable=too-many-arguments
         The SVG fragment string for the chip group and the chip's width in
         logical units, which is ``max(58.0, len(label) * size * 0.62 + 18)``
         and therefore never less than 58.
+
+    Raises
+    ------
+    ValueError
+        If `mark` names no declared mark, which `state_mark` reports.
     """
     width = max(58.0, len(label) * size * 0.62 + 18)
     body = '<g data-state-chip="true">'
