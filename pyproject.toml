@@ -96,6 +96,7 @@ extend-ignore = [
 # chapter 14 uses for worked document-plane sizes, so its diagnostics must
 # contain that character rather than the letter x.
 "tools/check-layout.py" = ["RUF001"]
+"tools/layoutcheck/*.py" = ["RUF001"]
 # The SVG generator is a data-heavy drawing library: primitives take geometry
 # and style arguments positionally, figure builders hold many locals, and the
 # rendered strings contain typographic glyphs such as the multiplication sign.

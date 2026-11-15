@@ -11,7 +11,9 @@ The book is written in Markdown, one chapter per file, with SVG figures under
 
 ```sh
 make figures      # regenerate the SVG figures
-make check        # run formatting, lint, spelling, link and SVG gates
+make check        # run every gate: formatting, Markdown lint, spelling, Python
+                  # lint, typing and tests, links, figures, the state, keyboard,
+                  # layout and requirement contracts, and the SVG proof sheet
 ```
 
 The validation tools are Python, and they follow the df12 Python health

@@ -109,7 +109,7 @@ def fig_small_world() -> str:
         64,
         70,
         "The Cabochon character",
-        "Four structural choices, not a decoration kit. Each one can be recognised in a window without reading its label.",
+        "Four structural choices, not a decoration kit. Each one can be recognized in a window without reading its label.",
     )
     cards = [
         (

@@ -94,7 +94,7 @@ exits non-zero on the first contract violation it reports.
 | `check-figures.py`      | Every generated SVG against its declared figure class, inventory and geometry                      |
 | `check-states.py`       | The live-state projection, the chapter's transition table, the state figure and the event fixtures |
 | `check-keyboard.py`     | The ordered Escape fixtures                                                                        |
-| `check-layout.py`       | The layout budgets derived from the declared tokens                                                |
+| `check-layout.py`       | The layout budgets, and chapter 14's band and worked tables, against the declared tokens           |
 | `check-links.py`        | Links, heading anchors, figure embedding, and the chapter, owner, state and profile manifest       |
 | `check-requirements.py` | That the checklist and the structured requirement registry are the same set, with owned evidence   |
 
@@ -143,11 +143,12 @@ the reason:
 ## Packages beside the scripts
 
 The commit gates call `tools/check-figures.py`, `tools/check-states.py`,
-`tools/check-links.py` and `tools/check-requirements.py` directly, and each
-remains a thin command-line entry point. Their implementations live in
-`figurecheck/`, `statecheck/`, `linkcheck/` and `requirementcheck/` so that no
-module exceeds the line limit. Keep new behaviour in the package and the entry
-point as a docstring plus a `main()` call.
+`tools/check-links.py`, `tools/check-layout.py` and
+`tools/check-requirements.py` directly, and each remains a thin command-line
+entry point. Their implementations live in `figurecheck/`, `statecheck/`,
+`linkcheck/`, `layoutcheck/` and `requirementcheck/` so that no module exceeds
+the line limit. Keep new behaviour in the package and the entry point as a
+docstring plus a `main()` call.
 
 ## Figures
 

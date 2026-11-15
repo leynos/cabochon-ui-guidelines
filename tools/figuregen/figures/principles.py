@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 from figuregen.canvas import ellipse, line, lines, rect, svg_doc, txt
 from figuregen.ornaments import title_block
 from figuregen.palette import (
@@ -19,6 +21,30 @@ from figuregen.palette import (
     TEAL_INK,
     WHITE,
 )
+
+
+def _object_spokes(gx: float, gy: float) -> str:
+    """Return the labelled spokes drawn around the object glyph."""
+    body = ""
+    for angle, label in [(-60, "N"), (-10, "T"), (40, "D"), (90, "P")]:
+        radians = math.radians(angle)
+        body += line(
+            gx,
+            gy,
+            gx + 62 * math.cos(radians),
+            gy + 62 * math.sin(radians),
+            stroke=LINE,
+        )
+        body += txt(
+            gx + 68 * math.cos(radians),
+            gy + 68 * math.sin(radians) + 4,
+            label,
+            size=9,
+            fill=OXIDE,
+            family=F_MONO,
+            anchor="middle",
+        )
+    return body
 
 
 def fig_principles() -> str:
@@ -81,25 +107,7 @@ def fig_principles() -> str:
             body += rect(gx + 12, gy - 16, 22, 18, fill=WHITE, stroke=LINE)
         elif glyph == "object":
             body += ellipse(gx, gy, 40, 26, fill=PINE2, stroke=PINE)
-            for angle, label in [(-60, "N"), (-10, "T"), (40, "D"), (90, "P")]:
-                body += line(
-                    gx,
-                    gy,
-                    gx + 62 * __import__("math").cos(__import__("math").radians(angle)),
-                    gy + 62 * __import__("math").sin(__import__("math").radians(angle)),
-                    stroke=LINE,
-                )
-                body += txt(
-                    gx + 68 * __import__("math").cos(__import__("math").radians(angle)),
-                    gy
-                    + 68 * __import__("math").sin(__import__("math").radians(angle))
-                    + 4,
-                    label,
-                    size=9,
-                    fill=OXIDE,
-                    family=F_MONO,
-                    anchor="middle",
-                )
+            body += _object_spokes(gx, gy)
         elif glyph == "page":
             body += rect(gx - 38, gy - 34, 76, 68, fill=WHITE, stroke=INK)
             body += txt(
