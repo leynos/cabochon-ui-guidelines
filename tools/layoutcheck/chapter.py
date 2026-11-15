@@ -7,10 +7,13 @@ row with the values derived by `layoutcheck.budget`. `layoutcheck.cli` and
 
 from __future__ import annotations
 
+import re
+
 from layoutcheck.budget import bands, derive
 from layoutcheck.contract import (
     BAND_PROFILES,
     BUDGETS,
+    MalformedCellError,
     addends,
     chapter_text,
     number,
@@ -18,6 +21,11 @@ from layoutcheck.contract import (
     stated_total,
     table_with,
 )
+
+
+def _complete_number(value: int) -> str:
+    """Return a pattern matching a whole number, not part of a longer one."""
+    return rf"(?<![\d.]){value}(?![\d.])"
 
 
 def check_band_rows(
@@ -30,7 +38,11 @@ def check_band_rows(
         if len(row) != 3:
             errors.append(f"band table row {row!r}: expected three cells")
             continue
-        values = addends(row[1])
+        try:
+            values = addends(row[1])
+        except MalformedCellError as error:
+            errors.append(f"band table row {row[0]!r}: {error}")
+            continue
         names = [
             name
             for name, members in profiles.items()
@@ -65,19 +77,35 @@ def _check_worked_window(
     name = str(configuration["name"])
     declared_width = number(tokens, configuration["width"])
     declared_height = number(tokens, configuration["height"])
-    if f"{declared_width} × {declared_height}" not in window:
+    width_pattern = _complete_number(declared_width)
+    height_pattern = _complete_number(declared_height)
+    size = rf"{width_pattern}\s*×\s*{height_pattern}"
+    if re.search(size, window) is None:
         errors.append(
             f"worked table row {name!r}: window cell {window!r} is not "
             f"{declared_width} × {declared_height}"
         )
     for side_name in ("left", "right"):
         pane = str(configuration[side_name])
-        if str(tokens[pane]) not in window:
+        if re.search(_complete_number(tokens[pane]), window) is None:
             errors.append(
                 f"worked table row {name!r}: window cell omits the "
                 f"{pane} width {tokens[pane]}"
             )
     return errors
+
+
+def _check_addends(name: str, cell: str, total: int) -> list[str]:
+    """Check that a worked cell's addends sum to its stated total."""
+    try:
+        values = addends(cell)
+    except MalformedCellError as error:
+        return [f"worked table row {name!r}: {error}"]
+    if sum(values) != total:
+        return [
+            f"worked table row {name!r}: addends {cell!r} do not sum to {total}"
+        ]
+    return []
 
 
 def _check_worked_side(
@@ -86,16 +114,14 @@ def _check_worked_side(
     """Check the side-allocation cell against its derived total."""
     errors: list[str] = []
     name = str(configuration["name"])
-    if stated_total(side) != expected:
+    total = stated_total(side)
+    if total != expected:
         errors.append(
             f"worked table row {name!r}: side allocation {side!r} is not "
             f"the derived {expected}"
         )
-    if "=" in side and sum(addends(side)) != stated_total(side):
-        errors.append(
-            f"worked table row {name!r}: addends {side!r} do not sum to "
-            f"{stated_total(side)}"
-        )
+    if "=" in side:
+        errors.extend(_check_addends(name, side, total))
     return errors
 
 
@@ -139,6 +165,10 @@ def check_worked_row(
         errors.append(
             f"worked table row {name!r}: bands {stated_bands!r} are not "
             f"the derived {band_total}"
+        )
+    if "=" in stated_bands:
+        errors.extend(
+            _check_addends(name, stated_bands, stated_total(stated_bands))
         )
     declared_width = number(tokens, configuration["width"])
     errors.extend(_check_worked_side(configuration, side, declared_width - width))

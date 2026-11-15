@@ -111,10 +111,31 @@ def test_current_requires_a_matching_epoch_and_coverage(
             "accepted": True,
         }
     )
-    fresh = facts["accepted_epoch"] == facts["invalidation_epoch"] and (
-        vector_at_least(facts["accepted_validated"], facts["known_source"])
+    validated = facts["accepted_validated"]
+    known = facts["known_source"]
+    covers = all(
+        key in validated and validated[key] >= value
+        for key, value in known.items()
     )
+    fresh = facts["accepted_epoch"] == facts["invalidation_epoch"] and covers
     assert project(facts) == ("Current" if fresh else "Stale")
+
+
+def test_a_covering_vector_at_the_same_epoch_projects_current() -> None:
+    """A validated vector that covers its source at one epoch is Current."""
+    facts = facts_for(
+        {
+            "authorized": True,
+            "availability": "present",
+            "accepted": True,
+            "accepted_validated": {"rate": 2},
+            "accepted_epoch": 4,
+            "known_source": {"rate": 1},
+            "invalidation_epoch": 4,
+            "request_active": False,
+        }
+    )
+    assert project(facts) == "Current"
 
 
 @given(st.dictionaries(st.text(max_size=4), EPOCHS, max_size=4))

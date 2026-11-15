@@ -1,7 +1,7 @@
 """Parse the checklist into the requirement identifiers it declares.
 
-The `parse_checklist` function strips comments and fenced examples, then maps
-each visible checklist item to the owner links it names.
+The `parse_checklist` function strips comments, fenced examples and code spans,
+then maps each visible checklist item to the owner links it names.
 `requirementcheck.checks` imports it before the registry comparison.
 """
 
@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import typing as typ
 
-from markdown_structure import strip_fences_and_comments
+from markdown_structure import checklist_items, strip_code_and_comments
 
 from requirementcheck.contract import OWNER_RE, REQUIREMENT_RE
 
@@ -18,10 +18,10 @@ if typ.TYPE_CHECKING:
 
 
 def parse_checklist(path: Path, problems: list[str]) -> dict[str, list[str]]:
-    """Parse visible checklist items, ignoring comments and fenced examples."""
+    """Parse visible checklist items, ignoring comments, fences and code."""
     items: dict[str, list[str]] = {}
-    text = strip_fences_and_comments(path.read_text(encoding="utf-8"))
-    for block in text.split("- [ ] ")[1:]:
+    text = strip_code_and_comments(path.read_text(encoding="utf-8"))
+    for block in checklist_items(text):
         match = REQUIREMENT_RE.match(block)
         if not match:
             problems.append("checklist item has no requirement identifier")

@@ -18,7 +18,15 @@ BUDGETS = json.loads(
 )
 CHAPTER = ROOT / "book" / "14-spacing-metrics.md"
 BAND_PROFILES = ("document", "document_strip", "studio", "studio_strip")
-PLANE_RE = re.compile(r"^(\d+)\s*×\s*(\d+)(?!\d)")
+PLANE_RE = re.compile(r"^(\d+)\s*×\s*(\d+)(?![\d.])")
+
+
+class MalformedCellError(ValueError):
+    """A worked cell is not a sum of integers joined by ``+``."""
+
+    def __init__(self, cell: str) -> None:
+        """Describe the cell that is not a plain sum."""
+        super().__init__(f"{cell!r} is not a sum of integers joined by '+'")
 
 
 def chapter_text() -> str:
@@ -60,8 +68,16 @@ def table_with(text: str, header: str) -> list[list[str]]:
 
 
 def addends(cell: str) -> list[int]:
-    """Return the integer addends of a worked arithmetic cell."""
-    return [int(part) for part in re.findall(r"\d+", cell.split("=")[0])]
+    """Return the integer addends of a worked arithmetic cell.
+
+    Only ``+`` may join the addends. Any other operator, or a term that is not
+    an integer, raises `MalformedCellError` instead of extracting numbers from a
+    malformed cell.
+    """
+    try:
+        return [int(term) for term in cell.split("=")[0].split("+")]
+    except ValueError as error:
+        raise MalformedCellError(cell) from error
 
 
 def stated_total(cell: str) -> int:

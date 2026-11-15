@@ -20,9 +20,17 @@ from linkcheck.contract import (
     CONTRACT,
     FIGURES,
     FRONT_FIGURE_RE,
+    FRONT_MATTER_RE,
     FRONT_PART_RE,
     ROOT,
+    resolved_destination,
 )
+
+
+def _front_matter(text: str) -> str:
+    """Return the leading front-matter block, or an empty string."""
+    match = FRONT_MATTER_RE.match(text)
+    return match.group(1) if match else ""
 
 
 def check_links(chapters: list[Path], problems: list[str]) -> None:
@@ -56,7 +64,7 @@ def check_front_figure(chapters: list[Path], problems: list[str]) -> None:
     """Check that each declared front-matter figure exists and is embedded."""
     for chapter in chapters:
         text = chapter.read_text(encoding="utf-8")
-        declared = FRONT_FIGURE_RE.findall(text)
+        declared = FRONT_FIGURE_RE.findall(_front_matter(text))
         if not declared:
             continue
         figure = declared[0]
@@ -85,15 +93,19 @@ def check_manifest(chapters: list[Path], problems: list[str]) -> None:
 
     navigation = BOOK / CONTRACT["navigation"]
     nav_text = navigation.read_text(encoding="utf-8")
-    nav_paths = {target.partition("#")[0] for target in link_targets(nav_text)}
+    nav_paths = {
+        resolved
+        for target in link_targets(nav_text)
+        if (resolved := resolved_destination(BOOK, target)) is not None
+    }
     for entry in entries:
         name = entry["file"]
-        if name not in nav_paths:
+        if (BOOK / name).resolve() not in nav_paths:
             problems.append(f"navigation does not link chapter {name}")
         path = BOOK / name
         if not path.exists():
             continue
-        part = FRONT_PART_RE.findall(path.read_text(encoding="utf-8"))
+        part = FRONT_PART_RE.findall(_front_matter(path.read_text(encoding="utf-8")))
         if not part:
             problems.append(f"{name}: missing part in front matter")
         elif part[0] != entry["part"]:

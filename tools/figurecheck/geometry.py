@@ -161,16 +161,19 @@ def _consume_point(
 
 
 def path_bbox(data: str) -> BBox:
-    """Compute the bounding box of an SVG path data string."""
+    """Compute the bounding box of the segments an SVG path data string draws."""
     tokens = PATH_TOKEN_RE.findall(data)
     points: list[tuple[float, float]] = []
     radius = 0.0
     command: str | None = None
+    drawn = False
+    starts_here = False
     index = 0
     while index < len(tokens):
         token = tokens[index]
         if token.isalpha():
             command = token
+            starts_here = True
             index += 1
             continue
         if command not in {"M", "L", "A"}:
@@ -179,16 +182,17 @@ def path_bbox(data: str) -> BBox:
             radius, point, index = _consume_arc(tokens, index, radius)
         else:
             point, index = _consume_point(tokens, index)
+        if command != "M" or not starts_here:
+            drawn = True
+        starts_here = False
         points.append(point)
-    if not points:
-        raise GeometryError("path draws no points")
-    xs = [point[0] for point in points]
-    ys = [point[1] for point in points]
+    if not drawn:
+        raise GeometryError("path draws no segments")
     return (
-        min(xs) - radius,
-        min(ys) - radius,
-        max(xs) + radius,
-        max(ys) + radius,
+        min(point[0] for point in points) - radius,
+        min(point[1] for point in points) - radius,
+        max(point[0] for point in points) + radius,
+        max(point[1] for point in points) + radius,
     )
 
 
@@ -267,6 +271,15 @@ def primitive_bbox(element: ElementTree.Element) -> BBox:
     return builder(element)
 
 
+def _presentation(element: ElementTree.Element, name: str) -> str | None:
+    """Return a presentation value, letting an inline style take precedence."""
+    for declaration in (element.get("style") or "").split(";"):
+        property_name, separator, value = declaration.partition(":")
+        if separator and property_name.strip().lower() == name:
+            return value.strip()
+    return element.get(name)
+
+
 def hidden_reason(
     element: ElementTree.Element,
     parents: dict[ElementTree.Element, ElementTree.Element],
@@ -274,11 +287,13 @@ def hidden_reason(
     """Return why an element is not painted, or ``None`` if it is."""
     chain = _ancestry(element, parents)
     for node in reversed(chain):
-        if node.get("display") == "none":
+        display = _presentation(node, "display")
+        if display is not None and display.lower() == "none":
             return "display none"
-        if node.get("visibility") in {"hidden", "collapse"}:
+        visibility = _presentation(node, "visibility")
+        if visibility is not None and visibility.lower() in {"hidden", "collapse"}:
             return "visibility hidden"
-        opacity = node.get("opacity")
+        opacity = _presentation(node, "opacity")
         if opacity is not None and parse_number(opacity, "opacity") <= 0:
             return "zero opacity"
     return None
@@ -314,8 +329,13 @@ def paint_visible(element: ElementTree.Element) -> bool:
     stroke = (element.get("stroke") or "").lower()
     fill_opacity = parse_number(element.get("fill-opacity", "1"), "fill-opacity")
     stroke_opacity = parse_number(element.get("stroke-opacity", "1"), "stroke-opacity")
+    stroke_width = parse_number(element.get("stroke-width", "1"), "stroke-width")
     has_fill = fill not in {"", "none", "transparent"} and fill_opacity > 0
-    has_stroke = stroke not in {"", "none", "transparent"} and stroke_opacity > 0
+    has_stroke = (
+        stroke not in {"", "none", "transparent"}
+        and stroke_opacity > 0
+        and stroke_width > 0
+    )
     return has_fill or has_stroke
 
 

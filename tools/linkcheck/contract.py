@@ -20,6 +20,17 @@ CONTRACT = json.loads(
 
 FRONT_FIGURE_RE = re.compile(r"^figure:\s*[\"']?([^\"'\n]+)[\"']?\s*$", re.MULTILINE)
 FRONT_PART_RE = re.compile(r"^part:\s*[\"']?([^\"'\n]+)[\"']?\s*$", re.MULTILINE)
+FRONT_MATTER_RE = re.compile(r"\A---[ \t]*\n(.*?)\n---[ \t]*(?:\n|\Z)", re.DOTALL)
 REQUIREMENT_RE = re.compile(r"\*\*([A-Z]{3}-[0-9]{2})\*\*")
 OWNER_RE = re.compile(r"Owner:\s*\[[^\]]*\]\(([^)]+)\)")
 REQUIREMENT_ID_RE = re.compile(CONTRACT["requirements"]["id_pattern"])
+
+EXTERNAL_PREFIXES = ("http://", "https://", "mailto:")
+
+
+def resolved_destination(base: Path, target: str) -> Path | None:
+    """Resolve a local link destination against a base directory."""
+    path_part = target.partition("#")[0]
+    if not path_part or path_part.startswith(EXTERNAL_PREFIXES):
+        return None
+    return (base / path_part).resolve()

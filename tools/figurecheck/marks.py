@@ -19,7 +19,6 @@ if typ.TYPE_CHECKING:
 class _Drawing(typ.NamedTuple):
     """The primitives a mark group offers, filtered by how they paint."""
 
-    children: list[ElementTree.Element]
     filled: list[ElementTree.Element]
     stroked: list[ElementTree.Element]
     lines: list[ElementTree.Element]
@@ -61,10 +60,12 @@ def _hatch(drawing: _Drawing) -> bool:
 
 
 def _dashed(drawing: _Drawing) -> bool:
-    """Check that a dashed rectangle draws the dashed mark."""
+    """Check that an unfilled dashed rectangle draws the dashed mark."""
     return any(
-        local_name(child) == "rect" and child.get("stroke-dasharray")
-        for child in drawing.children
+        local_name(child) == "rect"
+        and child.get("stroke-dasharray")
+        and (child.get("fill") or "none").lower() == "none"
+        for child in drawing.stroked
     )
 
 
@@ -89,15 +90,15 @@ def mark_is_drawn(group: ElementTree.Element, kind: str, colour: str) -> bool:
     """Check that the mark group contains the primitive its record claims."""
     colour = colour.upper()
     children = list(group)
+    stroked = [
+        child for child in children if (child.get("stroke") or "").upper() == colour
+    ]
     drawing = _Drawing(
-        children=children,
         filled=[
             child for child in children if (child.get("fill") or "").upper() == colour
         ],
-        stroked=[
-            child for child in children if (child.get("stroke") or "").upper() == colour
-        ],
-        lines=[child for child in children if local_name(child) == "line"],
+        stroked=stroked,
+        lines=[child for child in stroked if local_name(child) == "line"],
     )
     check = _MARK_CHECKS.get(kind)
     return check is not None and check(drawing)

@@ -97,7 +97,8 @@ def _check_record_evidence(
             problems.append(
                 f"{identifier}: invalid evidence route {step.get('route')!r}"
             )
-        if not str(step.get("detail", "")).strip():
+        detail = step.get("detail")
+        if not isinstance(detail, str) or not detail.strip():
             problems.append(f"{identifier}: evidence route has no detail")
 
 

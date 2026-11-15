@@ -63,6 +63,13 @@ def _registry_cases() -> list[tuple[str, cabc.Callable[..., None], str]]:
             "CON-01: no applicability predicate",
         ),
         (
+            "null evidence detail",
+            lambda data: data["requirements"][0]["evidence"][0].update({
+                "detail": None
+            }),
+            "CON-01: evidence route has no detail",
+        ),
+        (
             "empty registry",
             lambda data: data.clear(),
             "requirement registry is empty",
@@ -102,6 +109,23 @@ def _renumber_owner(text: str) -> str:
     )
 
 
+def _checked_duplicate(text: str) -> str:
+    """Append a checked task-list item repeating an existing identifier."""
+    return text + (
+        "\n- [x] **CON-01** — A checked duplicate. Owner: "
+        "[Ecosystem map](03-ecosystem-map.md#the-substrate-components).\n"
+    )
+
+
+def _code_only_owner(text: str) -> str:
+    """Move the CON-01 owner link inside an inline code span."""
+    return text.replace(
+        "Owner: [Ecosystem map](03-ecosystem-map.md#the-substrate-components).",
+        "`Owner: [Ecosystem map](03-ecosystem-map.md#the-substrate-components)`.",
+        1,
+    )
+
+
 def _checklist_cases() -> list[tuple[str, cabc.Callable[[str], str], str]]:
     """Return every checklist mutation with the diagnostic it must provoke."""
     return [
@@ -117,6 +141,19 @@ def _checklist_cases() -> list[tuple[str, cabc.Callable[[str], str], str]]:
             "removed checklist entry",
             _remove_doc_04,
             "registry record DOC-04 has no checklist item",
+        ),
+        (
+            "checked checklist item is parsed",
+            _checked_duplicate,
+            "duplicate checklist identifier CON-01",
+        ),
+        (
+            "owner link inside a code span",
+            _code_only_owner,
+            (
+                "CON-01: checklist owner disagrees with registry owner "
+                "'03-ecosystem-map.md#the-substrate-components'"
+            ),
         ),
     ]
 

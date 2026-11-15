@@ -15,6 +15,7 @@ if typ.TYPE_CHECKING:
 
 from markdown_structure import (
     anchors,
+    checklist_items,
     link_targets,
     slug,
     strip_code_and_comments,
@@ -27,6 +28,7 @@ from linkcheck.contract import (
     OWNER_RE,
     REQUIREMENT_ID_RE,
     REQUIREMENT_RE,
+    resolved_destination,
 )
 
 
@@ -78,9 +80,9 @@ def check_requirements(problems: list[str]) -> None:
     """Check checklist identifiers, owners and the anchors they name."""
     spec = CONTRACT["requirements"]
     checklist = BOOK / spec["checklist"]
-    text = strip_fences_and_comments(checklist.read_text(encoding="utf-8"))
+    text = strip_code_and_comments(checklist.read_text(encoding="utf-8"))
     seen: set[str] = set()
-    for block in text.split("- [ ] ")[1:]:
+    for block in checklist_items(text):
         _check_requirement(block, checklist, seen, problems)
 
 
@@ -131,7 +133,7 @@ def check_states(problems: list[str]) -> None:
         ),
     ):
         owner = BOOK / spec[owner_key]
-        text = owner.read_text(encoding="utf-8")
+        text = strip_fences_and_comments(owner.read_text(encoding="utf-8"))
         cells = first_cells(section(text, heading))
         problems.extend(
             f"{owner.name}: {group} state {state!r} is not declared in its state table"
@@ -152,10 +154,11 @@ def check_profiles(problems: list[str]) -> None:
     )
 
 
-def _references_path(path: Path, owner_name: str) -> bool:
-    """Return whether any chapter references a contract path."""
+def _references_path(path: Path, owner: Path) -> bool:
+    """Return whether a chapter links to a contract owner file."""
+    resolved_owner = owner.resolve()
     return any(
-        target.partition("#")[0] == owner_name
+        resolved_destination(path.parent, target) == resolved_owner
         for target in link_targets(path.read_text(encoding="utf-8"))
     )
 
@@ -172,7 +175,7 @@ def check_commands(problems: list[str]) -> None:
         if not path.exists():
             problems.append(f"command view {view} is missing")
             continue
-        if not _references_path(path, owner.name):
+        if not _references_path(path, owner):
             problems.append(f"{view}: does not reference the command record owner")
 
 
@@ -188,5 +191,5 @@ def check_resources(problems: list[str]) -> None:
         if not path.exists():
             problems.append(f"resource consumer {consumer} is missing")
             continue
-        if not _references_path(path, owner.name):
+        if not _references_path(path, owner):
             problems.append(f"{consumer}: does not reference the resource owner")

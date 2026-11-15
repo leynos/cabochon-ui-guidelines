@@ -89,5 +89,68 @@
     "old": "<metadata>",
     "new": "<metadata xmlns=\"urn:removed\">",
     "expected": "missing embedded metadata"
+  },
+  {
+    "label": "path without segments",
+    "filename": "fig-06-state.svg",
+    "old": "d=\"M 308.60 192.60 A 2.9 2.9 0 1 0 308.70 195.20\"",
+    "new": "d=\"M 308.60 192.60 M 308.70 195.20\"",
+    "expected": "draws no segments"
+  },
+  {
+    "label": "hidden styled root",
+    "filename": "fig-06-state.svg",
+    "old": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1200 910\"",
+    "new": "<svg xmlns=\"http://www.w3.org/2000/svg\" style=\"display:none\" viewBox=\"0 0 1200 910\"",
+    "expected": "is not visible"
+  },
+  {
+    "label": "zero stroke width",
+    "filename": "fig-06-state.svg",
+    "old": "stroke=\"#456A62\" stroke-width=\"1.5\"",
+    "new": "stroke=\"#456A62\" stroke-width=\"0\"",
+    "expected": "draws nothing visible"
+  },
+  {
+    "label": "filled dashed mark",
+    "filename": "fig-29-embed.svg",
+    "old": "fill=\"none\" stroke=\"#8A302F\" stroke-width=\"1.2\" rx=\"0\" stroke-dasharray=\"1.6 1.4\"",
+    "new": "fill=\"#8A302F\" stroke=\"#8A302F\" stroke-width=\"1.2\" rx=\"0\" stroke-dasharray=\"1.6 1.4\"",
+    "expected": "does not draw it"
+  },
+  {
+    "label": "wrong-colour crossed line",
+    "filename": "fig-29-embed.svg",
+    "old": "<line x1=\"728\" y1=\"650\" x2=\"732\" y2=\"654\" stroke=\"#8A302F\" stroke-width=\"1.2\"/>",
+    "new": "<line x1=\"728\" y1=\"650\" x2=\"732\" y2=\"654\" stroke=\"#285E50\" stroke-width=\"1.2\"/>",
+    "expected": "does not draw it"
+  },
+  {
+    "label": "shifted viewBox origin",
+    "filename": "fig-prod-chrome.svg",
+    "old": "viewBox=\"0 0 320 140\"",
+    "new": "viewBox=\"10 0 320 140\"",
+    "expected": "viewBox disagrees with the declared canvas"
+  },
+  {
+    "label": "hidden state label",
+    "filename": "fig-06-state.svg",
+    "old": "data-state=\"current\">CURRENT</text>",
+    "new": "data-state=\"current\" opacity=\"0\">CURRENT</text>",
+    "expected": "label is not visible"
+  },
+  {
+    "label": "clipped state mark",
+    "filename": "fig-06-state.svg",
+    "old": "<circle cx=\"86\" cy=\"194\" r=\"3\" fill=\"#285E50\" stroke-width=\"1\"/>",
+    "new": "<circle cx=\"86\" cy=\"194\" r=\"3\" fill=\"#285E50\" stroke-width=\"1\" clip-path=\"url(#c)\"/>",
+    "expected": "uses clipping"
+  },
+  {
+    "label": "mark outside the viewBox",
+    "filename": "fig-06-state.svg",
+    "old": "<g data-mark=\"dot\" data-state-id=\"current\" data-role=\"pine2\">",
+    "new": "<g data-mark=\"dot\" data-state-id=\"current\" data-role=\"pine2\" transform=\"translate(-87.5,0)\">",
+    "expected": "clipped by the viewBox"
   }
 ]

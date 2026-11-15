@@ -10,12 +10,8 @@ from __future__ import annotations
 import typing as typ
 
 if typ.TYPE_CHECKING:
-    from pathlib import Path
-
-import typing as typ
-
-if typ.TYPE_CHECKING:
     import collections.abc as cabc
+    from pathlib import Path
 
 
 def replace(path: Path, old: str, new: str, count: int = -1) -> bool:
@@ -52,6 +48,36 @@ def _state_in_comment(root: Path) -> bool:
     chapter = root / "book" / "08-live-relationships.md"
     return replace(chapter, "| Refreshing |", "| Updating   |", 1) and append(
         chapter, "\n<!-- Refreshing -->\n"
+    )
+
+
+def _part_only_in_fence(root: Path) -> bool:
+    """Move a chapter's part field from front matter into a fenced example."""
+    chapter = root / "book" / "01-purpose.md"
+    return replace(chapter, "part: Orientation\n", "", 1) and append(
+        chapter, "\n```yaml\npart: Orientation\n```\n"
+    )
+
+
+def _image_reference_command_link(root: Path) -> bool:
+    """Replace the command owner link with an image reference to the same file."""
+    chapter = root / "book" / "23-command-palette.md"
+    return replace(
+        chapter,
+        "[Menus](10-menus.md)",
+        "![Menus][menus]\n\n[menus]: 10-menus.md\n",
+        1,
+    )
+
+
+def _fenced_state_heading(root: Path) -> bool:
+    """Insert a fenced level-two heading between a state heading and its table."""
+    chapter = root / "book" / "08-live-relationships.md"
+    return replace(
+        chapter,
+        "## The five states\n\n",
+        "## The five states\n\n```markdown\n## Example\n```\n\n",
+        1,
     )
 
 
@@ -232,5 +258,91 @@ def _mutation_cases() -> list[tuple[str, cabc.Callable[[Path], bool], str | None
                 "\n<!--\n- [ ] **ZZZ-99** — Comment-only item.\n-->\n",
             ),
             None,
+        ),
+        (
+            "angle-bracket destinations",
+            lambda root: append(
+                root / purpose,
+                "\n[angle](<01-purpose.md>) and [ref]\n\n[ref]: <01-purpose.md>\n",
+            ),
+            None,
+        ),
+        (
+            "comment delimiter inside a code span",
+            lambda root: append(
+                root / purpose,
+                "\n[ok](#the-rate-field)\n\nA literal `<!--` in a span.\n\n"
+                "## The `rate` field\n",
+            ),
+            None,
+        ),
+        (
+            "duplicate reference definition",
+            lambda root: append(
+                root / purpose,
+                "\n[dup]: 01-purpose.md\n[dup]: no-such-file.md\n\n[broken][dup]\n",
+            ),
+            None,
+        ),
+        (
+            "image reference is not an ordinary link",
+            _image_reference_command_link,
+            "does not reference the command record owner",
+        ),
+        (
+            "figure field inside a fenced example",
+            lambda root: append(
+                root / purpose, "\n```yaml\nfigure: fig-absent.svg\n```\n"
+            ),
+            None,
+        ),
+        (
+            "part field only in a fenced example",
+            _part_only_in_fence,
+            "missing part in front matter",
+        ),
+        (
+            "navigation destination with a leading ./",
+            lambda root: replace(
+                root / "book" / "README.md",
+                "](01-purpose.md)",
+                "](./01-purpose.md)",
+                1,
+            ),
+            None,
+        ),
+        (
+            "checked checklist item is validated",
+            lambda root: append(
+                root / "book" / "40-checklist.md",
+                "\n- [x] **CON-01** — A checked duplicate. Owner: "
+                "[Ecosystem map](03-ecosystem-map.md#the-substrate-components).\n",
+            ),
+            "duplicate requirement identifier CON-01",
+        ),
+        (
+            "state heading inside a fenced example",
+            _fenced_state_heading,
+            None,
+        ),
+        (
+            "owner link with a leading ./",
+            lambda root: replace(
+                root / "book" / "23-command-palette.md",
+                "](10-menus.md)",
+                "](./10-menus.md)",
+                1,
+            ),
+            None,
+        ),
+        (
+            "owner link inside a code span",
+            lambda root: append(
+                root / "book" / "40-checklist.md",
+                "\n- [ ] **CON-99** — A demonstration. "
+                "`Owner: [Ecosystem map]"
+                "(03-ecosystem-map.md#the-substrate-components)`\n",
+            ),
+            "requirement CON-99 names no owner",
         ),
     ]

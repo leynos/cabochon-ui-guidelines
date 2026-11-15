@@ -176,7 +176,9 @@ diagram editor, not a separate copy.
 A diagram whose committed source has changed but whose drawing has not been
 re-rendered shows **Unrendered changes**. The last drawing remains visible and
 printable, labelled with that state. A diagram whose external source has
-advanced shows **Stale**; a diagram whose provider is unavailable shows
+advanced dispatches a refresh and shows **Refreshing**, as every live
+relationship does; it rests in **Stale** only while no request is in flight, as
+after a cancelled refresh. A diagram whose provider is unavailable shows
 **Broken**.
 
 ## Accessibility

@@ -10,7 +10,7 @@ changed total fails rather than merely moving a string elsewhere in the prose.
 
 The implementation lives in the ``layoutcheck`` package beside this script. Run
 from the repository root with ``python3 -I tools/check-layout.py``. Pass
-``--self-test`` to prove that seven deliberate token, value or table changes fail.
+``--self-test`` to prove that eleven deliberate token, value or table changes fail.
 """
 
 from __future__ import annotations

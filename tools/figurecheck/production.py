@@ -63,7 +63,7 @@ def _check_canvas(
         )
     box = [float(item) for item in NUMBER_RE.findall(root.get("viewBox", ""))]
     if len(box) != 4 or not all(
-        starmap(_agrees, zip(box[2:], [width, height], strict=True))
+        starmap(_agrees, zip(box, [0.0, 0.0, width, height], strict=True))
     ):
         errors.append(f"{name}: viewBox disagrees with the declared canvas")
     return True

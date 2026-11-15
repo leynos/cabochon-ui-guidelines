@@ -15,7 +15,6 @@ from figurecheck.contract import STATE_RECORDS, SVG_NS, GeometryError
 from figurecheck.geometry import (
     clip_used,
     hidden_reason,
-    intersect_area,
     local_name,
     rendered_bbox,
     viewbox,
@@ -24,6 +23,8 @@ from figurecheck.marks import mark_is_drawn
 
 if typ.TYPE_CHECKING:
     from xml.etree import ElementTree
+
+VIEWBOX_TOLERANCE = 0.01
 
 
 class _Figure(typ.NamedTuple):
@@ -72,13 +73,27 @@ def _check_label(
             f"{figure.name}: state {identifier!r} drawn in {fill or 'no fill'}, "
             f"record declares {record['colour']}"
         )
+    reason = hidden_reason(element, figure.parents)
+    if reason is not None:
+        figure.errors.append(
+            f"{figure.name}: state {identifier!r} label is not visible ({reason})"
+        )
+
+
+def _contained(box: tuple[float, ...], view: tuple[float, ...]) -> bool:
+    """Return whether a box lies inside the view box within tolerance."""
+    return all(
+        box[index] >= view[index] - VIEWBOX_TOLERANCE
+        and box[index + 2] <= view[index + 2] + VIEWBOX_TOLERANCE
+        for index in (0, 1)
+    )
 
 
 def _check_mark_geometry(
     figure: _Figure, group: ElementTree.Element, identifier: str
 ) -> None:
     """Check that a state mark is visible and inside the view box."""
-    if clip_used(group, figure.parents):
+    if any(clip_used(element, figure.parents) for element in group.iter()):
         figure.errors.append(
             f"{figure.name}: state {identifier!r} mark uses clipping, which the "
             "constrained subset forbids"
@@ -97,7 +112,7 @@ def _check_mark_geometry(
             f"{figure.name}: state {identifier!r} mark is invalid: {exc}"
         )
         return
-    if intersect_area(box, viewbox(figure.root)) <= 0:
+    if not _contained(box, viewbox(figure.root)):
         figure.errors.append(
             f"{figure.name}: state {identifier!r} mark is clipped by the viewBox"
         )
