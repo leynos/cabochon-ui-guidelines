@@ -71,6 +71,22 @@ def probe_exchanged_planes() -> str | None:
     return None
 
 
+def probe_plane_digit() -> str | None:
+    """Return a failure if an extra digit in a plane size is not detected."""
+    rows = copy.deepcopy(table_with(chapter_text(), "Document plane"))
+    width, height = BUDGETS["configurations"][0]["expected"]
+    rows[0][3] = f"{width}0 × {height}"
+    errors = check_worked_rows(
+        rows,
+        BUDGETS["tokens"],
+        BUDGETS["profiles"],
+        BUDGETS["configurations"],
+    )
+    if not any("document plane" in error for error in errors):
+        return "a plane size with an extra digit was not detected"
+    return None
+
+
 def probe_band_total() -> str | None:
     """Return a failure if a changed band total is not detected."""
     rows = copy.deepcopy(table_with(chapter_text(), "Bands"))
@@ -87,12 +103,13 @@ PROBES = (
     probe_width_floor,
     probe_splitter,
     probe_exchanged_planes,
+    probe_plane_digit,
     probe_band_total,
 )
 
 
 def self_test(baseline_errors: list[str]) -> int:
-    """Prove that six deliberate token, value or table changes are detected."""
+    """Prove that seven deliberate token, value or table changes are detected."""
     failures = ["baseline budgets did not pass"] if baseline_errors else []
     failures.extend(failure for probe in PROBES if (failure := probe()))
 

@@ -28,16 +28,17 @@ def _object_spokes(gx: float, gy: float) -> str:
     body = ""
     for angle, label in [(-60, "N"), (-10, "T"), (40, "D"), (90, "P")]:
         radians = math.radians(angle)
+        cos_a, sin_a = math.cos(radians), math.sin(radians)
         body += line(
             gx,
             gy,
-            gx + 62 * math.cos(radians),
-            gy + 62 * math.sin(radians),
+            gx + 62 * cos_a,
+            gy + 62 * sin_a,
             stroke=LINE,
         )
         body += txt(
-            gx + 68 * math.cos(radians),
-            gy + 68 * math.sin(radians) + 4,
+            gx + 68 * cos_a,
+            gy + 68 * sin_a + 4,
             label,
             size=9,
             fill=OXIDE,

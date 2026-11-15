@@ -9,6 +9,7 @@ from layoutcheck.contract import (
     addends,
     chapter_text,
     number,
+    plane_size,
     stated_total,
     table_with,
 )
@@ -103,7 +104,7 @@ def _check_worked_plane(
     errors: list[str] = []
     name = str(configuration["name"])
     width, height = derived
-    if not plane.startswith(f"{width} × {height}"):
+    if plane_size(plane) != (width, height):
         errors.append(
             f"worked table row {name!r}: document plane {plane!r} is not "
             f"the derived {width} × {height}"

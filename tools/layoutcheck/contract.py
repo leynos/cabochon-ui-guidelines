@@ -12,6 +12,7 @@ BUDGETS = json.loads(
 )
 CHAPTER = ROOT / "book" / "14-spacing-metrics.md"
 BAND_PROFILES = ("document", "document_strip", "studio", "studio_strip")
+PLANE_RE = re.compile(r"^(\d+)\s*×\s*(\d+)(?!\d)")
 
 
 def chapter_text() -> str:
@@ -60,6 +61,14 @@ def addends(cell: str) -> list[int]:
 def stated_total(cell: str) -> int:
     """Return the total that a worked arithmetic cell states."""
     return int(cell.split("=")[-1])
+
+
+def plane_size(cell: str) -> tuple[int, int] | None:
+    """Return the complete width and height that a plane cell states."""
+    match = PLANE_RE.match(cell)
+    if match is None:
+        return None
+    return int(match.group(1)), int(match.group(2))
 
 
 def number(tokens: dict[str, int], value: object) -> int:
