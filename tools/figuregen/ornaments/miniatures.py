@@ -1,4 +1,11 @@
-"""Draw miniature note, table, page and canvas previews."""
+"""Draw miniature note, table, page and canvas previews.
+
+Each function draws one document type at thumbnail size, so several kinds of
+document can be compared side by side in a single tile. The
+`figuregen.ornaments` package re-exports all four for
+`figuregen.figures.document_centre`, which previews each document in the
+centre list.
+"""
 
 from __future__ import annotations
 

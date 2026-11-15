@@ -1,4 +1,11 @@
-"""Draw the state marks and group them with their identity."""
+"""Draw the state marks and group them with their identity.
+
+Each declared state maps to one mark — a dot, arc, triangle, broken ring,
+lock, hatch, dashed line or cross — so a state still reads in greyscale.
+`mark_group` wraps a mark and its label in a group that the figure checker
+can attribute to a state. The `figuregen.ornaments` package re-exports both
+for `figuregen.ornaments.chips` and for the figures that draw a state legend.
+"""
 
 from __future__ import annotations
 

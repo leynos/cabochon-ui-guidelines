@@ -1,4 +1,11 @@
-"""Draw the page furniture: kickers, title blocks and frames."""
+"""Draw the page furniture: kickers, title blocks and frames.
+
+`kicker` sets a small section label, `title_block` pairs an italic display
+title with its explanatory paragraph, and `frame` outlines a group of
+related tiles. The `figuregen.ornaments` package re-exports all three for the
+`figuregen.figures.*` builders, which open every page with a kicker and a
+title block.
+"""
 
 from __future__ import annotations
 

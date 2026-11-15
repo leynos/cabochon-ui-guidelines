@@ -1,4 +1,12 @@
-"""Draw labelled and live-state chips."""
+"""Draw labelled and live-state chips.
+
+`chip` draws a rectangular label in a declared colour and returns its width.
+`state_chip` pairs a declared live or resolution state's label with that
+state's non-colour mark, so no state depends on colour alone. The
+`figuregen.ornaments` package re-exports both for the figures that name a
+document state and for `figuregen.widgets.chrome`, which shows the state of a
+window.
+"""
 
 from __future__ import annotations
 
