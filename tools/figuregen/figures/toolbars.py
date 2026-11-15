@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from figuregen.canvas import ellipse, line, para, path, rect, svg_doc, txt
+from figuregen.canvas import line, para, rect, svg_doc, txt
+from figuregen.glyphs import tool_glyph
 from figuregen.ornaments import state_chip, title_block
 from figuregen.palette import (
     F_DISPLAY,
@@ -38,30 +39,8 @@ def fig_toolbars() -> str:
         bx = x + 12 + index * 38
         active = index == 1
         body += rect(bx, y + 31, 30, 30, fill=PINE2 if active else HIGH, stroke=LINE)
-        cx, cy = bx + 15, y + 46
         colour = WHITE if active else INK
-        if glyph == "select":
-            body += path(
-                f"M {cx - 5} {cy - 7} L {cx + 3} {cy + 4} L {cx - 1} {cy + 4} L {cx + 1} {cy + 10} L {cx - 3} {cy + 11} L {cx - 5} {cy + 5} L {cx - 8} {cy + 8} Z",
-                stroke=colour,
-                sw=1.4,
-            )
-        elif glyph == "pen":
-            body += path(
-                f"M {cx - 6} {cy + 7} L {cx - 4} {cy} L {cx + 5} {cy - 9} L {cx + 9} {cy - 5} L {cx} {cy + 4} Z",
-                stroke=colour,
-                sw=1.4,
-            )
-        elif glyph == "line":
-            body += line(cx - 7, cy + 7, cx + 7, cy - 7, stroke=colour, sw=2)
-        elif glyph == "rect":
-            body += rect(cx - 7, cy - 5, 14, 10, fill="none", stroke=colour, sw=1.4)
-        elif glyph == "ellipse":
-            body += ellipse(cx, cy, 8, 6, fill="none", stroke=colour, sw=1.4)
-        else:
-            body += txt(
-                cx, cy + 5, "T", size=14, fill=colour, weight="bold", anchor="middle"
-            )
+        body += tool_glyph(glyph, bx + 15, y + 46, colour)
     body += line(x + 240, y + 37, x + 240, y + 57, stroke=LINE)
     body += txt(x + 248, y + 50, "Stroke  1 px", size=11, fill=SOFT)
     body += txt(x + 400, y + 50, "Grid  16 px", size=11, fill=SOFT)

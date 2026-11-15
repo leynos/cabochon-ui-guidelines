@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import shutil
 import sys
 import tempfile
@@ -9,7 +10,9 @@ import typing as typ
 from pathlib import Path
 
 from figurecheck.checks import run
-from figurecheck.contract import FIGURES
+from figurecheck.contract import FIGURES, ROOT
+
+MUTATION_FILE = ROOT / "tools" / "figure-mutations.json"
 
 
 class _Mutation(typ.NamedTuple):
@@ -22,99 +25,38 @@ class _Mutation(typ.NamedTuple):
     expected: str
 
 
-MUTATIONS = (
-    _Mutation(
-        "state mark removed",
-        "fig-06-state.svg",
-        '<circle cx="86" cy="194" r="3" fill="#285E50" stroke-width="1"/>',
-        "",
-        "does not draw it",
-    ),
-    _Mutation(
-        "state colour changed",
-        "fig-06-state.svg",
-        'fill="#285E50" font-family="&#x27;DejaVu Sans Mono&#x27;,',
-        'fill="#8A302F" font-family="&#x27;DejaVu Sans Mono&#x27;,',
-        "drawn in",
-    ),
-    _Mutation(
-        "mark declaration removed",
-        "fig-06-state.svg",
-        '<g data-mark="dot" data-state-id="current" data-role="pine2">',
-        '<g data-state-id="current" data-role="pine2">',
-        "has no declared mark",
-    ),
-    _Mutation(
-        "zero radius dot",
-        "fig-06-state.svg",
-        '<circle cx="86" cy="194" r="3"',
-        '<circle cx="86" cy="194" r="0"',
-        "zero radius",
-    ),
-    _Mutation(
-        "invisible dot",
-        "fig-06-state.svg",
-        '<circle cx="86" cy="194" r="3"',
-        '<circle cx="86" cy="194" r="3" opacity="0"',
-        "zero opacity",
-    ),
-    _Mutation(
-        "contradictory label",
-        "fig-06-state.svg",
-        'data-state="denied">DENIED</text>',
-        'data-state="denied">CURRENT</text>',
-        "label 'CURRENT' disagrees",
-    ),
-    _Mutation(
-        "annotation removed",
-        "fig-06-state.svg",
-        'data-state="current">CURRENT</text>',
-        'data-state="current-removed">CURRENT</text>',
-        "unknown state identity",
-    ),
-    _Mutation(
-        "state removed from inventory",
-        "fig-06-state.svg",
-        'data-state="current">CURRENT</text>',
-        'data-state-removed="current">CURRENT</text>',
-        "state inventory expects 1 of 'current', found 0",
-    ),
-    _Mutation(
-        "transformed production geometry",
-        "fig-prod-chrome.svg",
-        '<g data-component="title_bar" data-height="31">',
-        '<g data-component="title_bar" data-height="31" transform="scale(1,2)">',
-        "rendered height",
-    ),
-    _Mutation(
-        "production scale metadata",
-        "fig-prod-chrome.svg",
-        'data-figure-scale="1.0"',
-        'data-figure-scale="2.0"',
-        "declares scale",
-    ),
-    _Mutation(
-        "hidden production component",
-        "fig-prod-chrome.svg",
-        '<g data-component="menu_bar" data-height="29">',
-        '<g data-component="menu_bar" data-height="29" display="none">',
-        "is not visible",
-    ),
-    _Mutation(
-        "figure class changed",
-        "fig-06-state.svg",
-        'data-figure-class="schematic"',
-        'data-figure-class="production"',
-        "disagrees with data",
-    ),
-    _Mutation(
-        "metadata removed",
-        "fig-06-state.svg",
-        "<metadata>",
-        '<metadata xmlns="urn:removed">',
-        "missing embedded metadata",
-    ),
-)
+def _as_text(entry: dict[str, object], field: str, *, allow_empty: bool = False) -> str:
+    """Return a text field from one declared mutation."""
+    value = entry.get(field)
+    if not isinstance(value, str):
+        raise SystemExit(f"figure contract: mutation field {field!r} is missing")
+    if not allow_empty and not value:
+        raise SystemExit(f"figure contract: mutation field {field!r} is empty")
+    return value
+
+
+def load_mutations(path: Path) -> tuple[_Mutation, ...]:
+    """Load the declared mutations that the self-test applies."""
+    declared = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(declared, list) or not declared:
+        raise SystemExit("figure contract: the mutation file declares no mutations")
+    mutations: list[_Mutation] = []
+    for entry in declared:
+        if not isinstance(entry, dict):
+            raise SystemExit(f"figure contract: malformed mutation {entry!r}")
+        mutations.append(
+            _Mutation(
+                _as_text(entry, "label"),
+                _as_text(entry, "filename"),
+                _as_text(entry, "old"),
+                _as_text(entry, "new", allow_empty=True),
+                _as_text(entry, "expected"),
+            )
+        )
+    return tuple(mutations)
+
+
+MUTATIONS = load_mutations(MUTATION_FILE)
 
 
 def _detect(work: Path, mutation: _Mutation) -> str | None:

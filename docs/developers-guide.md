@@ -121,6 +121,7 @@ hand-copied expectations:
 | :----------------------------- | :------------------------------------------------------------------------------------ |
 | `tools/book-contract.json`     | Chapter navigation, part mapping, requirement and owner patterns, states and profiles |
 | `tools/figure-data.json`       | Palette roles, state marks, live-state projection, transitions, and figure metadata   |
+| `tools/figure-mutations.json`  | The deliberate figure defects that the checker's self-test must detect                |
 | `tools/keyboard-fixtures.json` | The ordered Escape scenarios                                                          |
 | `tools/layout-budgets.json`    | Layout tokens, profiles and worked configurations                                     |
 | `tools/requirements.json`      | The structured requirement registry                                                   |

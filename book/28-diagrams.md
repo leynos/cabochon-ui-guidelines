@@ -34,11 +34,13 @@ fact.
 
 - Rendering is automatic after a short pause in typing, and on demand from the
   **Render** command.
-- A successful render of committed source replaces the drawing, records the
-  source revision it rendered and clears any diagnostics. A render of an
-  uncommitted draft is a preview: it may replace the visible drawing while the
-  draft is being edited, but the drawing and its hit map stay bound to the last
-  committed revision, and only a render of committed source replaces them.
+- A successful render of committed source replaces the drawing, its hit map and
+  its accessible nodes together, records the source revision it rendered and
+  clears any diagnostics. A render of an uncommitted draft is a preview and
+  never replaces them: the preview is drawn as a separate, non-interactive
+  surface over the committed drawing, carries no hit regions and no accessible
+  nodes, and is labelled **Draft preview**. Only a render of committed source
+  replaces the drawing.
 - A failed render keeps the last successful drawing, dims it slightly and
   shows the diagnostic beside the source line that caused it.
 - The status line reports the render state: **Rendered 14:02**, **Rendering**,
@@ -159,8 +161,10 @@ Deleting an element produces a recoverable broken reference, not a silent
 attachment to the next element.
 
 The rendered drawing, its element mapping, its hit regions and its accessible
-nodes all refer to the same committed source revision. A render from an older
-revision cannot replace a newer one.
+nodes all refer to the same committed source revision, so the hit map always
+describes the objects that were drawn. A render from an older revision cannot
+replace a newer one, and a draft preview stands outside that set because it
+carries no hit regions and no accessible nodes.
 
 ## Embedded diagrams
 

@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from figuregen.canvas import circle, line, para, path, rect, svg_doc, txt
+from figuregen.canvas import circle, line, para, rect, svg_doc, txt
+from figuregen.glyphs import tool_glyph
 from figuregen.ornaments import state_chip, title_block
 from figuregen.palette import (
     F_DISPLAY,
@@ -19,52 +20,6 @@ from figuregen.palette import (
 from figuregen.widgets import checkbox, inspector_row, pane_head, window_shell
 
 
-def _glyph_select(cx: float, cy: float, colour: str) -> str:
-    """Draw the selection tool glyph."""
-    return path(
-        f"M {cx - 5} {cy - 7} L {cx + 3} {cy + 4} L {cx - 1} {cy + 4} L {cx + 1} {cy + 10} L {cx - 3} {cy + 11} L {cx - 5} {cy + 5} L {cx - 8} {cy + 8} Z",
-        stroke=colour,
-        sw=1.4,
-    )
-
-
-def _glyph_text(cx: float, cy: float, colour: str) -> str:
-    """Draw the text tool glyph."""
-    return txt(cx, cy + 5, "T", size=13, fill=colour, weight="bold", anchor="middle")
-
-
-def _glyph_rect(cx: float, cy: float, colour: str) -> str:
-    """Draw the rectangle tool glyph."""
-    return rect(cx - 7, cy - 5, 14, 10, fill="none", stroke=colour, sw=1.4)
-
-
-def _glyph_pen(cx: float, cy: float, colour: str) -> str:
-    """Draw the pen tool glyph."""
-    return path(
-        f"M {cx - 6} {cy + 7} L {cx - 4} {cy} L {cx + 5} {cy - 9} L {cx + 9} {cy - 5} L {cx} {cy + 4} Z",
-        stroke=colour,
-        sw=1.4,
-    )
-
-
-def _glyph_link(cx: float, cy: float, colour: str) -> str:
-    """Draw the link tool glyph."""
-    return path(
-        f"M {cx - 6} {cy + 4} L {cx - 8} {cy + 6} M {cx + 6} {cy - 4} L {cx + 8} {cy - 6} M {cx - 7} {cy + 2} L {cx + 7} {cy - 2}",
-        stroke=colour,
-        sw=1.4,
-    )
-
-
-_GLYPHS = {
-    "select": _glyph_select,
-    "text": _glyph_text,
-    "rect": _glyph_rect,
-    "pen": _glyph_pen,
-    "link": _glyph_link,
-}
-
-
 def _tool_strip(x: float, y: float, w: float) -> str:
     """Draw the tool strip."""
     body = rect(x, y + 60, w, 30, fill=PAPER, stroke=None)
@@ -74,7 +29,7 @@ def _tool_strip(x: float, y: float, w: float) -> str:
         active = index == 1
         body += rect(bx, y + 60, 30, 30, fill=PINE2 if active else HIGH, stroke=LINE)
         colour = WHITE if active else INK
-        body += _GLYPHS[glyph](bx + 15, y + 75, colour)
+        body += tool_glyph(glyph, bx + 15, y + 75, colour, text_size=13)
     return body
 
 
