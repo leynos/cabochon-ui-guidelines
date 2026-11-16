@@ -188,6 +188,20 @@ def test_from_document_rejects_an_unknown_figure_class() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "declared", [[], {}, 7, None], ids=["array", "object", "number", "null"]
+)
+def test_from_document_rejects_a_non_text_figure_class(declared: object) -> None:
+    """A class that is not text is reported rather than crashing the loader."""
+    document = _valid_document()
+    document["figures"] = {"fig-one": {**_SPEC, "class": declared}}
+    with pytest.raises(ContractError) as error:
+        Catalogue.from_document(document)
+    assert "figures.fig-one.class is not a string" in str(error.value), (
+        "the error message must report the class's type, not a TypeError"
+    )
+
+
 def test_from_document_accepts_a_null_scale() -> None:
     """A specification may declare no scale, which the builders then default."""
     document = _valid_document()

@@ -281,8 +281,9 @@ def _spec_table(value: object) -> dict[str, dict[str, object]]:
     ------
     ContractError
         If the section is not an object, if a specification is not an object,
-        if a specification omits a field `annotate` reads, or if it declares a
-        class other than ``schematic``, ``editorial`` or ``production``.
+        if a specification omits a field `annotate` reads, if its class is not
+        a string, or if it declares a class other than ``schematic``,
+        ``editorial`` or ``production``.
     """
     table = _require_mapping(value, name="figures")
     specs: dict[str, dict[str, object]] = {}
@@ -291,10 +292,15 @@ def _spec_table(value: object) -> dict[str, dict[str, object]]:
         missing = [field for field in _SPEC_FIELDS if field not in spec]
         if missing:
             raise ContractError(f"figure contract figures.{figure_name} lacks {missing}")
-        if spec["class"] not in _SPEC_CLASSES:
+        figure_class = spec["class"]
+        if not isinstance(figure_class, str):
+            raise ContractError(
+                f"figure contract figures.{figure_name}.class is not a string"
+            )
+        if figure_class not in _SPEC_CLASSES:
             raise ContractError(
                 f"figure contract figures.{figure_name}.class "
-                f"is not a known class: {spec['class']!r}"
+                f"is not a known class: {figure_class!r}"
             )
         specs[str(figure_name)] = spec
     return specs
