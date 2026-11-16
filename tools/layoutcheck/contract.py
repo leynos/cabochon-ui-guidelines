@@ -1,24 +1,140 @@
 """Paths, declared data and Markdown table helpers for the layout contract.
 
-The module loads `tools/layout-budgets.json` and locates
-`book/14-spacing-metrics.md`, then provides the table and arithmetic helpers
-that the budget and chapter checks share. Every sibling layout module imports
-it.
+The module locates `tools/layout-budgets.json` and `book/14-spacing-metrics.md`,
+and provides the `Budgets` record plus the table and arithmetic helpers that
+the budget and chapter checks share. It performs no file I/O at import:
+`load_document` reads the JSON document, `load_budgets` validates its three
+sections, and the command-line entry point loads them once.
 """
 
 from __future__ import annotations
 
 import json
 import re
+import typing as typ
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-BUDGETS = json.loads(
-    (ROOT / "tools" / "layout-budgets.json").read_text(encoding="utf-8")
-)
+DATA_PATH = ROOT / "tools" / "layout-budgets.json"
 CHAPTER = ROOT / "book" / "14-spacing-metrics.md"
 BAND_PROFILES = ("document", "document_strip", "studio", "studio_strip")
 PLANE_RE = re.compile(r"^(\d+)\s*×\s*(\d+)(?![\d.])")
+
+
+class ContractError(Exception):
+    """The layout budgets document cannot be read, decoded or parsed.
+
+    The error also reports a document that does not declare the three sections
+    the checks read. The loader raises it rather than stopping the interpreter,
+    so the command-line entry point can report the defect and choose its own
+    exit status.
+    """
+
+
+class Budgets(typ.NamedTuple):
+    """The validated layout budgets.
+
+    A `Budgets` is built once by `load_budgets` at the command-line entry point
+    and passed to the budget, chapter and self-test checks, so the file read is
+    explicit rather than an import-time side effect.
+    """
+
+    tokens: dict[str, int]
+    profiles: dict[str, list[str]]
+    configurations: list[dict[str, object]]
+
+
+def load_document(path: Path) -> dict[str, object]:
+    """Load the layout budgets document as a decoded JSON object.
+
+    Parameters
+    ----------
+    path
+        The document to read.
+
+    Returns
+    -------
+    dict[str, object]
+        The decoded JSON object.
+
+    Raises
+    ------
+    ContractError
+        If the file cannot be read as UTF-8 text, does not decode to JSON or
+        does not declare a JSON object.
+    """
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise ContractError(f"cannot read {path}: {exc}") from exc
+    except UnicodeDecodeError as exc:
+        raise ContractError(f"cannot decode {path} as UTF-8: {exc}") from exc
+    try:
+        document = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise ContractError(f"cannot parse {path} as JSON: {exc}") from exc
+    if not isinstance(document, dict):
+        raise ContractError(f"{path} does not declare a JSON object")
+    return document
+
+
+def _mapping(document: dict[str, object], field: str) -> dict[str, object]:
+    """Return a declared JSON object field, or report its absence."""
+    value = document.get(field)
+    if not isinstance(value, dict):
+        raise ContractError(f"layout budgets do not declare {field}")
+    return value
+
+
+def _sequence(document: dict[str, object], field: str) -> list[object]:
+    """Return a declared JSON array field, or report its absence."""
+    value = document.get(field)
+    if not isinstance(value, list):
+        raise ContractError(f"layout budgets do not declare {field}")
+    return value
+
+
+def load_budgets(path: Path) -> Budgets:
+    """Load and validate the layout budgets at ``path``.
+
+    Parameters
+    ----------
+    path
+        The budgets document to load.
+
+    Returns
+    -------
+    Budgets
+        The token table, band profiles and worked configurations.
+
+    Raises
+    ------
+    ContractError
+        If the document cannot be read, does not declare the three sections,
+        or declares a token table whose values are not integers.
+    """
+    document = load_document(path)
+    tokens = _mapping(document, "tokens")
+    if not all(isinstance(value, int) for value in tokens.values()):
+        raise ContractError("layout budgets declare a non-integer token")
+    profiles = _mapping(document, "profiles")
+    for name, bands in profiles.items():
+        if not isinstance(bands, list) or not all(
+            isinstance(band, str) for band in bands
+        ):
+            raise ContractError(
+                f"layout budget profile {name!r} is not a list of names"
+            )
+    configurations: list[dict[str, object]] = []
+    for index, value in enumerate(_sequence(document, "configurations")):
+        if not isinstance(value, dict):
+            raise ContractError(f"configurations[{index}] is not a JSON object")
+        configurations.append(value)
+    return Budgets(
+        tokens=typ.cast("dict[str, int]", tokens),
+        profiles=typ.cast("dict[str, list[str]]", profiles),
+        configurations=configurations,
+    )
 
 
 class MalformedCellError(ValueError):

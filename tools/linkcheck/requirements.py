@@ -24,10 +24,9 @@ from markdown_structure import (
 
 from linkcheck.contract import (
     BOOK,
-    CONTRACT,
     OWNER_RE,
-    REQUIREMENT_ID_RE,
     REQUIREMENT_RE,
+    Contract,
     resolved_destination,
 )
 
@@ -45,45 +44,54 @@ def _check_owner(
         problems.append(f"requirement {identifier}: missing owner anchor {owner}")
 
 
-def _requirement_identifier(
-    block: str, seen: set[str], problems: list[str]
-) -> str | None:
+class _Context(typ.NamedTuple):
+    """The shared inputs for one checklist item's checks."""
+
+    checklist: Path
+    contract: Contract
+    seen: set[str]
+    problems: list[str]
+
+
+def _requirement_identifier(block: str, context: _Context) -> str | None:
     """Return the item's requirement identifier after checking its form."""
     ids = REQUIREMENT_RE.findall(block)
     if not ids:
-        problems.append("checklist item has no requirement identifier")
+        context.problems.append("checklist item has no requirement identifier")
         return None
     identifier = ids[0]
-    if not REQUIREMENT_ID_RE.fullmatch(identifier):
-        problems.append(f"requirement {identifier} does not match the pattern")
-    if identifier in seen:
-        problems.append(f"duplicate requirement identifier {identifier}")
-    seen.add(identifier)
+    if not context.contract.requirement_ids.fullmatch(identifier):
+        context.problems.append(f"requirement {identifier} does not match the pattern")
+    if identifier in context.seen:
+        context.problems.append(f"duplicate requirement identifier {identifier}")
+    context.seen.add(identifier)
     return identifier
 
 
-def _check_requirement(
-    block: str, checklist: Path, seen: set[str], problems: list[str]
-) -> None:
+def _check_requirement(block: str, context: _Context) -> None:
     """Check one checklist item's identifier and every owner it names."""
-    identifier = _requirement_identifier(block, seen, problems)
+    identifier = _requirement_identifier(block, context)
     if identifier is None:
         return
     owners = OWNER_RE.findall(block)
     if not owners:
-        problems.append(f"requirement {identifier} names no owner")
+        context.problems.append(f"requirement {identifier} names no owner")
     for owner in owners:
-        _check_owner(identifier, owner, checklist, problems)
+        _check_owner(identifier, owner, context.checklist, context.problems)
 
 
-def check_requirements(problems: list[str]) -> None:
+def check_requirements(contract: Contract, problems: list[str]) -> None:
     """Check checklist identifiers, owners and the anchors they name."""
-    spec = CONTRACT["requirements"]
-    checklist = BOOK / spec["checklist"]
+    checklist = BOOK / contract.requirements["checklist"]
     text = strip_code_and_comments(checklist.read_text(encoding="utf-8"))
-    seen: set[str] = set()
+    context = _Context(
+        checklist=checklist,
+        contract=contract,
+        seen=set(),
+        problems=problems,
+    )
     for block in checklist_items(text):
-        _check_requirement(block, checklist, seen, problems)
+        _check_requirement(block, context)
 
 
 def _data_cell(parts: list[str]) -> str | None:
@@ -121,9 +129,9 @@ def section(text: str, heading: str) -> str:
     return "\n".join(kept)
 
 
-def check_states(problems: list[str]) -> None:
+def check_states(contract: Contract, problems: list[str]) -> None:
     """Check that every declared live and resolution state leads a state table."""
-    spec = CONTRACT["states"]
+    spec = contract.states
     for group, owner_key, heading in (
         ("live", "live_owner", "the-five-states"),
         (
@@ -142,9 +150,9 @@ def check_states(problems: list[str]) -> None:
         )
 
 
-def check_profiles(problems: list[str]) -> None:
+def check_profiles(contract: Contract, problems: list[str]) -> None:
     """Check that each conformance profile is declared in its owning file."""
-    spec = CONTRACT["profiles"]
+    spec = contract.profiles
     owner = BOOK / spec["owner"]
     text = strip_code_and_comments(owner.read_text(encoding="utf-8"))
     problems.extend(
@@ -163,9 +171,9 @@ def _references_path(path: Path, owner: Path) -> bool:
     )
 
 
-def check_commands(problems: list[str]) -> None:
+def check_commands(contract: Contract, problems: list[str]) -> None:
     """Check that every command view references the command record owner."""
-    spec = CONTRACT["commands"]
+    spec = contract.commands
     owner = BOOK / spec["record_owner"]
     if not owner.exists():
         problems.append(f"command record owner {owner.name} is missing")
@@ -179,9 +187,9 @@ def check_commands(problems: list[str]) -> None:
             problems.append(f"{view}: does not reference the command record owner")
 
 
-def check_resources(problems: list[str]) -> None:
+def check_resources(contract: Contract, problems: list[str]) -> None:
     """Check that every resource consumer references the resource owner."""
-    spec = CONTRACT["resources"]
+    spec = contract.resources
     owner = BOOK / spec["owner"]
     if not owner.exists():
         problems.append(f"resource owner {owner.name} is missing")

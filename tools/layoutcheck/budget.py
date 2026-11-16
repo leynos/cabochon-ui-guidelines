@@ -8,7 +8,7 @@ these functions; tokens come from `tools/layout-budgets.json`.
 
 from __future__ import annotations
 
-from layoutcheck.contract import BUDGETS, number
+from layoutcheck.contract import number
 
 
 def bands(tokens: dict[str, int], profiles: dict[str, list[str]], name: str) -> int:
@@ -134,21 +134,19 @@ def expected_plane(
 
 def validate(
     configuration: dict[str, object],
-    tokens: dict[str, int] | None = None,
-    profiles: dict[str, list[str]] | None = None,
+    tokens: dict[str, int],
+    profiles: dict[str, list[str]],
 ) -> list[str]:
-    """Validate one configuration against the declared tokens.
+    """Validate one configuration against the supplied tokens.
 
     Parameters
     ----------
     configuration : dict[str, object]
         The configuration whose derived values are checked.
-    tokens : dict[str, int] | None
-        The token table to check against; the declared table is used when
-        this is ``None``.
-    profiles : dict[str, list[str]] | None
-        The band profiles to check against; the declared profiles are used
-        when this is ``None``.
+    tokens : dict[str, int]
+        The token table to check against.
+    profiles : dict[str, list[str]]
+        The band profiles to check against.
 
     Returns
     -------
@@ -157,8 +155,6 @@ def validate(
         validates.
     """
     errors: list[str] = []
-    tokens = BUDGETS["tokens"] if tokens is None else tokens
-    profiles = BUDGETS["profiles"] if profiles is None else profiles
     band_total, width, height = derive(tokens, profiles, configuration)
     expected_width, expected_height = expected_plane(tokens, configuration)
     if (width, height) != (expected_width, expected_height):

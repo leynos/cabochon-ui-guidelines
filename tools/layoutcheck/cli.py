@@ -11,12 +11,22 @@ import sys
 
 from layoutcheck.budget import validate
 from layoutcheck.chapter import check_chapter
-from layoutcheck.contract import BUDGETS
+from layoutcheck.contract import (
+    DATA_PATH,
+    Budgets,
+    ContractError,
+    load_budgets,
+)
 from layoutcheck.selftest import self_test
 
 
-def run() -> list[str]:
+def run(budgets: Budgets) -> list[str]:
     """Validate every declared configuration and the chapter's worked values.
+
+    Parameters
+    ----------
+    budgets : Budgets
+        The declared tokens, profiles and configurations.
 
     Returns
     -------
@@ -24,9 +34,9 @@ def run() -> list[str]:
         One diagnostic per configuration or chapter value that fails.
     """
     errors: list[str] = []
-    for configuration in BUDGETS["configurations"]:
-        errors.extend(validate(configuration))
-    errors.extend(check_chapter())
+    for configuration in budgets.configurations:
+        errors.extend(validate(configuration, budgets.tokens, budgets.profiles))
+    errors.extend(check_chapter(budgets))
     return errors
 
 
@@ -38,15 +48,20 @@ def main() -> int:
     int
         The process exit status: zero on success, one on failure.
     """
-    errors = run()
+    try:
+        budgets = load_budgets(DATA_PATH)
+        errors = run(budgets)
+    except ContractError as error:
+        print(f"layout contract: {error}", file=sys.stderr)
+        return 1
     if "--self-test" in sys.argv:
-        return self_test(errors)
+        return self_test(errors, budgets)
     if errors:
         for error in errors:
             print(f"layout budget: {error}", file=sys.stderr)
         return 1
     print(
-        f"layout budget: {len(BUDGETS['configurations'])} configurations "
+        f"layout budget: {len(budgets.configurations)} configurations "
         "derive from the declared tokens"
     )
     return 0

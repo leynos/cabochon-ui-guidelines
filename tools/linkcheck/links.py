@@ -18,12 +18,12 @@ from markdown_structure import anchors
 
 from linkcheck.contract import (
     BOOK,
-    CONTRACT,
     FIGURES,
     FRONT_FIGURE_RE,
     FRONT_MATTER_RE,
     FRONT_PART_RE,
     ROOT,
+    Contract,
     resolved_destination,
 )
 
@@ -78,11 +78,13 @@ def check_front_figure(chapters: list[Path], problems: list[str]) -> None:
             )
 
 
-def check_manifest(chapters: list[Path], problems: list[str]) -> None:
+def check_manifest(
+    chapters: list[Path], contract: Contract, problems: list[str]
+) -> None:
     """Check that the manifest, the chapters and their parts agree."""
-    entries = CONTRACT["chapters"]
+    entries = contract.chapters
     declared = {entry["file"] for entry in entries}
-    navigation_name = CONTRACT["navigation"]
+    navigation_name = contract.navigation
     present = {path.name for path in chapters if path.name != navigation_name}
     problems.extend(
         f"manifest names missing chapter {name}" for name in sorted(declared - present)
@@ -92,7 +94,7 @@ def check_manifest(chapters: list[Path], problems: list[str]) -> None:
         for name in sorted(present - declared)
     )
 
-    navigation = BOOK / CONTRACT["navigation"]
+    navigation = BOOK / contract.navigation
     nav_text = navigation.read_text(encoding="utf-8")
     nav_paths = {
         resolved

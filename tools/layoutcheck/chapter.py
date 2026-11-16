@@ -12,7 +12,7 @@ import re
 from layoutcheck.budget import bands, derive
 from layoutcheck.contract import (
     BAND_PROFILES,
-    BUDGETS,
+    Budgets,
     MalformedCellError,
     addends,
     chapter_text,
@@ -359,11 +359,13 @@ def check_worked_rows(
     return errors
 
 
-def check_chapter(text: str | None = None) -> list[str]:
+def check_chapter(budgets: Budgets, text: str | None = None) -> list[str]:
     """Check that chapter 14's tables state the derived worked values.
 
     Parameters
     ----------
+    budgets : Budgets
+        The declared tokens, profiles and configurations to check against.
     text : str | None
         The chapter source to check; the committed chapter is read when
         this is ``None``.
@@ -375,15 +377,15 @@ def check_chapter(text: str | None = None) -> list[str]:
         budgets.
     """
     source = chapter_text() if text is None else text
-    tokens = BUDGETS["tokens"]
-    profiles = BUDGETS["profiles"]
+    tokens = budgets.tokens
+    profiles = budgets.profiles
     errors = check_band_rows(table_with(source, "Bands"), tokens, profiles)
     errors.extend(
         check_worked_rows(
             table_with(source, "Document plane"),
             tokens,
             profiles,
-            BUDGETS["configurations"],
+            budgets.configurations,
         )
     )
     return errors

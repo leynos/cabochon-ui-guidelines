@@ -14,9 +14,16 @@ from pathlib import Path
 
 import pytest
 from figurecheck import contract as figurecheck_contract
+from layoutcheck import contract as layoutcheck_contract
+from linkcheck import contract as linkcheck_contract
 from statecheck import contract as statecheck_contract
 
-CONTRACT_MODULES = (statecheck_contract, figurecheck_contract)
+CONTRACT_MODULES = (
+    statecheck_contract,
+    figurecheck_contract,
+    linkcheck_contract,
+    layoutcheck_contract,
+)
 TOOLS = Path(__file__).resolve().parent.parent / "tools"
 
 _AUDIT_SCRIPT = """
@@ -42,6 +49,17 @@ import figurecheck.contract
 import figurecheck.selftest
 import figuregen.cli
 import figuregen.figdata
+import layoutcheck.budget
+import layoutcheck.chapter
+import layoutcheck.cli
+import layoutcheck.contract
+import layoutcheck.selftest
+import linkcheck.checks
+import linkcheck.cli
+import linkcheck.contract
+import linkcheck.links
+import linkcheck.requirements
+import linkcheck.selftest
 import statecheck.cli
 import statecheck.contract
 import statecheck.selftest
@@ -49,7 +67,10 @@ print("clean")
 """
 
 
-@pytest.fixture(params=CONTRACT_MODULES, ids=["statecheck", "figurecheck"])
+@pytest.fixture(
+    params=CONTRACT_MODULES,
+    ids=["statecheck", "figurecheck", "linkcheck", "layoutcheck"],
+)
 def contract_module(request: pytest.FixtureRequest) -> typ.Any:
     """Return one package's contract module under test."""
     return request.param

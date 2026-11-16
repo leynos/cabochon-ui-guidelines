@@ -7,7 +7,7 @@ and manifest checks from `linkcheck.links` plus the requirement checks from
 
 from __future__ import annotations
 
-from linkcheck.contract import BOOK
+from linkcheck.contract import BOOK, Contract
 from linkcheck.links import check_front_figure, check_links, check_manifest
 from linkcheck.requirements import (
     check_commands,
@@ -18,7 +18,7 @@ from linkcheck.requirements import (
 )
 
 
-def run_checks() -> list[str]:
+def run_checks(contract: Contract) -> list[str]:
     """Run every structural check and return the accumulated problems."""
     problems: list[str] = []
     chapters = sorted(BOOK.glob("*.md"))
@@ -27,10 +27,10 @@ def run_checks() -> list[str]:
         return problems
     check_links(chapters, problems)
     check_front_figure(chapters, problems)
-    check_manifest(chapters, problems)
-    check_requirements(problems)
-    check_states(problems)
-    check_profiles(problems)
-    check_commands(problems)
-    check_resources(problems)
+    check_manifest(chapters, contract, problems)
+    check_requirements(contract, problems)
+    check_states(contract, problems)
+    check_profiles(contract, problems)
+    check_commands(contract, problems)
+    check_resources(contract, problems)
     return problems

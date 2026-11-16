@@ -119,13 +119,25 @@ instead of writing files. Two state probes compare a hand-written projection
 with the real one rather than mutating `project()`, so they guard the expected
 failures and the fixtures, not every branch of the projection itself.
 
-## Shared Markdown parser
+## Shared Markdown parsers
 
-`tools/markdown_structure.py` is the single implementation the Markdown
-checkers import for structural parsing. It extracts heading anchors and link or
-image destinations, and it removes HTML comments and fenced code before
-parsing, so text that a renderer would not display cannot satisfy a structural
-contract. Change it rather than copying its rules into a checker.
+Two modules are the single implementation the Markdown checkers import, and
+neither should be copied into a checker.
+
+`tools/markdown_structure.py` parses structure. It returns a heading's anchor
+through `slug`, collects the anchors and checklist items a chapter declares
+through `anchors` and `checklist_items`, and removes HTML comments, fenced code
+and, where a caller asks for it, inline code spans through
+`strip_fences_and_comments` and `strip_code_and_comments`. Text that a renderer
+would not display therefore cannot satisfy a structural contract. Code-span
+recognition honours CommonMark escapes: a backtick after a backslash is literal
+and cannot open a span.
+
+`tools/markdown_links.py` is the shared implementation for link and image
+destination extraction. `targets` returns every destination in the source,
+`link_targets` returns only those reached through a link, and `image_targets`
+returns only those reached through an image. It resolves CommonMark's backslash
+rules and reports each destination as the renderer would display it.
 
 ## Contract sources
 
@@ -141,6 +153,15 @@ hand-copied expectations:
 | `tools/layout-budgets.json`    | Layout tokens, profiles and worked configurations                                     |
 | `tools/requirements.json`      | The structured requirement registry                                                   |
 | `tools/state-fixtures.json`    | The live-state event scenarios                                                        |
+
+No contract module reads a file at import. Each package exposes a
+`load_document(path)` that reads one JSON document and a loader that validates
+the sections it needs, such as `load_contract`, `load_catalogue` or
+`load_budgets`. A document that cannot be read, decoded or shaped raises the
+package's `ContractError`; the command-line entry point catches it, prints one
+line to standard error and returns 1. A check therefore receives its contract
+as an argument rather than importing a hidden global, and importing the package
+performs no I/O.
 
 ## Documented exemptions
 
