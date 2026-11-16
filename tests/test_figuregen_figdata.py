@@ -118,11 +118,83 @@ def test_from_document_rejects_a_wrong_section_type(
 def test_from_document_rejects_a_non_string_state_value() -> None:
     """A state record holding a non-string field is rejected."""
     document = _valid_document()
-    document["live_states"] = {"Current": {"id": 1}}
+    document["live_states"] = {
+        "Current": {
+            "id": 1,
+            "word": "Current",
+            "colour": "#000000",
+            "mark": "dot",
+            "role": "oxide",
+        }
+    }
     with pytest.raises(ContractError) as error:
         Catalogue.from_document(document)
     assert "live_states.Current" in str(error.value), (
         "the error message must name the offending state record"
+    )
+    assert "non-string" in str(error.value), (
+        "the error message must name the unusable value"
+    )
+
+
+def test_from_document_rejects_a_state_missing_a_field() -> None:
+    """A state record that omits a field the chip reads is rejected."""
+    document = _valid_document()
+    document["live_states"] = {
+        "Current": {
+            "id": "current",
+            "word": "Current",
+            "colour": "#000000",
+            "mark": "dot",
+        }
+    }
+    with pytest.raises(ContractError) as error:
+        Catalogue.from_document(document)
+    assert "live_states.Current lacks ['role']" in str(error.value), (
+        "the error message must name the state and the missing field"
+    )
+
+
+_SPEC = {
+    "class": "schematic",
+    "scale": 1.0,
+    "components": [],
+    "profile": {},
+    "states": [],
+}
+
+
+@pytest.mark.parametrize("field", tuple(_SPEC))
+def test_from_document_rejects_a_spec_missing_a_field(field: str) -> None:
+    """A figure specification that omits a field `annotate` reads is rejected."""
+    spec = {key: value for key, value in _SPEC.items() if key != field}
+    document = _valid_document()
+    document["figures"] = {"fig-one": spec}
+    with pytest.raises(ContractError) as error:
+        Catalogue.from_document(document)
+    assert f"figures.fig-one lacks ['{field}']" in str(error.value), (
+        "the error message must name the figure and the missing field"
+    )
+
+
+def test_from_document_rejects_an_unknown_figure_class() -> None:
+    """A figure specification whose class is not declared is rejected."""
+    document = _valid_document()
+    document["figures"] = {"fig-one": {**_SPEC, "class": "poster"}}
+    with pytest.raises(ContractError) as error:
+        Catalogue.from_document(document)
+    assert "figures.fig-one.class is not a known class: 'poster'" in str(error.value), (
+        "the error message must name the unknown class"
+    )
+
+
+def test_from_document_accepts_a_null_scale() -> None:
+    """A specification may declare no scale, which the builders then default."""
+    document = _valid_document()
+    document["figures"] = {"fig-one": {**_SPEC, "scale": None}}
+    catalogue = Catalogue.from_document(document)
+    assert catalogue.figure_specs["fig-one"]["scale"] is None, (
+        "an absent scale survives validation"
     )
 
 

@@ -11,7 +11,9 @@ Comments and fences are scanned together: a comment delimiter inside a fenced
 example is literal text, while a fence marker inside a comment is not a fence.
 Inline code is masked while those scans run, so a literal comment delimiter
 inside a code span cannot hide the rest of a chapter; the spans are restored
-afterwards because headings keep their inline code.
+afterwards because headings keep their inline code. A backtick that follows a
+backslash is literal and cannot open a span, while a backslash inside a genuine
+span is content, as CommonMark requires.
 """
 
 from __future__ import annotations
@@ -25,7 +27,6 @@ if typ.TYPE_CHECKING:
 FENCE_OPEN_RE = re.compile(r"^\s{0,3}(`{3,}|~{3,})")
 HEADING_RE = re.compile(r"^#{1,6}\s+(.+?)\s*#*\s*$", re.MULTILINE)
 EXPLICIT_ANCHOR_RE = re.compile(r"<a\s+id=[\"']([^\"']+)[\"']")
-INLINE_CODE_RE = re.compile(r"(?<!`)(`+)(?!`)(.*?)(?<!`)\1(?!`)", re.DOTALL)
 CHECKLIST_ITEM_RE = re.compile(r"^ {0,3}- \[[ xX]\] ", re.MULTILINE)
 CODE_PLACEHOLDER_RE = re.compile(r"\x00([0-9]+)\x00")
 
@@ -94,18 +95,74 @@ def _scan_comment(text: str, position: int, kept: list[str]) -> tuple[int, bool]
     return end + 3, False
 
 
+def _is_escaped(text: str, index: int) -> bool:
+    """Return whether the character at ``index`` follows an odd backslash run."""
+    count = 0
+    position = index - 1
+    while position >= 0 and text[position] == "\\":
+        count += 1
+        position -= 1
+    return count % 2 == 1
+
+
+def _run_end(text: str, start: int) -> int:
+    """Return the index just past the backtick run that begins at ``start``."""
+    end = start
+    while end < len(text) and text[end] == "`":
+        end += 1
+    return end
+
+
+def _closing_run(text: str, position: int, length: int) -> int | None:
+    """Return the end of the next backtick run of exactly ``length`` backticks.
+
+    A run of another length is skipped, as CommonMark requires, and a backslash
+    before the closing run is content rather than an escape, so it does not stop
+    the run from closing the span.
+    """
+    search = position
+    while True:
+        start = text.find("`", search)
+        if start == -1:
+            return None
+        end = _run_end(text, start)
+        if end - start == length:
+            return end
+        search = end
+
+
+def _find_code_span(text: str, position: int) -> tuple[int, int] | None:
+    """Return the bounds of the first code span that starts at or after ``position``.
+
+    An opening backtick run that follows a backslash is literal text and cannot
+    open a span, so a pair of escaped backticks around a link leaves the link
+    visible. Backslashes inside a span are content.
+    """
+    search = position
+    while True:
+        start = text.find("`", search)
+        if start == -1:
+            return None
+        end = _run_end(text, start)
+        if not _is_escaped(text, start):
+            close = _closing_run(text, end, end - start)
+            if close is not None:
+                return start, close
+        search = end
+
+
 def _scan_inline(
     text: str, position: int, kept: list[str], spans: list[str]
 ) -> tuple[int, bool]:
     """Consume ordinary text up to the next comment, code span or line end."""
     comment = text.find("<!--", position)
-    span = INLINE_CODE_RE.search(text, position)
-    span_start = span.start() if span is not None else -1
+    span = _find_code_span(text, position)
+    span_start = span[0] if span is not None else -1
     newline = text.find("\n", position)
     if span is not None and _earliest(span_start, comment, newline):
         kept.extend((text[position:span_start], _placeholder(len(spans))))
-        spans.append(span.group(0))
-        return span.end(), False
+        spans.append(text[span[0] : span[1]])
+        return span[1], False
     if _earliest(comment, newline, span_start):
         kept.extend((text[position:comment], "<!--"))
         return comment + 4, True
@@ -173,28 +230,8 @@ def _closes_fence(
     return len(marker) >= fence_length and not remainder.strip()
 
 
-def strip_fences_and_comments(text: str) -> str:
-    """Remove fenced code blocks and HTML comments from Markdown.
-
-    Inline code is deliberately kept, because a heading such as
-    ``## The `rate` field`` still contributes ``rate`` to its anchor. Code
-    spans are masked while comments and fences are located, so a literal
-    comment delimiter inside a span is not treated as a comment. Comment
-    delimiters inside a fence remain literal, and a fence marker inside a
-    comment does not open or close a fence.
-
-    Parameters
-    ----------
-    text : str
-        The Markdown source to process.
-
-    Returns
-    -------
-    str
-        The visible text, with comments and fenced blocks removed and the
-        masked inline code restored in place.
-    """
-    masked, spans = _mask_code_spans(text)
+def _without_fences_and_comments(masked: str) -> str:
+    """Drop comments and fenced blocks from text whose spans are placeholders."""
     kept: list[str] = []
     fence_char: str | None = None
     fence_length = 0
@@ -218,11 +255,40 @@ def strip_fences_and_comments(text: str) -> str:
             fence_length = len(marker)
             continue
         kept.append(line)
-    return _restore_code_spans("\n".join(kept), spans)
+    return "\n".join(kept)
+
+
+def strip_fences_and_comments(text: str) -> str:
+    """Remove fenced code blocks and HTML comments from Markdown.
+
+    Inline code is deliberately kept, because a heading such as
+    ``## The `rate` field`` still contributes ``rate`` to its anchor. Code
+    spans are masked while comments and fences are located, so a literal
+    comment delimiter inside a span is not treated as a comment. Comment
+    delimiters inside a fence remain literal, and a fence marker inside a
+    comment does not open or close a fence.
+
+    Parameters
+    ----------
+    text : str
+        The Markdown source to process.
+
+    Returns
+    -------
+    str
+        The visible text, with comments and fenced blocks removed and the
+        masked inline code restored in place.
+    """
+    masked, spans = _mask_code_spans(text)
+    return _restore_code_spans(_without_fences_and_comments(masked), spans)
 
 
 def strip_code_and_comments(text: str) -> str:
     """Remove comments, fenced blocks and code spans, including multi-line ones.
+
+    Recognition reuses the same scan as `strip_fences_and_comments`, so an
+    escaped backtick is literal here as well and a genuine span is removed
+    whole, however many lines it covers.
 
     Parameters
     ----------
@@ -235,7 +301,8 @@ def strip_code_and_comments(text: str) -> str:
         The text with fenced code blocks, HTML comments and inline code
         spans removed.
     """
-    return INLINE_CODE_RE.sub("", strip_fences_and_comments(text))
+    masked, _spans = _mask_code_spans(text)
+    return CODE_PLACEHOLDER_RE.sub("", _without_fences_and_comments(masked))
 
 
 def _item_body(text: str, start: int, end: int) -> str:

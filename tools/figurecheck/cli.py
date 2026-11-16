@@ -45,14 +45,14 @@ def main() -> int:
             return self_test()
         data = load_document(DATA_PATH)
         records, messages = state_records(data)
+        if messages:
+            for message in messages:
+                print(f"figure contract: {message}", file=sys.stderr)
+            return 1
+        errors = run(FIGURES, data, records)
     except ContractError as error:
         print(f"figure contract: {error}", file=sys.stderr)
         return 1
-    if messages:
-        for message in messages:
-            print(f"figure contract: {message}", file=sys.stderr)
-        return 1
-    errors = run(FIGURES, data, records)
     if errors:
         for error in errors:
             print(f"figure contract: {error}", file=sys.stderr)

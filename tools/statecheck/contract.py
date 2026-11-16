@@ -151,8 +151,39 @@ def transition_rows(data: dict[str, object]) -> list[LiveTransition]:
 
 
 def scenarios(fixtures: dict[str, object]) -> list[Scenario]:
-    """Return every fixture sequence the fixtures document declares."""
-    return typ.cast("list[Scenario]", _sequence(fixtures, "scenarios"))
+    """Return every fixture sequence the fixtures document declares.
+
+    Parameters
+    ----------
+    fixtures
+        The decoded fixture document.
+
+    Returns
+    -------
+    list[Scenario]
+        The validated fixture sequences.
+
+    Raises
+    ------
+    ContractError
+        If a sequence is not an object, names no scenario, declares no
+        ``events`` array of objects, or declares ``facts`` that is not an
+        object. The message names the sequence's position.
+    """
+    records = _sequence(fixtures, "scenarios")
+    for index, record in enumerate(records):
+        if not isinstance(record, dict):
+            raise ContractError(f"scenario {index} is not a JSON object")
+        if not isinstance(record.get("name"), str):
+            raise ContractError(f"scenario {index} declares no name")
+        events = record.get("events")
+        if not isinstance(events, list) or not all(
+            isinstance(event, dict) for event in events
+        ):
+            raise ContractError(f"scenario {index} declares no events array")
+        if not isinstance(record.get("facts", {}), dict):
+            raise ContractError(f"scenario {index} declares malformed facts")
+    return typ.cast("list[Scenario]", records)
 
 
 def defaults(fixtures: dict[str, object]) -> Facts:

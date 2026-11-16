@@ -110,35 +110,47 @@ def _state_group(data: dict[str, object], group: str) -> list[dict[str, object]]
     return records
 
 
+def _text(value: object) -> str | None:
+    """Return a declared text value, or None when it is absent or not text."""
+    if not isinstance(value, str):
+        return None
+    stripped = value.strip()
+    return stripped or None
+
+
 def _validated_record(
     state: dict[str, object], roles: dict[str, object]
 ) -> tuple[dict[str, str] | None, list[str]]:
     """Validate one state record in isolation, returning it and its defects."""
-    missing = [
-        field for field in STATE_FIELDS if not str(state.get(field, "")).strip()
-    ]
+    values: dict[str, str] = {}
+    missing: list[str] = []
+    for field in STATE_FIELDS:
+        value = _text(state.get(field))
+        if value is None:
+            missing.append(field)
+        else:
+            values[field] = value
     if missing:
         return None, [f"state {state.get('word')!r} lacks {missing}"]
-    identifier = str(state["id"])
-    word = str(state["word"]).upper()
+    word = values["word"].upper()
     messages: list[str] = []
-    if state["mark"] not in MARK_KINDS:
-        messages.append(f"state {word!r} has unknown mark {state['mark']!r}")
-    role = str(state["role"])
+    if values["mark"] not in MARK_KINDS:
+        messages.append(f"state {word!r} has unknown mark {values['mark']!r}")
+    role = values["role"]
     role_colour = roles.get(role)
     if role_colour is None:
         messages.append(f"state {word!r} names unknown role {role!r}")
-    elif str(role_colour).upper() != str(state["colour"]).upper():
+    elif str(role_colour).upper() != values["colour"].upper():
         messages.append(
-            f"state {word!r} colour {state['colour']} "
+            f"state {word!r} colour {values['colour']} "
             f"disagrees with role {role!r}"
         )
     record = {
-        "id": identifier,
+        "id": values["id"],
         "word": word,
-        "mark": str(state["mark"]),
+        "mark": values["mark"],
         "role": role,
-        "colour": str(state["colour"]).upper(),
+        "colour": values["colour"].upper(),
     }
     return record, messages
 

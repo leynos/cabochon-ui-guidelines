@@ -171,6 +171,75 @@ def test_state_records_omit_a_state_with_a_missing_field() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "declared",
+    [
+        _state(cue=None),
+        {key: value for key, value in _state().items() if key != "cue"},
+        _state(cue=7),
+    ],
+    ids=["null", "absent", "not-text"],
+)
+def test_state_records_omit_a_state_whose_field_is_not_text(
+    declared: dict[str, object],
+) -> None:
+    """A null, absent or non-text field leaves the state out of the mapping."""
+    records, messages = figurecheck_contract.state_records(_document(declared))
+    assert records == {}, "a state without a declared text field yields no record"
+    assert messages == ["state 'Denied' lacks ['cue']"], (
+        "the unusable field is named in the diagnostic"
+    )
+
+
+@pytest.mark.parametrize(
+    ("record", "expected"),
+    [
+        pytest.param("one", "scenario 0 is not a JSON object", id="not-an-object"),
+        pytest.param({"events": []}, "scenario 0 declares no name", id="no-name"),
+        pytest.param(
+            {"name": "one", "events": "none"},
+            "scenario 0 declares no events array",
+            id="events-not-an-array",
+        ),
+        pytest.param(
+            {"name": "one", "events": [1]},
+            "scenario 0 declares no events array",
+            id="event-not-an-object",
+        ),
+        pytest.param(
+            {"name": "one", "events": [], "facts": []},
+            "scenario 0 declares malformed facts",
+            id="facts-not-an-object",
+        ),
+    ],
+)
+def test_scenarios_reject_a_malformed_record(
+    record: object, expected: str
+) -> None:
+    """A fixture sequence that does not declare its shape is reported by position."""
+    with pytest.raises(statecheck_contract.ContractError) as info:
+        statecheck_contract.scenarios({"scenarios": [record]})
+    assert str(info.value) == expected, "the defect is reported with its position"
+
+
+def test_scenarios_name_the_offending_position() -> None:
+    """The reported position is the malformed record's index, not the first one."""
+    fixtures = {"scenarios": [{"name": "one", "events": []}, {"name": 2}]}
+    with pytest.raises(statecheck_contract.ContractError) as info:
+        statecheck_contract.scenarios(fixtures)
+    assert str(info.value) == "scenario 1 declares no name", (
+        "the position counts every preceding record"
+    )
+
+
+def test_scenarios_read_the_real_fixtures() -> None:
+    """Every committed scenario validates and is returned unchanged."""
+    fixtures = statecheck_contract.load_document(statecheck_contract.FIXTURES_PATH)
+    declared = statecheck_contract.scenarios(fixtures)
+    assert declared == fixtures["scenarios"], "the committed fixtures validate"
+    assert declared, "the fixtures declare at least one scenario"
+
+
 def test_importing_contract_modules_reads_no_document() -> None:
     """Importing the contract modules performs no file read but source loads."""
     result = subprocess.run(

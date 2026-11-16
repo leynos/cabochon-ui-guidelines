@@ -36,6 +36,12 @@ LiveTransition = typ.TypedDict(
 
 _TRANSITION_TEXT_FIELDS = ("id", "event", "to", "owner")
 
+# The fields `figuregen.ornaments.state_chip` reads from a state record, and
+# the fields `figuregen.production.annotate` reads from a figure specification.
+_STATE_FIELDS = ("word", "colour", "id", "mark", "role")
+_SPEC_FIELDS = ("class", "scale", "components", "profile", "states")
+_SPEC_CLASSES = {"schematic", "editorial", "production"}
+
 
 class ContractError(Exception):
     """Report a figure contract that cannot be used.
@@ -204,6 +210,11 @@ def _string_table(value: object, *, name: str) -> dict[str, dict[str, str]]:
     records: dict[str, dict[str, str]] = {}
     for state_name, record_value in table.items():
         record = _require_mapping(record_value, name=f"{name}.{state_name}")
+        missing = [field for field in _STATE_FIELDS if field not in record]
+        if missing:
+            raise ContractError(
+                f"figure contract {name}.{state_name} lacks {missing}"
+            )
         if not all(isinstance(item, str) for item in record.values()):
             raise ContractError(
                 f"figure contract {name}.{state_name} has a non-string value"
@@ -269,13 +280,24 @@ def _spec_table(value: object) -> dict[str, dict[str, object]]:
     Raises
     ------
     ContractError
-        If the section is not an object or a specification is not an object.
+        If the section is not an object, if a specification is not an object,
+        if a specification omits a field `annotate` reads, or if it declares a
+        class other than ``schematic``, ``editorial`` or ``production``.
     """
     table = _require_mapping(value, name="figures")
-    return {
-        str(figure_name): dict(_require_mapping(spec, name=f"figures.{figure_name}"))
-        for figure_name, spec in table.items()
-    }
+    specs: dict[str, dict[str, object]] = {}
+    for figure_name, spec_value in table.items():
+        spec = dict(_require_mapping(spec_value, name=f"figures.{figure_name}"))
+        missing = [field for field in _SPEC_FIELDS if field not in spec]
+        if missing:
+            raise ContractError(f"figure contract figures.{figure_name} lacks {missing}")
+        if spec["class"] not in _SPEC_CLASSES:
+            raise ContractError(
+                f"figure contract figures.{figure_name}.class "
+                f"is not a known class: {spec['class']!r}"
+            )
+        specs[str(figure_name)] = spec
+    return specs
 
 
 def load_document(path: Path) -> dict[str, object]:

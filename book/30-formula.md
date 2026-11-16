@@ -170,12 +170,12 @@ becomes **Copy result** and the reason is stated.
 
 ## Keyboard
 
-| Key           | Action                                                                                                                                                                                                             |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Enter         | Accept the highlighted selector completion while one is open; otherwise activate the current primary action, inserting the live value only when the destination accepts it and copying the result when it does not |
-| Escape        | Dismiss a completion, then cancel and restore the selection                                                                                                                                                        |
-| Control+Space | Offer selector completions                                                                                                                                                                                         |
-| Tab           | Move between expression, sources and actions                                                                                                                                                                       |
+| Key           | Action                                                                                                                                                                                                                                                                                                                    |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Enter         | Commit an active input-method composition; otherwise accept the highlighted selector completion while one is open; otherwise activate the action of the control that has focus, inserting the live value only when the expression field has focus and the destination accepts it, and copying the result when it does not |
+| Escape        | Dismiss a completion, then cancel and restore the selection                                                                                                                                                                                                                                                               |
+| Control+Space | Offer selector completions                                                                                                                                                                                                                                                                                                |
+| Tab           | Move between expression, sources and actions                                                                                                                                                                                                                                                                              |
 
 The expression field supports the usual editing keys and must not swallow Tab,
 so that the user can reach the actions without a pointer. Enter accepts the
