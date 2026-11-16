@@ -54,6 +54,30 @@ def test_parenthesised_destination_is_kept_whole() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        (r"[x](file\_name.md)", ["file_name.md"]),
+        (r"[x](a\.b.md)", ["a.b.md"]),
+        (r"[x](a\\b.md)", [r"a\b.md"]),
+    ],
+    ids=["escaped-underscore", "escaped-dot", "literal-backslash"],
+)
+def test_destination_keeps_the_characters_its_escapes_make_literal(
+    source: str, expected: list[str]
+) -> None:
+    """An escaped character reaches the caller as itself, not as a stand-in."""
+    assert targets(source) == expected, "the destination holds the literal character"
+
+
+def test_escaped_labels_resolve_separately() -> None:
+    """Labels that differ only in escaped punctuation keep their own targets."""
+    text = "[one\\_x]: one.md\n[one\\.x]: two.md\n\n[use][one\\.x]\n"
+    assert link_targets(text) == ["two.md"], (
+        "each escaped label resolves to its own definition"
+    )
+
+
 def test_angle_bracket_destination_loses_its_brackets() -> None:
     """The angle brackets CommonMark permits around a destination are removed."""
     assert targets("[angle](<01-purpose.md>)") == ["01-purpose.md"], (

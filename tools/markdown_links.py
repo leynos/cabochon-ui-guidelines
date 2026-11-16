@@ -16,8 +16,8 @@ import string
 from markdown_structure import strip_code_and_comments
 
 _ESCAPABLE = frozenset(string.punctuation)
-_ESCAPED_CHAR = "\ue000"
-_LITERAL_BACKSLASH = "\ue001"
+_LITERAL_BACKSLASH = "\ue000"
+_ESCAPED_BASE = 0xE100
 
 TARGET_RE = re.compile(
     r"(?P<image>!)?\[[^\]]*\]\(\s*"
@@ -31,13 +31,33 @@ REF_LINK_RE = re.compile(r"(?P<image>!)?\[(?P<text>[^\]]*)\]\[(?P<label>[^\]]*)\
 SHORTCUT_RE = re.compile(r"(?P<image>!)?\[(?P<label>[^\]]+)\](?![\[(:])")
 
 
+def _placeholder(char: str) -> str:
+    """Return the stand-in that keeps an escaped character out of the syntax."""
+    return chr(_ESCAPED_BASE + ord(char))
+
+
+def _restore(text: str) -> str:
+    """Return text with each stand-in turned back into the character it holds."""
+    out: list[str] = []
+    for char in text:
+        code = ord(char)
+        if char == _LITERAL_BACKSLASH:
+            out.append("\\")
+        elif _ESCAPED_BASE <= code < _ESCAPED_BASE + 128:
+            out.append(chr(code - _ESCAPED_BASE))
+        else:
+            out.append(char)
+    return "".join(out)
+
+
 def _neutralise_escapes(text: str) -> str:
     """Return text with CommonMark backslash escapes made inert.
 
     A run of backslashes before an escapable character renders as half as many
     literal backslashes, and an odd run makes the character after it literal
     punctuation that can neither open nor close a delimiter. Each is replaced
-    with a placeholder so the patterns above cannot read it as syntax.
+    with a distinct stand-in, which `_restore` turns back into the character it
+    stood for, so a destination keeps the text the renderer would follow.
 
     Parameters
     ----------
@@ -63,7 +83,7 @@ def _neutralise_escapes(text: str) -> str:
         out.append(_LITERAL_BACKSLASH * (run // 2))
         if run % 2:
             if end < len(text) and text[end] in _ESCAPABLE:
-                out.append(_ESCAPED_CHAR)
+                out.append(_placeholder(text[end]))
                 end += 1
             else:
                 out.append(_LITERAL_BACKSLASH)
@@ -72,15 +92,15 @@ def _neutralise_escapes(text: str) -> str:
 
 
 def _unwrap_target(target: str) -> str:
-    """Return a destination without the angle brackets CommonMark permits."""
+    """Return a destination without its angle brackets and stand-ins."""
     if target.startswith("<") and target.endswith(">"):
-        return target[1:-1]
-    return target
+        target = target[1:-1]
+    return _restore(target)
 
 
 def _normalise_label(label: str) -> str:
     """Normalise a reference label for comparison."""
-    return re.sub(r"\s+", " ", label.strip()).casefold()
+    return re.sub(r"\s+", " ", _restore(label).strip()).casefold()
 
 
 def _reference_definitions(text: str) -> dict[str, str]:
@@ -136,7 +156,9 @@ def targets(text: str, *, images: bool | None = None) -> list[str]:
     balanced parentheses. A backslash before punctuation makes that character
     literal text, and a backslash before a backslash makes the pair a literal
     backslash, so only an odd run of backslashes can escape the delimiter that
-    follows it.
+    follows it. A reported destination holds those literal characters, not the
+    stand-ins used while the text is scanned, and two labels that differ only
+    in escaped punctuation resolve to their own definitions.
 
     Parameters
     ----------

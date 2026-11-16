@@ -44,7 +44,9 @@ def title_block(x: float, y: float, heading: str, deck: str | None = None) -> st
     The deck is drawn as one line rather than wrapped. Its baseline is
     ``y + 80``, which is absolute y=150 for the ``y = 70`` origin every caller
     passes. No caller reserves the height a second line would need, so a
-    wrapped deck would be drawn over the figure it introduces.
+    wrapped deck can be drawn over the figure it introduces. Whether it is
+    depends on where that figure's content begins, so a wrapped deck would need
+    a layout check rather than a fixed offset.
 
     Parameters
     ----------
