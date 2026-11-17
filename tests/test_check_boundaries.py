@@ -146,6 +146,63 @@ def test_layout_chapter_check_does_not_fall_back_to_the_committed_chapter() -> N
     )
 
 
+def _layout_document() -> dict[str, object]:
+    """Return a layout document whose panes name declared tokens."""
+    return {
+        "tokens": {
+            "splitter": 6,
+            "navigator": 210,
+            "inspector": 240,
+            "default_width": 1280,
+            "default_height": 800,
+            "document_width_min": 420,
+            "document_content_height": 320,
+            "document_viewport_min": 320,
+            "compact_viewport_min": 240,
+        },
+        "profiles": {"document": ["navigator"]},
+        "configurations": [
+            {
+                "name": "standard",
+                "width": "default_width",
+                "height": "default_height",
+                "profile": "document",
+                "left": "navigator",
+                "right": "inspector",
+                "expected": [818, 640],
+            }
+        ],
+    }
+
+
+@pytest.mark.parametrize("side", ["left", "right"])
+def test_layout_cli_reports_a_numeric_pane(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    side: str,
+) -> None:
+    """A side pane given as a number is reported at the command line."""
+    document = _layout_document()
+    configurations = document["configurations"]
+    assert isinstance(configurations, list), "the fixture declares a list"
+    configuration = configurations[0]
+    assert isinstance(configuration, dict), "the fixture declares one configuration"
+    configuration[side] = 240
+    path = tmp_path / "layout-budgets.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    monkeypatch.setattr(layoutcheck_cli, "DATA_PATH", path)
+    assert layoutcheck_cli.main() == 1, "a numeric pane exits non-zero"
+    captured = capsys.readouterr()
+    assert captured.err.startswith("layout contract: "), (
+        "the command reports the numeric pane on standard error"
+    )
+    assert f"configurations[0].{side} names no declared pane token: 240" in (
+        captured.err
+    ), "the diagnostic names the pane field"
+    assert "Traceback" not in captured.err, "the defect is not raised to the interpreter"
+
+
 def test_layout_cli_reports_a_rejected_contract(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:

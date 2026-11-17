@@ -189,11 +189,13 @@ practical. `linkcheck.run_checks` takes the book directory,
 checks take the contract their entry point loaded. A test can therefore drive
 those checks from a temporary book or a hand-written document.
 
-The entry points resolve `ROOT`, `BOOK`, `FIGURES` and `DATA_PATH`. The state
-checker is the remaining exception inside the checks themselves:
-`statecheck.transitions.chapter_rows` and `compare_figure` still read the fixed
-`CHAPTER` and `FIGURE` paths, so those two are exercised only against the
-committed book and figure.
+The entry points resolve `ROOT`, `BOOK`, `FIGURES` and `DATA_PATH`. Two
+readers inside the checks still take no argument.
+`statecheck.transitions.chapter_rows` and `compare_figure` read the fixed
+`CHAPTER` and `FIGURE` paths, so they are exercised only against the committed
+book and figure. `tools/check-keyboard.py` is a single script rather than a
+package and loads `tools/keyboard-fixtures.json` into a module constant when it
+is imported, so it too runs only against the committed fixtures.
 
 ## Documented exemptions
 
