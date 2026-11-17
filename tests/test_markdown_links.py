@@ -78,6 +78,27 @@ def test_escaped_labels_resolve_separately() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "code", [0xE000, 0xE001, 0xE020, 0xE100, 0xE121], ids=lambda code: f"{code:04X}"
+)
+def test_a_literal_private_use_character_survives(code: int) -> None:
+    """A private-use character in a destination is not read as a stand-in."""
+    char = chr(code)
+    source = f"[x](a{char}b.md)"
+    assert targets(source) == [f"a{char}b.md"], (
+        "the destination keeps the character the source declares"
+    )
+
+
+def test_a_literal_private_use_label_is_not_confused_with_punctuation() -> None:
+    """A label holding a private-use character keeps its own definition."""
+    literal = chr(0xE000)
+    text = f"[one{literal}x]: one.md\n[one!x]: two.md\n\n[use][one{literal}x]\n"
+    assert link_targets(text) == ["one.md"], (
+        "the literal character does not resolve to the escaped punctuation label"
+    )
+
+
 def test_angle_bracket_destination_loses_its_brackets() -> None:
     """The angle brackets CommonMark permits around a destination are removed."""
     assert targets("[angle](<01-purpose.md>)") == ["01-purpose.md"], (
