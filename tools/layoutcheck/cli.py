@@ -57,7 +57,7 @@ def main() -> int:
     except ContractError as error:
         print(f"layout contract: {error}", file=sys.stderr)
         return 1
-    except OSError as error:
+    except (OSError, UnicodeDecodeError) as error:
         print(f"layout chapter: {error}", file=sys.stderr)
         return 1
     if "--self-test" in sys.argv:

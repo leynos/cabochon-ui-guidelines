@@ -136,9 +136,12 @@ the backtick a delimiter.
 
 `tools/markdown_links.py` is the shared implementation for link and image
 destination extraction; `linkcheck.links` and `linkcheck.requirements` import
-it. `targets` returns every destination in the source, `link_targets` returns
-only those reached through an ordinary link, and `image_targets` only those
-reached through an image. Inline destinations are reported first, then
+it. `targets` returns every destination in the source, or a filtered subset
+through its keyword-only `images` argument: `True` keeps only embedded images,
+`False` keeps only ordinary links, and the default `None` keeps both.
+`link_targets` returns only those reached through an ordinary link, and
+`image_targets` only those reached through an image. Inline destinations are
+reported first, then
 `[text][label]` references, then shortcut `[label]` references whose label has
 a definition in the same chapter. Labels are compared after collapsing
 whitespace, trimming and case folding, and the first definition of a label
@@ -179,13 +182,18 @@ the package's `ContractError`; the command-line entry point catches it, prints
 one line to standard error and returns 1. Importing a package therefore
 performs no I/O.
 
-A check also receives the other data it reads as an argument rather than
-reaching for a fixed path. `linkcheck.run_checks` takes the book directory,
+A check receives the other data it reads as an argument wherever that is
+practical. `linkcheck.run_checks` takes the book directory,
 `layoutcheck.check_chapter` takes the chapter text that the entry point reads,
-and the requirement and figure checks take the contract their entry point
-loaded. The entry point alone resolves `ROOT`, `BOOK`, `FIGURES` or `DATA_PATH`.
-A test can therefore drive a check from a temporary book or a hand-written
-document.
+`figurecheck.run` takes the figure directory, and the requirement and figure
+checks take the contract their entry point loaded. A test can therefore drive
+those checks from a temporary book or a hand-written document.
+
+The entry points resolve `ROOT`, `BOOK`, `FIGURES` and `DATA_PATH`. The state
+checker is the remaining exception inside the checks themselves:
+`statecheck.transitions.chapter_rows` and `compare_figure` still read the fixed
+`CHAPTER` and `FIGURE` paths, so those two are exercised only against the
+committed book and figure.
 
 ## Documented exemptions
 
@@ -231,7 +239,11 @@ once; and `figuregen.production` annotates every rendered figure and draws the
 catalogue-height fixtures.
 
 Each figure has one module under `figuregen/figures/` that exposes a builder
-function. `figuregen.cli` maps every figure name to its builder. A builder that
+function, except the two production fixtures: their builders,
+`fig_prod_chrome` and `fig_prod_control`, sit in `figuregen.production` beside
+`production_component`, which draws one block at a catalogue height and records
+the component's name in `data-component` and its height in `data-height`.
+`figuregen.cli` maps every figure name to its builder. A builder that
 reads only the state records takes `Catalogue.states`, one that reads more of
 the catalogue takes the whole `Catalogue`, and the rest take no argument.
 `figuregen.figdata` loads and validates the catalogue's `live_states`,

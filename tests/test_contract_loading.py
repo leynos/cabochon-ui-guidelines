@@ -390,8 +390,13 @@ def _configurations(value: object) -> Callable[[dict[str, object]], None]:
         ),
         pytest.param(
             _replace(left=7.5),
-            "configurations[0].left names no declared token: 7.5",
-            id="non-token-pane",
+            "configurations[0].left names no declared pane token: 7.5",
+            id="fractional-pane",
+        ),
+        pytest.param(
+            _replace(right=240),
+            "configurations[0].right names no declared pane token: 240",
+            id="numeric-pane",
         ),
         pytest.param(
             _replace(profile="absent"),

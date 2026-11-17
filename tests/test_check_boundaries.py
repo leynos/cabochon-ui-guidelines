@@ -167,6 +167,23 @@ def test_layout_cli_reports_a_rejected_contract(
         "the command reports the defect on standard error"
     )
     assert "Traceback" not in captured.err, "the defect is not raised to the interpreter"
+
+
+def test_layout_cli_reports_an_undecodable_chapter(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A chapter that is not UTF-8 is reported, not raised to the interpreter."""
+    chapter = tmp_path / "14-spacing-metrics.md"
+    chapter.write_bytes(b"\xff\xfe# Chapter\n")
+    monkeypatch.setattr(layoutcheck_contract, "CHAPTER", chapter)
+    assert layoutcheck_cli.main() == 1, "an undecodable chapter exits non-zero"
+    captured = capsys.readouterr()
+    assert captured.err.startswith("layout chapter: "), (
+        "the command reports the unreadable chapter on standard error"
+    )
+    assert "Traceback" not in captured.err, "the defect is not raised to the interpreter"
+
+
 def test_requirement_contract_names_the_checklist_and_registry(
     tmp_path: Path,
 ) -> None:

@@ -118,6 +118,19 @@ def _token_reference(tokens: dict[str, int], value: object, where: str) -> None:
         raise ContractError(f"layout budget {where} names no declared token: {value!r}")
 
 
+def _pane_reference(tokens: dict[str, int], value: object, where: str) -> None:
+    """Report a side pane that is not the name of a declared token.
+
+    Both `layoutcheck.budget.side_width` and `layoutcheck.chapter` read a side
+    pane's width from the token table by name, so a literal number would be
+    looked up as a name and could only fail there.
+    """
+    if not isinstance(value, str) or value not in tokens:
+        raise ContractError(
+            f"layout budget {where} names no declared pane token: {value!r}"
+        )
+
+
 def _expected(tokens: dict[str, int], expected: object, where: str) -> None:
     """Report a worked plane that is not a pair of resolvable sizes."""
     if not isinstance(expected, list) or len(expected) != 2:
@@ -141,8 +154,10 @@ def _configuration(
         raise ContractError(f"{where} lacks {missing}")
     if not isinstance(value["name"], str) or not value["name"]:
         raise ContractError(f"{where}.name is not a non-empty string")
-    for field in ("width", "height", "left", "right"):
+    for field in ("width", "height"):
         _token_reference(tokens, value[field], f"{where}.{field}")
+    for field in ("left", "right"):
+        _pane_reference(tokens, value[field], f"{where}.{field}")
     profile = value["profile"]
     if not isinstance(profile, str) or profile not in profiles:
         raise ContractError(f"{where}.profile names no declared profile: {profile!r}")
