@@ -136,7 +136,10 @@ def _find_code_span(text: str, position: int) -> tuple[int, int] | None:
 
     An opening backtick run that follows a backslash is literal text and cannot
     open a span, so a pair of escaped backticks around a link leaves the link
-    visible. Backslashes inside a span are content.
+    visible. Only the escaped backtick is consumed, so the rest of its run can
+    still open a span of its own: when a backslash precedes two backticks, the
+    first is literal and the second opens a one-backtick span. Backslashes
+    inside a span are content.
     """
     search = position
     while True:
@@ -148,7 +151,9 @@ def _find_code_span(text: str, position: int) -> tuple[int, int] | None:
             close = _closing_run(text, end, end - start)
             if close is not None:
                 return start, close
-        search = end
+            search = end
+        else:
+            search = start + 1
 
 
 def _scan_inline(

@@ -19,8 +19,9 @@ from markdown_structure import strip_code_and_comments, strip_fences_and_comment
         (r"\`[broken](missing.md)\`", ["missing.md"]),
         (r"\`[a](b.md)\` and \`[c](d.md)\`", ["b.md", "d.md"]),
         (r"`[hidden](missing.md)`", []),
+        (r"\``[hidden](missing.md)`", []),
     ],
-    ids=["escaped-pair", "two-escaped-pairs", "genuine-span"],
+    ids=["escaped-pair", "two-escaped-pairs", "genuine-span", "escaped-run"],
 )
 def test_escaped_backticks_neither_open_nor_hide_a_link(
     source: str, expected: list[str]

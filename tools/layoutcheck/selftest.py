@@ -220,9 +220,18 @@ PROBES = (
 
 
 def self_test(baseline_errors: list[str], budgets: Budgets) -> int:
-    """Prove that twelve deliberate token, value or table changes are detected."""
-    failures = ["baseline budgets did not pass"] if baseline_errors else []
-    failures.extend(failure for probe in PROBES if (failure := probe(budgets)))
+    """Prove that twelve deliberate token, value or table changes are detected.
+
+    The probes read the committed chapter's worked tables by row position, so
+    they run only once the unmodified baseline passes. A failing baseline is
+    reported on its own and stops the self-test.
+    """
+    if baseline_errors:
+        print("layout budget self-test: baseline budgets did not pass", file=sys.stderr)
+        for error in baseline_errors:
+            print(f"layout budget: {error}", file=sys.stderr)
+        return 1
+    failures = [failure for probe in PROBES if (failure := probe(budgets))]
 
     if failures:
         for failure in failures:

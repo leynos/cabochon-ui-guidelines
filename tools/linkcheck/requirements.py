@@ -80,7 +80,17 @@ def _check_requirement(block: str, context: _Context) -> None:
 
 
 def check_requirements(book: Path, contract: Contract, problems: list[str]) -> None:
-    """Check checklist identifiers, owners and the anchors they name."""
+    """Check checklist identifiers, owners and the anchors they name.
+
+    Parameters
+    ----------
+    book : Path
+        The book directory that holds the checklist and the owner files.
+    contract : Contract
+        The loaded link contract, which names the checklist.
+    problems : list[str]
+        The accumulated problems, extended in place.
+    """
     checklist = book / contract.requirements["checklist"]
     text = strip_code_and_comments(checklist.read_text(encoding="utf-8"))
     context = _Context(
@@ -129,7 +139,17 @@ def section(text: str, heading: str) -> str:
 
 
 def check_states(book: Path, contract: Contract, problems: list[str]) -> None:
-    """Check that every declared live and resolution state leads a state table."""
+    """Check that every declared live and resolution state leads a state table.
+
+    Parameters
+    ----------
+    book : Path
+        The book directory that holds the owner chapters.
+    contract : Contract
+        The loaded link contract, which names the states and their owners.
+    problems : list[str]
+        The accumulated problems, extended in place.
+    """
     spec = contract.states
     for group, owner_key, heading in (
         ("live", "live_owner", "the-five-states"),
@@ -150,7 +170,17 @@ def check_states(book: Path, contract: Contract, problems: list[str]) -> None:
 
 
 def check_profiles(book: Path, contract: Contract, problems: list[str]) -> None:
-    """Check that each conformance profile is declared in its owning file."""
+    """Check that each conformance profile is declared in its owning file.
+
+    Parameters
+    ----------
+    book : Path
+        The book directory that holds the owning chapter.
+    contract : Contract
+        The loaded link contract, which names the profiles and their owner.
+    problems : list[str]
+        The accumulated problems, extended in place.
+    """
     spec = contract.profiles
     owner = book / spec["owner"]
     text = strip_code_and_comments(owner.read_text(encoding="utf-8"))
@@ -171,7 +201,17 @@ def _references_path(path: Path, owner: Path) -> bool:
 
 
 def check_commands(book: Path, contract: Contract, problems: list[str]) -> None:
-    """Check that every command view references the command record owner."""
+    """Check that every command view references the command record owner.
+
+    Parameters
+    ----------
+    book : Path
+        The book directory that holds the record owner and the views.
+    contract : Contract
+        The loaded link contract, which names the owner and the views.
+    problems : list[str]
+        The accumulated problems, extended in place.
+    """
     spec = contract.commands
     owner = book / spec["record_owner"]
     if not owner.exists():
@@ -187,7 +227,17 @@ def check_commands(book: Path, contract: Contract, problems: list[str]) -> None:
 
 
 def check_resources(book: Path, contract: Contract, problems: list[str]) -> None:
-    """Check that every resource consumer references the resource owner."""
+    """Check that every resource consumer references the resource owner.
+
+    Parameters
+    ----------
+    book : Path
+        The book directory that holds the owner and the consumer chapters.
+    contract : Contract
+        The loaded link contract, which names the owner and the consumers.
+    problems : list[str]
+        The accumulated problems, extended in place.
+    """
     spec = contract.resources
     owner = book / spec["owner"]
     if not owner.exists():
