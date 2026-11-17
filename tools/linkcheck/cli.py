@@ -24,7 +24,7 @@ def main() -> int:
     except ContractError as error:
         print(f"link contract: {error}", file=sys.stderr)
         return 1
-    problems = run_checks(contract)
+    problems = run_checks(contract, BOOK)
     if problems:
         for problem in problems:
             print(f"error: {problem}", file=sys.stderr)

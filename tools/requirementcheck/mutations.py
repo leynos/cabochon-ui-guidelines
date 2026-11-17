@@ -12,11 +12,16 @@ import shutil
 import typing as typ
 
 from requirementcheck.checks import run
-from requirementcheck.contract import ROOT
+from requirementcheck.contract import ROOT, load_requirements
 
 if typ.TYPE_CHECKING:
     import collections.abc as cabc
     from pathlib import Path
+
+
+def _run(root: Path) -> list[str]:
+    """Run the checks against the mutated copy's own contract."""
+    return run(root, load_requirements(root / "tools" / "book-contract.json"))
 
 
 def _fresh_repository(temporary: Path) -> Path:
@@ -203,7 +208,7 @@ def _run_registry_case(
     target.write_text(
         json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
-    problems = run(root)
+    problems = _run(root)
     target.write_text(original, encoding="utf-8")
     if expected in "\n".join(problems):
         return None, True
@@ -220,7 +225,7 @@ def _run_checklist_case(
     if changed == original:
         return f"{name}: mutation did not apply", False
     target.write_text(changed, encoding="utf-8")
-    problems = run(root)
+    problems = _run(root)
     target.write_text(original, encoding="utf-8")
     if expected in "\n".join(problems):
         return None, True
@@ -247,7 +252,7 @@ def _owner_copy_case(root: Path) -> tuple[str | None, bool]:
     if changed == original:
         return "copied owner mutation did not apply", False
     owner_copy.write_text(changed, encoding="utf-8")
-    problems = run(root)
+    problems = _run(root)
     owner_copy.write_text(original, encoding="utf-8")
     expected = (
         "CON-01: missing owner anchor 03-ecosystem-map.md#the-substrate-components"
@@ -277,16 +282,16 @@ def _benign_edit_failures(root: Path) -> list[str]:
     original = target.read_text(encoding="utf-8")
     failures: list[str] = []
     target.write_text(_apply_wording(original), encoding="utf-8")
-    if run(root):
+    if _run(root):
         failures.append("wording-only edit was rejected")
     target.write_text(_indented_owner(original), encoding="utf-8")
-    if run(root):
+    if _run(root):
         failures.append("an owner on an indented continuation line was rejected")
     target.write_text(
         original + "\n<!--\n- [ ] **ZZZ-99** — Comment-only item.\n-->\n",
         encoding="utf-8",
     )
-    if run(root):
+    if _run(root):
         failures.append("checklist item inside a comment was rejected")
     target.write_text(original, encoding="utf-8")
     return failures

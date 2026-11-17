@@ -23,7 +23,6 @@ from markdown_structure import (
 )
 
 from linkcheck.contract import (
-    BOOK,
     OWNER_RE,
     REQUIREMENT_RE,
     Contract,
@@ -80,9 +79,9 @@ def _check_requirement(block: str, context: _Context) -> None:
         _check_owner(identifier, owner, context.checklist, context.problems)
 
 
-def check_requirements(contract: Contract, problems: list[str]) -> None:
+def check_requirements(book: Path, contract: Contract, problems: list[str]) -> None:
     """Check checklist identifiers, owners and the anchors they name."""
-    checklist = BOOK / contract.requirements["checklist"]
+    checklist = book / contract.requirements["checklist"]
     text = strip_code_and_comments(checklist.read_text(encoding="utf-8"))
     context = _Context(
         checklist=checklist,
@@ -129,7 +128,7 @@ def section(text: str, heading: str) -> str:
     return "\n".join(kept)
 
 
-def check_states(contract: Contract, problems: list[str]) -> None:
+def check_states(book: Path, contract: Contract, problems: list[str]) -> None:
     """Check that every declared live and resolution state leads a state table."""
     spec = contract.states
     for group, owner_key, heading in (
@@ -140,7 +139,7 @@ def check_states(contract: Contract, problems: list[str]) -> None:
             "resolution-authority-and-cache-are-independent",
         ),
     ):
-        owner = BOOK / spec[owner_key]
+        owner = book / spec[owner_key]
         text = strip_fences_and_comments(owner.read_text(encoding="utf-8"))
         cells = first_cells(section(text, heading))
         problems.extend(
@@ -150,10 +149,10 @@ def check_states(contract: Contract, problems: list[str]) -> None:
         )
 
 
-def check_profiles(contract: Contract, problems: list[str]) -> None:
+def check_profiles(book: Path, contract: Contract, problems: list[str]) -> None:
     """Check that each conformance profile is declared in its owning file."""
     spec = contract.profiles
-    owner = BOOK / spec["owner"]
+    owner = book / spec["owner"]
     text = strip_code_and_comments(owner.read_text(encoding="utf-8"))
     problems.extend(
         f"{owner.name}: profile {name!r} is not declared"
@@ -171,15 +170,15 @@ def _references_path(path: Path, owner: Path) -> bool:
     )
 
 
-def check_commands(contract: Contract, problems: list[str]) -> None:
+def check_commands(book: Path, contract: Contract, problems: list[str]) -> None:
     """Check that every command view references the command record owner."""
     spec = contract.commands
-    owner = BOOK / spec["record_owner"]
+    owner = book / spec["record_owner"]
     if not owner.exists():
         problems.append(f"command record owner {owner.name} is missing")
         return
     for view in spec["views"]:
-        path = BOOK / view
+        path = book / view
         if not path.exists():
             problems.append(f"command view {view} is missing")
             continue
@@ -187,15 +186,15 @@ def check_commands(contract: Contract, problems: list[str]) -> None:
             problems.append(f"{view}: does not reference the command record owner")
 
 
-def check_resources(contract: Contract, problems: list[str]) -> None:
+def check_resources(book: Path, contract: Contract, problems: list[str]) -> None:
     """Check that every resource consumer references the resource owner."""
     spec = contract.resources
-    owner = BOOK / spec["owner"]
+    owner = book / spec["owner"]
     if not owner.exists():
         problems.append(f"resource owner {owner.name} is missing")
         return
     for consumer in spec["consumers"]:
-        path = BOOK / consumer
+        path = book / consumer
         if not path.exists():
             problems.append(f"resource consumer {consumer} is missing")
             continue

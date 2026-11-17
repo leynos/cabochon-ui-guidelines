@@ -7,7 +7,13 @@ and manifest checks from `linkcheck.links` plus the requirement checks from
 
 from __future__ import annotations
 
-from linkcheck.contract import BOOK, Contract
+import typing as typ
+
+if typ.TYPE_CHECKING:
+    from pathlib import Path
+
+    from linkcheck.contract import Contract
+
 from linkcheck.links import check_front_figure, check_links, check_manifest
 from linkcheck.requirements import (
     check_commands,
@@ -18,19 +24,32 @@ from linkcheck.requirements import (
 )
 
 
-def run_checks(contract: Contract) -> list[str]:
-    """Run every structural check and return the accumulated problems."""
+def run_checks(contract: Contract, book: Path) -> list[str]:
+    """Run every structural check and return the accumulated problems.
+
+    Parameters
+    ----------
+    contract : Contract
+        The loaded link contract.
+    book : Path
+        The book directory that holds the chapters and their manifest.
+
+    Returns
+    -------
+    list[str]
+        One problem per structural defect the checks found.
+    """
     problems: list[str] = []
-    chapters = sorted(BOOK.glob("*.md"))
+    chapters = sorted(book.glob("*.md"))
     if not chapters:
         problems.append("no chapters found under book/")
         return problems
-    check_links(chapters, problems)
-    check_front_figure(chapters, problems)
-    check_manifest(chapters, contract, problems)
-    check_requirements(contract, problems)
-    check_states(contract, problems)
-    check_profiles(contract, problems)
-    check_commands(contract, problems)
-    check_resources(contract, problems)
+    check_links(chapters, book, problems)
+    check_front_figure(chapters, book, problems)
+    check_manifest(chapters, book, contract, problems)
+    check_requirements(book, contract, problems)
+    check_states(book, contract, problems)
+    check_profiles(book, contract, problems)
+    check_commands(book, contract, problems)
+    check_resources(book, contract, problems)
     return problems

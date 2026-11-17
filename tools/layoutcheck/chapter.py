@@ -10,13 +10,10 @@ from __future__ import annotations
 import re
 
 from layoutcheck.budget import bands, derive
-from layoutcheck.contract import (
-    BAND_PROFILES,
-    Budgets,
+from layoutcheck.contract import BAND_PROFILES, Budgets, number
+from layoutcheck.tables import (
     MalformedCellError,
     addends,
-    chapter_text,
-    number,
     plane_size,
     stated_total,
     table_with,
@@ -359,16 +356,15 @@ def check_worked_rows(
     return errors
 
 
-def check_chapter(budgets: Budgets, text: str | None = None) -> list[str]:
+def check_chapter(budgets: Budgets, text: str) -> list[str]:
     """Check that chapter 14's tables state the derived worked values.
 
     Parameters
     ----------
     budgets : Budgets
         The declared tokens, profiles and configurations to check against.
-    text : str | None
-        The chapter source to check; the committed chapter is read when
-        this is ``None``.
+    text : str
+        The chapter source to check.
 
     Returns
     -------
@@ -376,7 +372,7 @@ def check_chapter(budgets: Budgets, text: str | None = None) -> list[str]:
         One diagnostic per table value that does not match the derived
         budgets.
     """
-    source = chapter_text() if text is None else text
+    source = text
     tokens = budgets.tokens
     profiles = budgets.profiles
     errors = check_band_rows(table_with(source, "Bands"), tokens, profiles)

@@ -8,7 +8,7 @@ these functions; tokens come from `tools/layout-budgets.json`.
 
 from __future__ import annotations
 
-from layoutcheck.contract import number
+from layoutcheck.contract import ContractError, number
 
 
 def bands(tokens: dict[str, int], profiles: dict[str, list[str]], name: str) -> int:
@@ -121,13 +121,13 @@ def expected_plane(
 
     Raises
     ------
-    SystemExit
+    ContractError
         If the configuration's worked plane is not a pair of entries.
     """
     declared = configuration["expected"]
     if not isinstance(declared, list) or len(declared) != 2:
-        raise SystemExit(
-            f"layout contract: {configuration['name']}: expected plane is malformed"
+        raise ContractError(
+            f"{configuration['name']}: expected plane is malformed"
         )
     return number(tokens, declared[0]), number(tokens, declared[1])
 

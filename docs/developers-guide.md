@@ -130,14 +130,31 @@ through `anchors` and `checklist_items`, and removes HTML comments, fenced code
 and, where a caller asks for it, inline code spans through
 `strip_fences_and_comments` and `strip_code_and_comments`. Text that a renderer
 would not display therefore cannot satisfy a structural contract. Code-span
-recognition honours CommonMark escapes: a backtick after a backslash is literal
-and cannot open a span.
+recognition honours CommonMark escapes: an odd run of backslashes before a
+backtick makes it literal and unable to open a span, while an even run leaves
+the backtick a delimiter.
 
 `tools/markdown_links.py` is the shared implementation for link and image
-destination extraction. `targets` returns every destination in the source,
-`link_targets` returns only those reached through a link, and `image_targets`
-returns only those reached through an image. It resolves CommonMark's backslash
-rules and reports each destination as the renderer would display it.
+destination extraction; `linkcheck.links` and `linkcheck.requirements` import
+it. `targets` returns every destination in the source, `link_targets` returns
+only those reached through an ordinary link, and `image_targets` only those
+reached through an image. Inline destinations are reported first, then
+`[text][label]` references, then shortcut `[label]` references whose label has
+a definition in the same chapter. Labels are compared after collapsing
+whitespace, trimming and case folding, and the first definition of a label
+wins. A destination may contain one level of balanced parentheses, and the
+angle brackets CommonMark permits around it are removed.
+
+The module resolves CommonMark's backslash rule rather than counting
+characters. Only an odd run of backslashes makes the following punctuation
+literal, and each pair of backslashes becomes one literal backslash, so
+`\[x](y.md)` is text while `\\[x](y.md)` is a link. While the text is scanned,
+each escaped character and each literal backslash is replaced by a private-use
+code point drawn from a run the source does not itself use. The reported
+destination holds the character the renderer would follow, not the stand-in, so
+two labels that differ only in escaped punctuation resolve to their own
+definitions and a literal private-use character in the source is reported
+unchanged.
 
 ## Contract sources
 
@@ -156,12 +173,19 @@ hand-copied expectations:
 
 No contract module reads a file at import. Each package exposes a
 `load_document(path)` that reads one JSON document and a loader that validates
-the sections it needs, such as `load_contract`, `load_catalogue` or
-`load_budgets`. A document that cannot be read, decoded or shaped raises the
-package's `ContractError`; the command-line entry point catches it, prints one
-line to standard error and returns 1. A check therefore receives its contract
-as an argument rather than importing a hidden global, and importing the package
+the sections it needs: `load_contract`, `load_catalogue`, `load_budgets` or
+`load_requirements`. A document that cannot be read, decoded or shaped raises
+the package's `ContractError`; the command-line entry point catches it, prints
+one line to standard error and returns 1. Importing a package therefore
 performs no I/O.
+
+A check also receives the other data it reads as an argument rather than
+reaching for a fixed path. `linkcheck.run_checks` takes the book directory,
+`layoutcheck.check_chapter` takes the chapter text that the entry point reads,
+and the requirement and figure checks take the contract their entry point
+loaded. The entry point alone resolves `ROOT`, `BOOK`, `FIGURES` or `DATA_PATH`.
+A test can therefore drive a check from a temporary book or a hand-written
+document.
 
 ## Documented exemptions
 
@@ -196,3 +220,24 @@ the committed figures exactly, and `make validate-svg` fails if regenerating
 them changes a byte. It also renders the proof sheet and one capture per figure
 with `agent-browser`, which must be read rather than trusted for XML validity
 alone.
+
+The generator is the `tools/figuregen/` package. `figuregen.palette` holds the
+colour roles and font stacks every drawing shares, and `figuregen.canvas`
+provides the SVG element and text helpers. `figuregen.ornaments` draws the
+shared page furniture, state chips, state marks and miniature document
+previews; `figuregen.widgets` draws the window chrome, form controls, pane
+headers and inspector rows; `figuregen.glyphs` draws the tool-strip glyphs
+once; and `figuregen.production` annotates every rendered figure and draws the
+catalogue-height fixtures.
+
+Each figure has one module under `figuregen/figures/` that exposes a builder
+function. `figuregen.cli` maps every figure name to its builder. A builder that
+reads only the state records takes `Catalogue.states`, one that reads more of
+the catalogue takes the whole `Catalogue`, and the rest take no argument.
+`figuregen.figdata` loads and validates the catalogue's `live_states`,
+`live_transitions`, `resolution_states` and `figures` sections, and its
+`StateTables` record exposes the live and resolution tables that the state chip
+reads. The command refuses to write anything when the builder registry and the
+catalogue name different figures, and it adds `data-figure-*` attributes and a
+`<metadata>` block to each figure so that the checker reads the declared class,
+scale, profile and components from the figure itself.

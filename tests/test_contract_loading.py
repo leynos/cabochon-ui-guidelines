@@ -1,21 +1,25 @@
-"""Tests for loading the figure and state contract documents.
+"""Tests for loading the figure, state and layout contract documents.
 
 The loaders must report a document that cannot be read, decoded or parsed as a
-typed contract error rather than a `SystemExit` or a traceback, and importing a
-contract module must not read any contract document.
+typed contract error rather than a `SystemExit` or a traceback, must reject a
+declared value the checks could not use, and importing a contract module must
+not read any contract document.
 """
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 import typing as typ
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
 from figurecheck import contract as figurecheck_contract
 from layoutcheck import contract as layoutcheck_contract
 from linkcheck import contract as linkcheck_contract
+from requirementcheck import contract as requirementcheck_contract
 from statecheck import contract as statecheck_contract
 
 CONTRACT_MODULES = (
@@ -23,6 +27,7 @@ CONTRACT_MODULES = (
     figurecheck_contract,
     linkcheck_contract,
     layoutcheck_contract,
+    requirementcheck_contract,
 )
 TOOLS = Path(__file__).resolve().parent.parent / "tools"
 
@@ -60,6 +65,10 @@ import linkcheck.contract
 import linkcheck.links
 import linkcheck.requirements
 import linkcheck.selftest
+import requirementcheck.checks
+import requirementcheck.cli
+import requirementcheck.contract
+import requirementcheck.selftest
 import statecheck.cli
 import statecheck.contract
 import statecheck.selftest
@@ -69,7 +78,7 @@ print("clean")
 
 @pytest.fixture(
     params=CONTRACT_MODULES,
-    ids=["statecheck", "figurecheck", "linkcheck", "layoutcheck"],
+    ids=["statecheck", "figurecheck", "linkcheck", "layoutcheck", "requirementcheck"],
 )
 def contract_module(request: pytest.FixtureRequest) -> typ.Any:
     """Return one package's contract module under test."""
@@ -259,6 +268,179 @@ def test_scenarios_read_the_real_fixtures() -> None:
     declared = statecheck_contract.scenarios(fixtures)
     assert declared == fixtures["scenarios"], "the committed fixtures validate"
     assert declared, "the fixtures declare at least one scenario"
+
+
+def _layout_configuration() -> dict[str, object]:
+    """Return one well-formed worked configuration."""
+    return {
+        "name": "standard",
+        "width": "default_width",
+        "height": "default_height",
+        "profile": "document",
+        "left": "navigator",
+        "right": "inspector",
+        "expected": [818, 640],
+    }
+
+
+def _layout_document() -> dict[str, object]:
+    """Return a minimal layout budget document the loader accepts."""
+    return {
+        "tokens": {
+            "title": 31,
+            "menu": 29,
+            "status": 26,
+            "splitter": 6,
+            "navigator": 210,
+            "inspector": 240,
+            "default_width": 1280,
+            "default_height": 800,
+            "document_width_min": 420,
+            "document_content_height": 320,
+            "document_viewport_min": 320,
+            "compact_viewport_min": 240,
+        },
+        "profiles": {"document": ["title", "menu", "status"]},
+        "configurations": [_layout_configuration()],
+    }
+
+
+def _write_layout(tmp_path: Path, document: object) -> Path:
+    """Write a layout budget document to a temporary path."""
+    path = tmp_path / "layout-budgets.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    return path
+
+
+def test_layout_budgets_accept_a_valid_document(tmp_path: Path) -> None:
+    """A document whose references all resolve loads unchanged."""
+    document = _layout_document()
+    budgets = layoutcheck_contract.load_budgets(_write_layout(tmp_path, document))
+    assert budgets.configurations == document["configurations"], (
+        "the valid configuration survives validation"
+    )
+    assert budgets.profiles == document["profiles"], "the valid profiles survive"
+    assert budgets.tokens == document["tokens"], "the valid tokens survive"
+
+
+def _configuration(document: dict[str, object]) -> dict[str, object]:
+    """Return the document's first configuration for mutation."""
+    configurations = document["configurations"]
+    assert isinstance(configurations, list), "the fixture declares a list"
+    first = configurations[0]
+    assert isinstance(first, dict), "the fixture declares one configuration"
+    return first
+
+
+def _replace(**changes: object) -> Callable[[dict[str, object]], None]:
+    """Return a mutation that replaces named configuration fields."""
+
+    def mutate(document: dict[str, object]) -> None:
+        _configuration(document).update(changes)
+
+    return mutate
+
+
+def _remove(field: str) -> Callable[[dict[str, object]], None]:
+    """Return a mutation that removes one configuration field."""
+
+    def mutate(document: dict[str, object]) -> None:
+        del _configuration(document)[field]
+
+    return mutate
+
+
+def _set_profile_bands(bands: list[str]) -> Callable[[dict[str, object]], None]:
+    """Return a mutation that replaces the declared profile's bands."""
+
+    def mutate(document: dict[str, object]) -> None:
+        document["profiles"] = {"document": bands}
+
+    return mutate
+
+
+def _drop_token(name: str) -> Callable[[dict[str, object]], None]:
+    """Return a mutation that removes one declared token."""
+
+    def mutate(document: dict[str, object]) -> None:
+        tokens = document["tokens"]
+        assert isinstance(tokens, dict), "the fixture declares a token table"
+        del tokens[name]
+
+    return mutate
+
+
+def _configurations(value: object) -> Callable[[dict[str, object]], None]:
+    """Return a mutation that replaces the configurations array."""
+
+    def mutate(document: dict[str, object]) -> None:
+        document["configurations"] = value
+
+    return mutate
+
+
+@pytest.mark.parametrize(
+    ("mutate", "reason"),
+    [
+        pytest.param(_remove("height"), "configurations[0] lacks ['height']", id="missing-field"),
+        pytest.param(
+            _replace(width="absent"),
+            "configurations[0].width names no declared token: 'absent'",
+            id="unknown-width-token",
+        ),
+        pytest.param(
+            _replace(left=7.5),
+            "configurations[0].left names no declared token: 7.5",
+            id="non-token-pane",
+        ),
+        pytest.param(
+            _replace(profile="absent"),
+            "configurations[0].profile names no declared profile: 'absent'",
+            id="unknown-profile",
+        ),
+        pytest.param(
+            _replace(expected=[818]),
+            "configurations[0].expected is not a pair of plane sizes",
+            id="short-expected",
+        ),
+        pytest.param(
+            _replace(expected="818 x 640"),
+            "configurations[0].expected is not a pair of plane sizes",
+            id="text-expected",
+        ),
+        pytest.param(
+            _replace(expected=["absent", 640]),
+            "configurations[0].expected names no declared token: 'absent'",
+            id="unknown-expected-token",
+        ),
+        pytest.param(
+            _replace(compact="yes"),
+            "configurations[0].compact is not a boolean",
+            id="text-compact",
+        ),
+        pytest.param(
+            _replace(name=""),
+            "configurations[0].name is not a non-empty string",
+            id="blank-name",
+        ),
+        pytest.param(_configurations(["one"]), "configurations[0] is not a JSON object", id="not-an-object"),
+        pytest.param(
+            _set_profile_bands(["title", "ghost"]),
+            "profile 'document' names undeclared tokens ['ghost']",
+            id="unknown-profile-band",
+        ),
+        pytest.param(_drop_token("splitter"), "layout budgets declare no ['splitter']", id="missing-token"),
+    ],
+)
+def test_layout_budgets_reject_an_unusable_document(
+    tmp_path: Path, mutate: Callable[[dict[str, object]], None], reason: str
+) -> None:
+    """A value the checks could not use is reported as a contract error."""
+    document = _layout_document()
+    mutate(document)
+    with pytest.raises(layoutcheck_contract.ContractError) as info:
+        layoutcheck_contract.load_budgets(_write_layout(tmp_path, document))
+    assert reason in str(info.value), "the error names the unusable declaration"
 
 
 def test_importing_contract_modules_reads_no_document() -> None:

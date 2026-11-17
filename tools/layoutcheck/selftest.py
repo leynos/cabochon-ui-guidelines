@@ -12,7 +12,8 @@ import sys
 
 from layoutcheck.budget import derive, expected_plane, validate
 from layoutcheck.chapter import check_band_rows, check_worked_rows
-from layoutcheck.contract import Budgets, chapter_text, table_with
+from layoutcheck.contract import Budgets, chapter_text
+from layoutcheck.tables import table_with
 
 
 def _worked_diagnostics(

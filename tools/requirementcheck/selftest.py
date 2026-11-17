@@ -10,13 +10,13 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
-from requirementcheck.checks import run
 from requirementcheck.mutations import (
     _benign_edit_failures,
     _checklist_cases,
     _fresh_repository,
     _owner_copy_case,
     _registry_cases,
+    _run,
     _run_checklist_case,
     _run_registry_case,
     _tally,
@@ -46,7 +46,7 @@ def self_test() -> None:
     detected = 0
     with tempfile.TemporaryDirectory() as temporary:
         root = _fresh_repository(Path(temporary))
-        if baseline := run(root):
+        if baseline := _run(root):
             failures.append(f"baseline is not clean: {baseline[:3]}")
         for name, edit, expected in _registry_cases():
             detected += _tally(failures, _run_registry_case(root, name, edit, expected))

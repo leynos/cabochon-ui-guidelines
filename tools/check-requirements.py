@@ -25,4 +25,4 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from requirementcheck.cli import main
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -15,18 +15,21 @@ from layoutcheck.contract import (
     DATA_PATH,
     Budgets,
     ContractError,
+    chapter_text,
     load_budgets,
 )
 from layoutcheck.selftest import self_test
 
 
-def run(budgets: Budgets) -> list[str]:
+def run(budgets: Budgets, text: str) -> list[str]:
     """Validate every declared configuration and the chapter's worked values.
 
     Parameters
     ----------
     budgets : Budgets
         The declared tokens, profiles and configurations.
+    text : str
+        The chapter source whose tables are checked.
 
     Returns
     -------
@@ -36,7 +39,7 @@ def run(budgets: Budgets) -> list[str]:
     errors: list[str] = []
     for configuration in budgets.configurations:
         errors.extend(validate(configuration, budgets.tokens, budgets.profiles))
-    errors.extend(check_chapter(budgets))
+    errors.extend(check_chapter(budgets, text))
     return errors
 
 
@@ -50,9 +53,12 @@ def main() -> int:
     """
     try:
         budgets = load_budgets(DATA_PATH)
-        errors = run(budgets)
+        errors = run(budgets, chapter_text())
     except ContractError as error:
         print(f"layout contract: {error}", file=sys.stderr)
+        return 1
+    except OSError as error:
+        print(f"layout chapter: {error}", file=sys.stderr)
         return 1
     if "--self-test" in sys.argv:
         return self_test(errors, budgets)
