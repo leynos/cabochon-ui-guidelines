@@ -137,6 +137,9 @@ def probe_band_addends(budgets: Budgets) -> str | None:
     errors = _worked_diagnostics(budgets, 0, 1, "44 + 999 = 160")
     if not any("do not sum" in error for error in errors):
         return "worked band addends that miss their total were not detected"
+    errors = _worked_diagnostics(budgets, 0, 1, "44 + 116 = 999 = 160")
+    if not any("more than one total" in error for error in errors):
+        return "a worked cell with two totals was not rejected"
     return None
 
 

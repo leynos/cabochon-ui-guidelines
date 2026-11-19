@@ -78,6 +78,14 @@ def test_escaped_labels_resolve_separately() -> None:
     )
 
 
+def test_an_escaped_label_does_not_merge_with_its_unscaped_spelling() -> None:
+    """CommonMark matches labels by source spelling, before escapes resolve."""
+    text = "[foo!]: one.md\n[foo\\!]: two.md\n\n[a][foo!]\n[b][foo\\!]\n"
+    assert link_targets(text) == ["one.md", "two.md"], (
+        "the escaped and unescaped labels name different definitions"
+    )
+
+
 @pytest.mark.parametrize(
     "code", [0xE000, 0xE001, 0xE020, 0xE100, 0xE121], ids=lambda code: f"{code:04X}"
 )

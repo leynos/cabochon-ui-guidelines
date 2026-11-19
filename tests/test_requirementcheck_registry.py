@@ -3,7 +3,8 @@
 `load_registry` records every unreadable or unparsable registry as one
 diagnostic and returns an empty mapping, so a caller sees a missing registry
 rather than an exception. That contract must hold for a file that cannot be
-read, a file that is not valid UTF-8 and a file that is not valid JSON.
+read, a file that is not valid UTF-8 and a file that is not valid JSON, and
+`requirementcheck.checks.run` extends it to a checklist that cannot be read.
 """
 
 from __future__ import annotations
@@ -11,12 +12,15 @@ from __future__ import annotations
 import typing as typ
 
 import pytest
+from requirementcheck.checks import run
+from requirementcheck.contract import RequirementContract
 from requirementcheck.registry import load_registry
 
 if typ.TYPE_CHECKING:
     from pathlib import Path
 
 UNREADABLE = "requirement registry is unreadable: "
+UNREADABLE_CHECKLIST = "requirement checklist is unreadable: "
 
 
 def test_missing_file_is_recorded(tmp_path: Path) -> None:
@@ -67,3 +71,15 @@ def test_valid_registry_returns_its_document(tmp_path: Path) -> None:
         "a readable registry yields its document"
     )
     assert problems == [], "a readable registry records no diagnostic"
+
+
+def test_an_unreadable_checklist_is_reported_rather_than_raised(
+    tmp_path: Path,
+) -> None:
+    """A missing checklist yields one diagnostic, not an exception."""
+    problems = run(tmp_path, RequirementContract("absent.md", "absent.json"))
+
+    assert len(problems) == 1, "the unreadable checklist earns exactly one diagnostic"
+    assert problems[0].startswith(UNREADABLE_CHECKLIST), (
+        "the diagnostic names the checklist"
+    )

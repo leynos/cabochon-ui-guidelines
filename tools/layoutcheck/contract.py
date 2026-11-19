@@ -189,7 +189,10 @@ def load_budgets(path: Path) -> Budgets:
     """
     document = load_document(path)
     tokens = _mapping(document, "tokens")
-    if not all(isinstance(value, int) for value in tokens.values()):
+    if not all(
+        isinstance(value, int) and not isinstance(value, bool)
+        for value in tokens.values()
+    ):
         raise ContractError("layout budgets declare a non-integer token")
     absent = [name for name in REQUIRED_TOKENS if name not in tokens]
     if absent:

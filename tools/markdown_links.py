@@ -138,16 +138,22 @@ def _unwrap_target(target: str, base: int) -> str:
     return _restore(target, base)
 
 
-def _normalise_label(label: str, base: int) -> str:
-    """Normalise a reference label for comparison."""
-    return re.sub(r"\s+", " ", _restore(label, base).strip()).casefold()
+def _normalise_label(label: str) -> str:
+    r"""Normalise a reference label the way CommonMark matches one.
+
+    Matching compares the label's source spelling after whitespace collapsing
+    and case folding; escapes are not resolved first, so ``foo\!`` and
+    ``foo!`` remain different labels. The escape stand-ins therefore stay in
+    place, which also keeps them distinct from the characters they stand for.
+    """
+    return re.sub(r"\s+", " ", label.strip()).casefold()
 
 
 def _reference_definitions(text: str, base: int) -> dict[str, str]:
     """Collect the first definition of each reference label in a chapter."""
     definitions: dict[str, str] = {}
     for match in REF_DEF_RE.finditer(text):
-        label = _normalise_label(match.group("label"), base)
+        label = _normalise_label(match.group("label"))
         definitions.setdefault(label, _unwrap_target(match.group("target"), base))
     return definitions
 
@@ -163,7 +169,7 @@ def _inside_span(position: int, spans: list[tuple[int, int]]) -> bool:
 
 
 def _reference_targets(
-    text: str, definitions: dict[str, str], base: int, *, images: bool | None
+    text: str, definitions: dict[str, str], *, images: bool | None
 ) -> list[str]:
     """Collect the reference targets used in a chapter."""
     found: list[str] = []
@@ -171,14 +177,14 @@ def _reference_targets(
     for match in REF_LINK_RE.finditer(text):
         consumed.append(match.span())
         label = match.group("label") or match.group("text")
-        target = definitions.get(_normalise_label(label, base))
+        target = definitions.get(_normalise_label(label))
         is_image = match.group("image") is not None
         if target is not None and _wanted(is_image=is_image, images=images):
             found.append(target)
     for match in SHORTCUT_RE.finditer(text):
         if _inside_span(match.start(), consumed):
             continue
-        target = definitions.get(_normalise_label(match.group("label"), base))
+        target = definitions.get(_normalise_label(match.group("label")))
         is_image = match.group("image") is not None
         if target is not None and _wanted(is_image=is_image, images=images):
             found.append(target)
@@ -227,7 +233,7 @@ def targets(text: str, *, images: bool | None = None) -> list[str]:
             found.append(_unwrap_target(match.group("target"), base))
     definitions = _reference_definitions(clean, base)
     if definitions:
-        found.extend(_reference_targets(clean, definitions, base, images=images))
+        found.extend(_reference_targets(clean, definitions, images=images))
     return found
 
 

@@ -370,6 +370,17 @@ def _drop_token(name: str) -> Callable[[dict[str, object]], None]:
     return mutate
 
 
+def _set_token(name: str, value: object) -> Callable[[dict[str, object]], None]:
+    """Return a mutation that replaces one declared token's value."""
+
+    def mutate(document: dict[str, object]) -> None:
+        tokens = document["tokens"]
+        assert isinstance(tokens, dict), "the fixture declares a token table"
+        tokens[name] = value
+
+    return mutate
+
+
 def _configurations(value: object) -> Callable[[dict[str, object]], None]:
     """Return a mutation that replaces the configurations array."""
 
@@ -435,6 +446,11 @@ def _configurations(value: object) -> Callable[[dict[str, object]], None]:
             id="unknown-profile-band",
         ),
         pytest.param(_drop_token("splitter"), "layout budgets declare no ['splitter']", id="missing-token"),
+        pytest.param(
+            _set_token("document_width_min", True),
+            "layout budgets declare a non-integer token",
+            id="boolean-token",
+        ),
     ],
 )
 def test_layout_budgets_reject_an_unusable_document(

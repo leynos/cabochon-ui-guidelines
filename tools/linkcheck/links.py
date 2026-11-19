@@ -31,6 +31,33 @@ def _front_matter(text: str) -> str:
     return match.group(1) if match else ""
 
 
+def _relative(path: Path, root: Path) -> Path:
+    """Return ``path`` relative to the reporting root when it lies beneath it.
+
+    Both paths are resolved first, so a book directory given as a relative
+    path and a link target resolved to an absolute one are still compared on
+    the same footing. A target outside the root keeps its own spelling
+    rather than raising `ValueError` from the comparison.
+
+    Parameters
+    ----------
+    path : Path
+        The chapter or target to name in a diagnostic.
+    root : Path
+        The directory the diagnostic reports paths against.
+
+    Returns
+    -------
+    Path
+        ``path`` relative to ``root``, or ``path`` unchanged when the two do
+        not share a base.
+    """
+    try:
+        return path.resolve().relative_to(root.resolve())
+    except ValueError:
+        return path
+
+
 def check_links(chapters: list[Path], book: Path, problems: list[str]) -> None:
     """Check that every local link target and fragment resolves.
 
@@ -57,15 +84,15 @@ def check_links(chapters: list[Path], book: Path, problems: list[str]) -> None:
                 path = (chapter.parent / path_part).resolve()
                 if not path.exists():
                     problems.append(
-                        f"{chapter.relative_to(root)}: missing link target {target}"
+                        f"{_relative(chapter, root)}: missing link target {target}"
                     )
                     continue
             if not fragment or path.suffix != ".md":
                 continue
             if fragment not in anchors(path):
                 problems.append(
-                    f"{chapter.relative_to(root)}: missing anchor "
-                    f"#{fragment} in {path.relative_to(root)}"
+                    f"{_relative(chapter, root)}: missing anchor "
+                    f"#{fragment} in {_relative(path, root)}"
                 )
 
 
@@ -90,10 +117,10 @@ def check_front_figure(chapters: list[Path], book: Path, problems: list[str]) ->
             continue
         figure = declared[0]
         if not (figures / figure).exists():
-            problems.append(f"{chapter.relative_to(root)}: missing figure {figure}")
+            problems.append(f"{_relative(chapter, root)}: missing figure {figure}")
         if f"../figures/{figure}" not in image_targets(text):
             problems.append(
-                f"{chapter.relative_to(root)}: declared figure {figure} "
+                f"{_relative(chapter, root)}: declared figure {figure} "
                 "is not embedded as an image in the body"
             )
 
@@ -127,6 +154,9 @@ def check_manifest(
     )
 
     navigation = book / contract.navigation
+    if not navigation.exists():
+        problems.append(f"navigation {contract.navigation} is missing")
+        return
     nav_text = navigation.read_text(encoding="utf-8")
     nav_paths = {
         resolved

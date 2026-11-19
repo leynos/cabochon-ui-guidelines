@@ -34,10 +34,16 @@ def run(root: Path, contract: RequirementContract) -> list[str]:
     list[str]
         Every diagnostic that `parse_checklist`, `load_registry` and
         `check_records` recorded, in the order they were produced. The list
-        is empty when the registry and checklist agree.
+        is empty when the registry and checklist agree. A checklist that
+        cannot be read is reported in place of the comparison, so the caller
+        still receives diagnostics rather than an exception.
     """
     problems: list[str] = []
-    checklist = parse_checklist(root / "book" / contract.checklist, problems)
+    try:
+        checklist = parse_checklist(root / "book" / contract.checklist, problems)
+    except (OSError, UnicodeDecodeError) as error:
+        problems.append(f"requirement checklist is unreadable: {error}")
+        return problems
     registry = load_registry(root / "tools" / contract.registry, problems)
     check_records(registry, checklist, root, problems)
     return problems

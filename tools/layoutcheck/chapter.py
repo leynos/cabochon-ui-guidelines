@@ -21,9 +21,17 @@ from layoutcheck.tables import (
 
 
 def _stated_total(cell: str, label: str, errors: list[str]) -> int | None:
-    """Return the cell's stated total, or record that it is not an integer."""
+    """Return the cell's stated total, or record why it could not be read.
+
+    A cell that states more than one total is reported with that defect
+    rather than as a missing integer, because its last total is readable but
+    the equality before it would go unchecked.
+    """
     try:
         return stated_total(cell)
+    except MalformedCellError as error:
+        errors.append(f"{label} {error}")
+        return None
     except ValueError:
         errors.append(f"{label} {cell!r} is not an integer")
         return None

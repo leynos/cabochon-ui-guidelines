@@ -77,6 +77,35 @@ def test_link_checks_read_the_supplied_book(tmp_path: Path) -> None:
     )
 
 
+def test_link_checks_report_a_missing_checklist_without_raising(
+    tmp_path: Path,
+) -> None:
+    """A missing checklist chapter is reported rather than read."""
+    contract = load_contract(_write_link(tmp_path, _link_document()))
+    book = _write_book(tmp_path, "See [the book](README.md).")
+    (book / "01-one.md").unlink()
+    problems = run_checks(contract, book)
+    assert "manifest names missing chapter 01-one.md" in problems, (
+        "the manifest reports the missing chapter"
+    )
+
+
+def test_link_checks_accept_a_relative_book_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A relative book directory still yields relative diagnostics."""
+    contract = load_contract(_write_link(tmp_path, _link_document()))
+    book = _write_book(tmp_path, "See [the book](README.md).")
+    (book / "README.md").write_text(
+        "# Book\n\n- [One](01-one.md#nowhere)\n", encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+    problems = run_checks(contract, Path("book"))
+    assert "book/README.md: missing anchor #nowhere in book/01-one.md" in problems, (
+        "the diagnostic is relative to the supplied book"
+    )
+
+
 def test_link_checks_report_destinations_relative_to_the_supplied_book(
     tmp_path: Path,
 ) -> None:

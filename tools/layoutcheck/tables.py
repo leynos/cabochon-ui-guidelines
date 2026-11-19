@@ -3,12 +3,16 @@
 The `tables`, `table_with`, `addends`, `stated_total` and `plane_size`
 functions read the chapter source that `layoutcheck.chapter` and
 `layoutcheck.selftest` supply. `table_with` raises the layout package's
-`ContractError` when the text lacks the table the caller needs.
+`ContractError` when the text lacks the table the caller needs. Fenced code
+blocks and HTML comments are removed before any table is read, so an example
+table that a renderer would not display cannot stand in for the real one.
 """
 
 from __future__ import annotations
 
 import re
+
+from markdown_structure import strip_fences_and_comments
 
 from layoutcheck.contract import ContractError
 
@@ -16,21 +20,29 @@ PLANE_RE = re.compile(r"^(\d+)\s*×\s*(\d+)(?![\d.])")
 
 
 class MalformedCellError(ValueError):
-    """A worked cell is not a sum of integers joined by ``+``."""
+    """A worked cell is not a sum of integers with at most one total."""
 
-    def __init__(self, cell: str) -> None:
-        """Describe the cell that is not a plain sum.
+    def __init__(self, cell: str, reason: str = "") -> None:
+        """Describe the cell that could not be read as worked arithmetic.
 
         Parameters
         ----------
         cell : str
-            The worked cell that could not be parsed as a sum.
+            The worked cell that could not be parsed.
+        reason : str
+            The defect, as a clause that follows the quoted cell. It
+            defaults to the cell not being a plain sum.
         """
-        super().__init__(f"{cell!r} is not a sum of integers joined by '+'")
+        detail = reason or "is not a sum of integers joined by '+'"
+        super().__init__(f"{cell!r} {detail}")
 
 
 def tables(text: str) -> list[list[list[str]]]:
-    """Return every Markdown table as rows of stripped cells.
+    """Return every rendered Markdown table as rows of stripped cells.
+
+    Fenced code blocks and HTML comments are discarded first, so a table that
+    a renderer would only show as an example, or not show at all, is not read
+    as the chapter's table.
 
     Parameters
     ----------
@@ -44,7 +56,7 @@ def tables(text: str) -> list[list[list[str]]]:
     """
     found: list[list[list[str]]] = []
     rows: list[list[str]] = []
-    for raw in text.splitlines():
+    for raw in strip_fences_and_comments(text).splitlines():
         line = raw.strip()
         if line.startswith("|"):
             rows.append([cell.strip() for cell in line.strip("|").split("|")])
@@ -100,12 +112,43 @@ def table_with(text: str, header: str) -> list[list[str]]:
     raise ContractError(f"chapter 14 has no table with a {header!r} column")
 
 
+def _worked_parts(cell: str) -> tuple[str, str | None]:
+    """Split a worked cell into its addend text and its stated total.
+
+    A worked cell states its total at most once. A cell that joins two totals
+    with more than one equals sign, such as ``44 + 116 = 999 = 160``, would
+    leave the intermediate equality unchecked, so it is rejected rather than
+    read from its last total.
+
+    Parameters
+    ----------
+    cell : str
+        The worked arithmetic cell.
+
+    Returns
+    -------
+    tuple[str, str | None]
+        The text before the equals sign, and the text after it when the cell
+        states a total.
+
+    Raises
+    ------
+    MalformedCellError
+        If the cell states more than one total.
+    """
+    parts = cell.split("=")
+    if len(parts) > 2:
+        raise MalformedCellError(cell, "states more than one total")
+    return parts[0], parts[1] if len(parts) == 2 else None
+
+
 def addends(cell: str) -> list[int]:
     """Return the integer addends of a worked arithmetic cell.
 
     Only ``+`` may join the addends. Any other operator, or a term that is not
     an integer, raises `MalformedCellError` instead of extracting numbers from a
-    malformed cell.
+    malformed cell. A cell that states more than one total is rejected too,
+    because the extra equality would go unchecked.
 
     Parameters
     ----------
@@ -117,8 +160,9 @@ def addends(cell: str) -> list[int]:
     list[int]
         The addends that precede any stated total.
     """
+    terms, _total = _worked_parts(cell)
     try:
-        return [int(term) for term in cell.split("=")[0].split("+")]
+        return [int(term) for term in terms.split("+")]
     except ValueError as error:
         raise MalformedCellError(cell) from error
 
@@ -127,8 +171,8 @@ def stated_total(cell: str) -> int:
     """Return the total that a worked arithmetic cell states.
 
     A cell that states no total, because it has no equals sign, still supplies
-    its own integer as the total. The total is read from the text after the
-    last equals sign.
+    its own integer as the total. The total is read from the text after the one
+    equals sign that the cell may hold.
 
     Parameters
     ----------
@@ -138,15 +182,16 @@ def stated_total(cell: str) -> int:
     Returns
     -------
     int
-        The integer after the last equals sign, or the integer that the whole
-        cell holds when the cell states no total.
+        The integer after the equals sign, or the integer that the whole cell
+        holds when the cell states no total.
 
     Raises
     ------
     ValueError
         If the stated total is not an integer.
     """
-    return int(cell.split("=")[-1])
+    terms, total = _worked_parts(cell)
+    return int(terms if total is None else total)
 
 
 def plane_size(cell: str) -> tuple[int, int] | None:

@@ -89,9 +89,13 @@ def check_requirements(book: Path, contract: Contract, problems: list[str]) -> N
     contract : Contract
         The loaded link contract, which names the checklist.
     problems : list[str]
-        The accumulated problems, extended in place.
+        The accumulated problems, extended in place. A missing checklist
+        adds nothing here: `linkcheck.links.check_manifest` already reports
+        every chapter the manifest declares but the book lacks.
     """
     checklist = book / contract.requirements["checklist"]
+    if not checklist.exists():
+        return
     text = strip_code_and_comments(checklist.read_text(encoding="utf-8"))
     context = _Context(
         checklist=checklist,
@@ -148,7 +152,9 @@ def check_states(book: Path, contract: Contract, problems: list[str]) -> None:
     contract : Contract
         The loaded link contract, which names the states and their owners.
     problems : list[str]
-        The accumulated problems, extended in place.
+        The accumulated problems, extended in place. A missing owner chapter
+        adds nothing here: `linkcheck.links.check_manifest` already reports
+        every chapter the manifest declares but the book lacks.
     """
     spec = contract.states
     for group, owner_key, heading in (
@@ -160,6 +166,8 @@ def check_states(book: Path, contract: Contract, problems: list[str]) -> None:
         ),
     ):
         owner = book / spec[owner_key]
+        if not owner.exists():
+            continue
         text = strip_fences_and_comments(owner.read_text(encoding="utf-8"))
         cells = first_cells(section(text, heading))
         problems.extend(
@@ -179,10 +187,14 @@ def check_profiles(book: Path, contract: Contract, problems: list[str]) -> None:
     contract : Contract
         The loaded link contract, which names the profiles and their owner.
     problems : list[str]
-        The accumulated problems, extended in place.
+        The accumulated problems, extended in place. A missing owner chapter
+        adds nothing here: `linkcheck.links.check_manifest` already reports
+        every chapter the manifest declares but the book lacks.
     """
     spec = contract.profiles
     owner = book / spec["owner"]
+    if not owner.exists():
+        return
     text = strip_code_and_comments(owner.read_text(encoding="utf-8"))
     problems.extend(
         f"{owner.name}: profile {name!r} is not declared"
