@@ -73,29 +73,62 @@ def _placeholder(char: str, base: int) -> str:
     return chr(base + _PUNCTUATION.index(char) + 1)
 
 
+def _punctuation_standin(char: str, base: int) -> str | None:
+    """Return the punctuation a stand-in holds, or ``None`` for other text."""
+    code = ord(char) - base
+    if 0 < code <= len(_PUNCTUATION):
+        return _PUNCTUATION[code - 1]
+    return None
+
+
 def _restore(text: str, base: int) -> str:
-    """Return text with each stand-in turned back into the character it holds."""
+    """Return text with its escape stand-ins turned back into literal text.
+
+    Every backslash was replaced by one stand-in, so a run of ``r`` stand-ins
+    renders as ``r // 2`` literal backslashes. An odd run also escapes the
+    character after it: when that character is a punctuation stand-in it
+    renders as the punctuation alone, and otherwise as a literal backslash
+    followed by the character.
+    """
     out: list[str] = []
-    for char in text:
-        code = ord(char) - base
-        if code == 0:
-            out.append("\\")
-        elif 0 < code <= len(_PUNCTUATION):
-            out.append(_PUNCTUATION[code - 1])
-        else:
-            out.append(char)
+    index = 0
+    while index < len(text):
+        if text[index] != chr(base):
+            punctuation = _punctuation_standin(text[index], base)
+            out.append(punctuation if punctuation is not None else text[index])
+            index += 1
+            continue
+        end = index
+        while end < len(text) and text[end] == chr(base):
+            end += 1
+        run = end - index
+        out.append("\\" * (run // 2))
+        if run % 2:
+            escaped = _punctuation_standin(text[end], base) if end < len(text) else None
+            if escaped is not None:
+                out.append(escaped)
+                end += 1
+            else:
+                out.append("\\")
+        index = end
     return "".join(out)
+
+
+def _escapes_at(text: str, end: int, run: int) -> bool:
+    """Return whether an odd backslash run ends by escaping punctuation."""
+    return run % 2 == 1 and end < len(text) and text[end] in _ESCAPABLE
 
 
 def _neutralise_escapes(text: str, base: int) -> str:
     """Return text with CommonMark backslash escapes made inert.
 
-    A run of backslashes before an escapable character renders as half as many
-    literal backslashes, and an odd run makes the character after it literal
-    punctuation that can neither open nor close a delimiter. Each is replaced
-    with a distinct stand-in drawn from the ``base`` run, which `_restore`
-    turns back into the character it stood for, so a destination keeps the text
-    the renderer would follow.
+    Every backslash is replaced by one stand-in drawn from the ``base`` run, so
+    the stand-ins record the source spelling exactly: a label written with two
+    backslashes stays distinguishable from one written with a single one.
+    Escapable punctuation after an odd run is replaced by its own stand-in, so
+    it can neither open nor close a delimiter. `_restore` applies CommonMark's
+    halving rule to a run when a destination is reported, so the caller keeps
+    the text the renderer would follow.
 
     Parameters
     ----------
@@ -107,7 +140,7 @@ def _neutralise_escapes(text: str, base: int) -> str:
     Returns
     -------
     str
-        The same text with every backslash run resolved.
+        The same text with its backslashes and escaped punctuation masked.
     """
     out: list[str] = []
     index = 0
@@ -120,13 +153,10 @@ def _neutralise_escapes(text: str, base: int) -> str:
         while end < len(text) and text[end] == "\\":
             end += 1
         run = end - index
-        out.append(chr(base) * (run // 2))
-        if run % 2:
-            if end < len(text) and text[end] in _ESCAPABLE:
-                out.append(_placeholder(text[end], base))
-                end += 1
-            else:
-                out.append(chr(base))
+        out.append(chr(base) * run)
+        if _escapes_at(text, end, run):
+            out.append(_placeholder(text[end], base))
+            end += 1
         index = end
     return "".join(out)
 
@@ -143,8 +173,9 @@ def _normalise_label(label: str) -> str:
 
     Matching compares the label's source spelling after whitespace collapsing
     and case folding; escapes are not resolved first, so ``foo\!`` and
-    ``foo!`` remain different labels. The escape stand-ins therefore stay in
-    place, which also keeps them distinct from the characters they stand for.
+    ``foo!`` remain different labels, as do ``a\qb`` and ``a\\qb``. The
+    stand-ins therefore stay in place, and because each one records a single
+    source character the masked spelling is injective in the source spelling.
     """
     return re.sub(r"\s+", " ", label.strip()).casefold()
 
@@ -204,7 +235,8 @@ def targets(text: str, *, images: bool | None = None) -> list[str]:
     backslash, so only an odd run of backslashes can escape the delimiter that
     follows it. A reported destination holds those literal characters, not the
     stand-ins used while the text is scanned, and two labels that differ only
-    in escaped punctuation resolve to their own definitions. The stand-ins come
+    in escaped punctuation or in the length of a backslash run resolve to their
+    own definitions, as CommonMark matches the source spelling. The stand-ins come
     from a private-use run the source does not use, so a literal private-use
     character in a destination or a label is reported unchanged.
 

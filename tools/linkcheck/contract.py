@@ -229,6 +229,35 @@ def _resources(document: dict[str, object]) -> ResourceSpec:
     }
 
 
+def _book_references(contract: Contract) -> list[tuple[str, str]]:
+    """Return every named book file with the contract field that names it."""
+    return [
+        ("requirements.checklist", contract.requirements["checklist"]),
+        ("states.live_owner", contract.states["live_owner"]),
+        ("states.resolution_owner", contract.states["resolution_owner"]),
+        ("profiles.owner", contract.profiles["owner"]),
+        ("commands.record_owner", contract.commands["record_owner"]),
+        *[("commands.views", name) for name in contract.commands["views"]],
+        ("resources.owner", contract.resources["owner"]),
+        *[("resources.consumers", name) for name in contract.resources["consumers"]],
+    ]
+
+
+def _validate_references(contract: Contract) -> None:
+    """Report a named book file that the manifest does not declare.
+
+    Every file these fields name is a chapter, and `check_manifest` only
+    reports chapters the manifest declares, so a reference outside the
+    manifest would otherwise be skipped without any diagnostic.
+    """
+    declared = {entry["file"] for entry in contract.chapters}
+    for field, name in _book_references(contract):
+        if name not in declared:
+            raise ContractError(
+                f"{field} names {name!r}, which the manifest does not declare"
+            )
+
+
 def load_contract(path: Path) -> Contract:
     """Load and validate the link contract at ``path``.
 
@@ -246,7 +275,8 @@ def load_contract(path: Path) -> Contract:
     ------
     ContractError
         If the document cannot be read, does not declare a section the checks
-        read, or declares an identifier pattern that does not compile.
+        read, declares an identifier pattern that does not compile, or names
+        a book file that the manifest does not declare.
     """
     document = load_document(path)
     requirements = _requirements(document)
@@ -256,7 +286,7 @@ def load_contract(path: Path) -> Contract:
         raise ContractError(
             f"requirement identifier pattern does not compile: {error}"
         ) from error
-    return Contract(
+    contract = Contract(
         chapters=_chapters(document),
         navigation=_text(document, "navigation"),
         requirements=requirements,
@@ -266,6 +296,8 @@ def load_contract(path: Path) -> Contract:
         resources=_resources(document),
         requirement_ids=requirement_ids,
     )
+    _validate_references(contract)
+    return contract
 
 
 def resolved_destination(base: Path, target: str) -> Path | None:

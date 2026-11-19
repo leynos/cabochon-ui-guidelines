@@ -112,3 +112,10 @@ def test_angle_bracket_destination_loses_its_brackets() -> None:
     assert targets("[angle](<01-purpose.md>)") == ["01-purpose.md"], (
         "the reported destination omits the angle brackets"
     )
+
+def test_labels_that_differ_in_backslash_run_length_stay_distinct() -> None:
+    """The stand-ins record each backslash, so the source spelling is kept."""
+    text = "[a\\qb]: one.md\n[a\\\\qb]: two.md\n\n[u1][a\\qb]\n[u2][a\\\\qb]\n"
+    assert link_targets(text) == ["one.md", "two.md"], (
+        "one backslash and two resolve to their own definitions"
+    )

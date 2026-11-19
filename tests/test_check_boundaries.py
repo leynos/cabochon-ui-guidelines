@@ -9,6 +9,7 @@ status rather than a traceback.
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -119,6 +120,61 @@ def test_link_checks_report_destinations_relative_to_the_supplied_book(
         "book/01-one.md: missing link target missing.md",
         "book/01-one.md: missing anchor #absent in book/README.md",
     ], "the problems name the chapter path relative to the supplied book"
+
+
+def _naming(
+    section: str, key: str, value: object
+) -> Callable[[dict[str, object]], None]:
+    """Return a mutation that replaces one field of a named contract section."""
+
+    def mutate(document: dict[str, object]) -> None:
+        part = document[section]
+        assert isinstance(part, dict), "the fixture declares the section"
+        part[key] = value
+
+    return mutate
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        pytest.param(
+            _naming("requirements", "checklist", "99-absent.md"), id="checklist"
+        ),
+        pytest.param(
+            _naming("states", "live_owner", "99-absent.md"), id="live-owner"
+        ),
+        pytest.param(
+            _naming("states", "resolution_owner", "99-absent.md"),
+            id="resolution-owner",
+        ),
+        pytest.param(_naming("profiles", "owner", "99-absent.md"), id="profile-owner"),
+        pytest.param(
+            _naming("commands", "record_owner", "99-absent.md"), id="command-owner"
+        ),
+        pytest.param(
+            _naming("commands", "views", ["99-absent.md"]), id="command-view"
+        ),
+        pytest.param(
+            _naming("resources", "owner", "99-absent.md"), id="resource-owner"
+        ),
+        pytest.param(
+            _naming("resources", "consumers", ["99-absent.md"]),
+            id="resource-consumer",
+        ),
+    ],
+)
+def test_link_contract_rejects_a_reference_outside_the_manifest(
+    tmp_path: Path, mutate: Callable[[dict[str, object]], None]
+) -> None:
+    """A named book file the manifest does not declare is reported."""
+    document = _link_document()
+    mutate(document)
+    with pytest.raises(ContractError) as info:
+        load_contract(_write_link(tmp_path, document))
+    assert "which the manifest does not declare" in str(info.value), (
+        "the error names the reference the manifest does not declare"
+    )
 
 
 def test_link_contract_rejects_a_pattern_that_does_not_compile(
