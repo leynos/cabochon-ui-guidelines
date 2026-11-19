@@ -10,7 +10,7 @@ from __future__ import annotations
 import typing as typ
 
 from statecheck.contract import ContractError, Facts, Step
-from statecheck.projection import vector_at_least
+from statecheck.projection import NO_MUTATION, Mutation, vector_at_least
 
 if typ.TYPE_CHECKING:
     import collections.abc as cabc
@@ -143,16 +143,27 @@ def _source_advanced(facts: Facts, step: Step) -> None:
     facts["request_covers"] = dict(facts["known_source"])
 
 
-def request_allowed(facts: Facts) -> bool:
-    """Derive whether the request is permitted."""
+def request_allowed(facts: Facts, mutation: Mutation = NO_MUTATION) -> bool:
+    """Derive whether the request is permitted.
+
+    Parameters
+    ----------
+    facts
+        The fact set the request would be issued from.
+    mutation
+        A deviation the self-test asks for; ``present_only`` refuses a request
+        whose source is merely uncertain.
+    """
     if not facts["authorized"]:
         return False
+    if mutation.present_only:
+        return facts["availability"] == "present"
     return facts["availability"] in {"present", "uncertain"}
 
 
-def _refresh_requested(facts: Facts, step: Step) -> None:
+def _refresh_requested(facts: Facts, step: Step, mutation: Mutation) -> None:
     """Derive the facts of a permitted refresh request."""
-    if not request_allowed(facts):
+    if not request_allowed(facts, mutation):
         return
     facts["request_generation"] += 1
     facts["request_active"] = True
@@ -239,7 +250,6 @@ PLAIN_HANDLERS: dict[str, cabc.Callable[[Facts, Step], None]] = {
     "grant_revoked": _grant_revoked,
     "grant_issued": _grant_issued,
     "source_advanced": _source_advanced,
-    "refresh_requested": _refresh_requested,
 }
 
 
@@ -271,17 +281,40 @@ def _provider_event(facts: Facts, step: Step, *, observe: bool) -> None:
     facts["availability"] = "present"
 
 
-def apply(
+def apply(  # ruff: ignore[too-many-arguments]  # pylint: disable=too-many-arguments
     facts: Facts,
     step: Step,
     *,
     observe_provider_while_denied: bool = True,
     check_reply_identity: bool = True,
+    mutation: Mutation = NO_MUTATION,
 ) -> None:
-    """Apply one event and its reply identity to the fact set."""
+    """Apply one event and its reply identity to the fact set.
+
+    Parameters
+    ----------
+    facts
+        The fact set to advance; updated in place.
+    step
+        The event to apply.
+    observe_provider_while_denied
+        Whether a provider event is recorded while the grant is denied.
+    check_reply_identity
+        Whether a reply must match the in-flight request's identity.
+    mutation
+        A deviation from the request policy that the self-test asks for.
+
+    Raises
+    ------
+    ContractError
+        If the step names an event the contract does not declare.
+    """
     event = step["event"]
     if event in PROVIDER_EVENTS:
         _provider_event(facts, step, observe=observe_provider_while_denied)
+        return
+    if event == "refresh_requested":
+        _refresh_requested(facts, step, mutation)
         return
     if event in PLAIN_HANDLERS:
         PLAIN_HANDLERS[event](facts, step)

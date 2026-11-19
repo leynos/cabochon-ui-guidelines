@@ -20,6 +20,7 @@ from linkcheck.contract import (
     FRONT_FIGURE_RE,
     FRONT_MATTER_RE,
     FRONT_PART_RE,
+    ChapterEntry,
     Contract,
     resolved_destination,
 )
@@ -58,6 +59,99 @@ def _relative(path: Path, root: Path) -> Path:
         return path
 
 
+def _unreadable(
+    path: Path,
+    root: Path,
+    error: OSError | UnicodeDecodeError,
+    problems: list[str],
+) -> None:
+    """Report a failed read once, naming the file relative to ``root``.
+
+    Several checks read the same chapter, so the first failed read records
+    the diagnostic and every later one leaves it alone. The message names the
+    file, so two different files never share a diagnostic.
+    """
+    message = f"{_relative(path, root)}: cannot be read: {error}"
+    if message not in problems:
+        problems.append(message)
+
+
+def read_text(path: Path, root: Path, problems: list[str]) -> str | None:
+    """Return a file's text, or record one diagnostic when it cannot be read.
+
+    Parameters
+    ----------
+    path : Path
+        The file to read.
+    root : Path
+        The directory the diagnostic reports the file against.
+    problems : list[str]
+        The accumulated problems, extended in place when the read fails.
+
+    Returns
+    -------
+    str | None
+        The decoded text, or ``None`` when the file could not be read. The
+        failed read is reported once, naming the file relative to ``root``, so
+        a caller can skip the checks that need the text rather than repeating
+        or inventing a defect.
+    """
+    try:
+        return path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as error:
+        _unreadable(path, root, error, problems)
+        return None
+
+
+def read_anchors(path: Path, root: Path, problems: list[str]) -> set[str] | None:
+    """Return a chapter's anchors, or record one diagnostic when unreadable.
+
+    Parameters
+    ----------
+    path : Path
+        The chapter whose anchors are wanted.
+    root : Path
+        The directory the diagnostic reports paths against.
+    problems : list[str]
+        The accumulated problems, extended in place when the read fails.
+
+    Returns
+    -------
+    set[str] | None
+        The chapter's anchors, or ``None`` when the file could not be read.
+    """
+    try:
+        return anchors(path)
+    except (OSError, UnicodeDecodeError) as error:
+        _unreadable(path, root, error, problems)
+        return None
+
+
+def _check_target(
+    chapter: Path, target: str, root: Path, problems: list[str]
+) -> None:
+    """Check one local link target and any fragment it names."""
+    if target.startswith(("http://", "https://", "mailto:")):
+        return
+    if target.startswith("#"):
+        path = chapter
+        fragment = target[1:]
+    else:
+        path_part, _, fragment = target.partition("#")
+        path = (chapter.parent / path_part).resolve()
+        if not path.exists():
+            problems.append(f"{_relative(chapter, root)}: missing link target {target}")
+            return
+    if not fragment or path.suffix != ".md":
+        return
+    known = read_anchors(path, root, problems)
+    if known is not None and fragment not in known:
+        problems.append(
+            f"{_relative(chapter, root)}: missing anchor "
+            f"#{fragment} in {_relative(path, root)}"
+        )
+
+
 def check_links(chapters: list[Path], book: Path, problems: list[str]) -> None:
     """Check that every local link target and fragment resolves.
 
@@ -72,28 +166,11 @@ def check_links(chapters: list[Path], book: Path, problems: list[str]) -> None:
     """
     root = book.parent
     for chapter in chapters:
-        text = chapter.read_text(encoding="utf-8")
+        text = read_text(chapter, root, problems)
+        if text is None:
+            continue
         for target in targets(text):
-            if target.startswith(("http://", "https://", "mailto:")):
-                continue
-            if target.startswith("#"):
-                path = chapter
-                fragment = target[1:]
-            else:
-                path_part, _, fragment = target.partition("#")
-                path = (chapter.parent / path_part).resolve()
-                if not path.exists():
-                    problems.append(
-                        f"{_relative(chapter, root)}: missing link target {target}"
-                    )
-                    continue
-            if not fragment or path.suffix != ".md":
-                continue
-            if fragment not in anchors(path):
-                problems.append(
-                    f"{_relative(chapter, root)}: missing anchor "
-                    f"#{fragment} in {_relative(path, root)}"
-                )
+            _check_target(chapter, target, root, problems)
 
 
 def check_front_figure(chapters: list[Path], book: Path, problems: list[str]) -> None:
@@ -111,7 +188,9 @@ def check_front_figure(chapters: list[Path], book: Path, problems: list[str]) ->
     root = book.parent
     figures = root / "figures"
     for chapter in chapters:
-        text = chapter.read_text(encoding="utf-8")
+        text = read_text(chapter, root, problems)
+        if text is None:
+            continue
         declared = FRONT_FIGURE_RE.findall(_front_matter(text))
         if not declared:
             continue
@@ -123,6 +202,32 @@ def check_front_figure(chapters: list[Path], book: Path, problems: list[str]) ->
                 f"{_relative(chapter, root)}: declared figure {figure} "
                 "is not embedded as an image in the body"
             )
+
+
+def _check_entry(
+    entry: ChapterEntry, book: Path, nav_paths: set[Path], problems: list[str]
+) -> None:
+    """Check that one manifest entry is navigated and declares its part.
+
+    An entry that cannot be read is reported as that failed read, so the
+    missing part it would otherwise imply is not also reported.
+    """
+    name = entry["file"]
+    if (book / name).resolve() not in nav_paths:
+        problems.append(f"navigation does not link chapter {name}")
+    path = book / name
+    if not path.exists():
+        return
+    text = read_text(path, book.parent, problems)
+    if text is None:
+        return
+    part = FRONT_PART_RE.findall(_front_matter(text))
+    if not part:
+        problems.append(f"{name}: missing part in front matter")
+    elif part[0] != entry["part"]:
+        problems.append(
+            f"{name}: part {part[0]!r} disagrees with manifest {entry['part']!r}"
+        )
 
 
 def check_manifest(
@@ -157,23 +262,13 @@ def check_manifest(
     if not navigation.exists():
         problems.append(f"navigation {contract.navigation} is missing")
         return
-    nav_text = navigation.read_text(encoding="utf-8")
+    nav_text = read_text(navigation, book.parent, problems)
+    if nav_text is None:
+        return
     nav_paths = {
         resolved
         for target in link_targets(nav_text)
         if (resolved := resolved_destination(book, target)) is not None
     }
     for entry in entries:
-        name = entry["file"]
-        if (book / name).resolve() not in nav_paths:
-            problems.append(f"navigation does not link chapter {name}")
-        path = book / name
-        if not path.exists():
-            continue
-        part = FRONT_PART_RE.findall(_front_matter(path.read_text(encoding="utf-8")))
-        if not part:
-            problems.append(f"{name}: missing part in front matter")
-        elif part[0] != entry["part"]:
-            problems.append(
-                f"{name}: part {part[0]!r} disagrees with manifest {entry['part']!r}"
-            )
+        _check_entry(entry, book, nav_paths, problems)

@@ -12,43 +12,19 @@ import sys
 import typing as typ
 
 from statecheck.contract import (
+    CHAPTER,
     DATA_PATH,
+    FIGURE,
     FIXTURES_PATH,
     Contract,
-    Facts,
     LiveTransition,
     Step,
-    defaults,
     load_contract,
 )
-from statecheck.events import request_allowed, validate_step
-from statecheck.projection import project, vector_at_least
+from statecheck.events import validate_step
+from statecheck.projection import Mutation
 from statecheck.scenarios import run_scenario, scenario_named
 from statecheck.transitions import compare_chapter, compare_figure, validate_transitions
-
-
-def _broken_first(facts: Facts) -> str:
-    """Return whether broken outranks stale in the projection order."""
-    if not facts["accepted"]:
-        return "Broken"
-    return project(facts)
-
-
-def _ignore_epoch(facts: Facts) -> str:
-    """Return whether a response belongs to a superseded epoch."""
-    if not facts["authorized"]:
-        return "Denied"
-    if facts["request_active"]:
-        return "Refreshing"
-    if facts["availability"] != "present" or not facts["accepted"]:
-        return "Broken"
-    fresh = vector_at_least(facts["accepted_validated"], facts["known_source"])
-    return "Current" if fresh else "Stale"
-
-
-def _present_only_request(facts: Facts) -> bool:
-    """Return whether a request carries only present values."""
-    return bool(facts["authorized"]) and facts["availability"] == "present"
 
 
 class MutationChecks:
@@ -98,33 +74,40 @@ def _edge_mutations(
         if record["id"] == "refresh-denied":
             record["owner"] = "Host"
     checks.require(
-        any("unknown transition" in error for error in compare_chapter(wrong_owner)),
+        any(
+            "unknown transition" in error
+            for error in compare_chapter(wrong_owner, CHAPTER)
+        ),
         "owner drift from the chapter table was not detected",
     )
 
 
 def _projection_mutations(checks: MutationChecks, contract: Contract) -> None:
-    """Yield mutations that break the projection order."""
-    first_load: Facts = copy.deepcopy(defaults(contract.fixtures))
-    first_load["request_active"] = True
+    """Require the fixtures to catch each deviation from the declared rules."""
     checks.require(
-        _broken_first(first_load) != project(first_load),
+        run_scenario(
+            scenario_named("first load without a cached value", contract.fixtures),
+            contract,
+            mutation=Mutation(broken_first=True),
+        ),
         "Broken no-cache projection was not detected",
     )
-
-    recovered: Facts = copy.deepcopy(defaults(contract.fixtures))
-    recovered["accepted"] = True
-    recovered["accepted_validated"] = {"rate": 1}
-    recovered["invalidation_epoch"] = 1
     checks.require(
-        _ignore_epoch(recovered) != project(recovered),
+        run_scenario(
+            scenario_named(
+                "failure invalidates freshness before recovery", contract.fixtures
+            ),
+            contract,
+            mutation=Mutation(ignore_epoch=True),
+        ),
         "ignored invalidation epoch was not detected",
     )
-
-    after_failure: Facts = copy.deepcopy(defaults(contract.fixtures))
-    after_failure["availability"] = "uncertain"
     checks.require(
-        _present_only_request(after_failure) != request_allowed(after_failure),
+        run_scenario(
+            scenario_named("timeout then retry", contract.fixtures),
+            contract,
+            mutation=Mutation(present_only=True),
+        ),
         "retry after an uncertain timeout was not detected",
     )
 
@@ -159,6 +142,7 @@ def _validation_mutations(checks: MutationChecks, contract: Contract) -> None:
 def _fixture_mutations(checks: MutationChecks, contract: Contract) -> None:
     """Yield mutations that break the event fixtures."""
     for name in (
+        "first load without a cached value",
         "provider loss while denied is remembered",
         "superseded reply is discarded",
         "timeout then retry",
@@ -202,7 +186,7 @@ def _figure_mutation(
     checks.require(
         any(
             "figure does not render event" in error
-            for error in compare_figure(missing_event)
+            for error in compare_figure(missing_event, FIGURE)
         ),
         "figure drift from the typed source was not detected",
     )
@@ -214,7 +198,7 @@ def _figure_mutation(
     checks.require(
         any(
             "figure does not render to" in error
-            for error in compare_figure(drifted_target)
+            for error in compare_figure(drifted_target, FIGURE)
         ),
         "figure target drift to another rendered label was not detected",
     )

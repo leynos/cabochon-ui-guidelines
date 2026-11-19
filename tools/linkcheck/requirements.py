@@ -15,7 +15,6 @@ if typ.TYPE_CHECKING:
 
 from markdown_links import link_targets
 from markdown_structure import (
-    anchors,
     checklist_items,
     slug,
     strip_code_and_comments,
@@ -28,28 +27,37 @@ from linkcheck.contract import (
     Contract,
     resolved_destination,
 )
-
-
-def _check_owner(
-    identifier: str, owner: str, checklist: Path, problems: list[str]
-) -> None:
-    """Check that a contract entry names every owning chapter."""
-    path_part, _, fragment = owner.partition("#")
-    path = (checklist.parent / path_part).resolve()
-    if not path.exists():
-        problems.append(f"requirement {identifier}: missing owner {owner}")
-        return
-    if fragment and fragment not in anchors(path):
-        problems.append(f"requirement {identifier}: missing owner anchor {owner}")
+from linkcheck.links import read_anchors, read_text
 
 
 class _Context(typ.NamedTuple):
     """The shared inputs for one checklist item's checks."""
 
+    book: Path
     checklist: Path
     contract: Contract
     seen: set[str]
     problems: list[str]
+
+
+def _check_owner(identifier: str, owner: str, context: _Context) -> None:
+    """Check that a contract entry names every owning chapter.
+
+    An owner that cannot be read is reported as that failed read, so the
+    missing anchor it would otherwise imply is not also reported.
+    """
+    path_part, _, fragment = owner.partition("#")
+    path = (context.checklist.parent / path_part).resolve()
+    if not path.exists():
+        context.problems.append(f"requirement {identifier}: missing owner {owner}")
+        return
+    if not fragment:
+        return
+    known = read_anchors(path, context.book.parent, context.problems)
+    if known is not None and fragment not in known:
+        context.problems.append(
+            f"requirement {identifier}: missing owner anchor {owner}"
+        )
 
 
 def _requirement_identifier(block: str, context: _Context) -> str | None:
@@ -76,7 +84,7 @@ def _check_requirement(block: str, context: _Context) -> None:
     if not owners:
         context.problems.append(f"requirement {identifier} names no owner")
     for owner in owners:
-        _check_owner(identifier, owner, context.checklist, context.problems)
+        _check_owner(identifier, owner, context)
 
 
 def check_requirements(book: Path, contract: Contract, problems: list[str]) -> None:
@@ -91,13 +99,18 @@ def check_requirements(book: Path, contract: Contract, problems: list[str]) -> N
     problems : list[str]
         The accumulated problems, extended in place. A missing checklist
         adds nothing here: `linkcheck.links.check_manifest` already reports
-        every chapter the manifest declares but the book lacks.
+        every chapter the manifest declares but the book lacks. A checklist
+        that cannot be read is reported as that failed read.
     """
     checklist = book / contract.requirements["checklist"]
     if not checklist.exists():
         return
-    text = strip_code_and_comments(checklist.read_text(encoding="utf-8"))
+    source = read_text(checklist, book.parent, problems)
+    if source is None:
+        return
+    text = strip_code_and_comments(source)
     context = _Context(
+        book=book,
         checklist=checklist,
         contract=contract,
         seen=set(),
@@ -154,7 +167,8 @@ def check_states(book: Path, contract: Contract, problems: list[str]) -> None:
     problems : list[str]
         The accumulated problems, extended in place. A missing owner chapter
         adds nothing here: `linkcheck.links.check_manifest` already reports
-        every chapter the manifest declares but the book lacks.
+        every chapter the manifest declares but the book lacks. An owner
+        chapter that cannot be read is reported as that failed read.
     """
     spec = contract.states
     for group, owner_key, heading in (
@@ -168,7 +182,10 @@ def check_states(book: Path, contract: Contract, problems: list[str]) -> None:
         owner = book / spec[owner_key]
         if not owner.exists():
             continue
-        text = strip_fences_and_comments(owner.read_text(encoding="utf-8"))
+        source = read_text(owner, book.parent, problems)
+        if source is None:
+            continue
+        text = strip_fences_and_comments(source)
         cells = first_cells(section(text, heading))
         problems.extend(
             f"{owner.name}: {group} state {state!r} is not declared in its state table"
@@ -189,13 +206,17 @@ def check_profiles(book: Path, contract: Contract, problems: list[str]) -> None:
     problems : list[str]
         The accumulated problems, extended in place. A missing owner chapter
         adds nothing here: `linkcheck.links.check_manifest` already reports
-        every chapter the manifest declares but the book lacks.
+        every chapter the manifest declares but the book lacks. An owner
+        chapter that cannot be read is reported as that failed read.
     """
     spec = contract.profiles
     owner = book / spec["owner"]
     if not owner.exists():
         return
-    text = strip_code_and_comments(owner.read_text(encoding="utf-8"))
+    source = read_text(owner, book.parent, problems)
+    if source is None:
+        return
+    text = strip_code_and_comments(source)
     problems.extend(
         f"{owner.name}: profile {name!r} is not declared"
         for name in spec["names"]
@@ -203,12 +224,21 @@ def check_profiles(book: Path, contract: Contract, problems: list[str]) -> None:
     )
 
 
-def _references_path(path: Path, owner: Path) -> bool:
-    """Return whether a chapter links to a contract owner file."""
+def _references_path(
+    path: Path, owner: Path, book: Path, problems: list[str]
+) -> bool:
+    """Return whether a chapter links to a contract owner file.
+
+    A chapter that cannot be read is reported as that failed read, and the
+    missing reference it would otherwise imply is not also reported.
+    """
+    source = read_text(path, book.parent, problems)
+    if source is None:
+        return True
     resolved_owner = owner.resolve()
     return any(
         resolved_destination(path.parent, target) == resolved_owner
-        for target in link_targets(path.read_text(encoding="utf-8"))
+        for target in link_targets(source)
     )
 
 
@@ -234,7 +264,7 @@ def check_commands(book: Path, contract: Contract, problems: list[str]) -> None:
         if not path.exists():
             problems.append(f"command view {view} is missing")
             continue
-        if not _references_path(path, owner):
+        if not _references_path(path, owner, book, problems):
             problems.append(f"{view}: does not reference the command record owner")
 
 
@@ -260,5 +290,5 @@ def check_resources(book: Path, contract: Contract, problems: list[str]) -> None
         if not path.exists():
             problems.append(f"resource consumer {consumer} is missing")
             continue
-        if not _references_path(path, owner):
+        if not _references_path(path, owner, book, problems):
             problems.append(f"{consumer}: does not reference the resource owner")

@@ -59,9 +59,20 @@ def facts_for(overrides: dict[str, object]) -> Facts:
 
 @given(FACT_OVERRIDES)
 def test_projection_is_total(overrides: dict[str, object]) -> None:
-    """Every fact set projects to one of the declared visible states."""
+    """Every fact set projects to a declared state, and one to a known state."""
     assert project(facts_for(overrides)) in STATE_NAMES, (
         "every fact set projects to a declared state"
+    )
+    first_load = facts_for(
+        {
+            "authorized": True,
+            "availability": "present",
+            "accepted": False,
+            "request_active": False,
+        }
+    )
+    assert project(first_load) == "Broken", (
+        "a first load with nothing accepted projects the pinned state"
     )
 
 

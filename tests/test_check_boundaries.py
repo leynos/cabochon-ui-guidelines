@@ -122,6 +122,52 @@ def test_link_checks_report_destinations_relative_to_the_supplied_book(
     ], "the problems name the chapter path relative to the supplied book"
 
 
+def test_link_checks_report_an_undecodable_chapter(tmp_path: Path) -> None:
+    """A chapter that is not UTF-8 becomes one diagnostic, not an exception."""
+    contract = load_contract(_write_link(tmp_path, _link_document()))
+    book = _write_book(tmp_path, "See [the book](README.md).")
+    (book / "01-one.md").write_bytes(b"\xff\xfe# One\n")
+
+    problems = run_checks(contract, book)
+
+    assert len(problems) == 1, "the chapter is reported once"
+    assert problems[0].startswith("book/01-one.md: cannot be read: "), (
+        "the diagnostic names the chapter and the failed read"
+    )
+
+
+def test_link_checks_report_an_undecodable_link_target(tmp_path: Path) -> None:
+    """A target that is not UTF-8 is reported rather than raised."""
+    contract = load_contract(_write_link(tmp_path, _link_document()))
+    book = _write_book(tmp_path, "See [other](02-two.md#heading).")
+    (book / "02-two.md").write_bytes(b"\xff\xfe## Heading\n")
+
+    problems = run_checks(contract, book)
+
+    assert "book/02-two.md: cannot be read: " in " ".join(problems), (
+        "the unreadable target is reported by its own name"
+    )
+
+
+def test_link_cli_reports_an_undecodable_chapter(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The link command reports an unreadable chapter without a traceback."""
+    book = _write_book(tmp_path, "See [the book](README.md).")
+    (book / "01-one.md").write_bytes(b"\xff\xfe# One\n")
+    monkeypatch.setattr(
+        linkcheck_cli, "DATA_PATH", _write_link(tmp_path, _link_document())
+    )
+    monkeypatch.setattr(linkcheck_cli, "BOOK", book)
+
+    assert linkcheck_cli.main() == 1, "an unreadable chapter exits non-zero"
+    captured = capsys.readouterr()
+    assert "book/01-one.md: cannot be read: " in captured.err, (
+        "the command reports the failed read"
+    )
+    assert "Traceback" not in captured.err, "the defect is not raised"
+
+
 def _naming(
     section: str, key: str, value: object
 ) -> Callable[[dict[str, object]], None]:

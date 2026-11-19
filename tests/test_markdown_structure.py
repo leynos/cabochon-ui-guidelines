@@ -52,3 +52,19 @@ def test_a_multi_line_span_is_removed_whole() -> None:
     assert strip_code_and_comments("`one\ntwo` tail") == " tail", (
         "the whole span is removed"
     )
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "````\ninside\n```\nstill inside\n````\n\nafter\n",
+        "```\ninside\n``` extra\nstill inside\n```\n\nafter\n",
+        "```\ninside\n````\n\nafter\n",
+    ],
+    ids=["shorter", "trailing-text", "longer"],
+)
+def test_only_a_permitted_fence_line_closes_a_fence(source: str) -> None:
+    """A shorter or trailing-text fence line leaves the block open."""
+    assert strip_fences_and_comments(source) == "\nafter", (
+        "everything before the permitted closing fence is removed"
+    )

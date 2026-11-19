@@ -18,15 +18,16 @@ from statecheck.contract import (
     scenarios,
 )
 from statecheck.events import apply, validate_step
-from statecheck.projection import project
+from statecheck.projection import NO_MUTATION, Mutation, project
 
 
-def run_scenario(
+def run_scenario(  # ruff: ignore[too-many-arguments]  # pylint: disable=too-many-arguments
     scenario: Scenario,
     contract: Contract,
     *,
     observe_provider_while_denied: bool = True,
     check_reply_identity: bool = True,
+    mutation: Mutation = NO_MUTATION,
 ) -> list[str]:
     """Run one fixture sequence and report every projection mismatch.
 
@@ -40,6 +41,9 @@ def run_scenario(
         Whether a provider event is recorded while the grant is denied.
     check_reply_identity
         Whether a reply must match the in-flight request's identity.
+    mutation
+        A deviation from the declared rules that the self-test asks for. The
+        fixture's own expected states must report it.
 
     Returns
     -------
@@ -61,8 +65,9 @@ def run_scenario(
             step,
             observe_provider_while_denied=observe_provider_while_denied,
             check_reply_identity=check_reply_identity,
+            mutation=mutation,
         )
-        actual = project(facts)
+        actual = project(facts, mutation)
         if actual != step["expected"]:
             errors.append(
                 f"scenario {scenario['name']!r} after {step['event']!r}: "

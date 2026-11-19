@@ -13,9 +13,7 @@ import typing as typ
 from xml.etree import ElementTree
 
 from statecheck.contract import (
-    CHAPTER,
     EDGE_ID,
-    FIGURE,
     SVG_NS,
     Contract,
     ContractError,
@@ -24,6 +22,7 @@ from statecheck.contract import (
 
 if typ.TYPE_CHECKING:
     import collections.abc as cabc
+    from pathlib import Path
 
 
 def _check_identifier(
@@ -135,9 +134,29 @@ def validate_transitions(
     return errors
 
 
-def chapter_rows() -> list[tuple[str, str, str, str]]:
-    """Read the transition table under the chapter's Transitions heading."""
-    text = CHAPTER.read_text(encoding="utf-8")
+def chapter_rows(path: Path) -> list[tuple[str, str, str, str]]:
+    """Read the transition table under the chapter's Transitions heading.
+
+    Parameters
+    ----------
+    path
+        The chapter that declares the transition table.
+
+    Returns
+    -------
+    list[tuple[str, str, str, str]]
+        One ``(from, event, to, owner)`` row per transition the table states.
+
+    Raises
+    ------
+    OSError
+        If the chapter cannot be opened or read.
+    UnicodeDecodeError
+        If the chapter is not UTF-8 text.
+    ContractError
+        If the chapter has no Transitions section.
+    """
+    text = path.read_text(encoding="utf-8")
     match = re.search(
         r"^## Transitions\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL
     )
@@ -159,8 +178,30 @@ def chapter_rows() -> list[tuple[str, str, str, str]]:
     return rows
 
 
-def compare_chapter(transitions: list[LiveTransition]) -> list[str]:
-    """Compare the typed transitions with the chapter's table."""
+def compare_chapter(transitions: list[LiveTransition], path: Path) -> list[str]:
+    """Compare the typed transitions with the chapter's table.
+
+    Parameters
+    ----------
+    transitions
+        The typed transition records to compare.
+    path
+        The chapter that declares the transition table.
+
+    Returns
+    -------
+    list[str]
+        Every disagreement between the table and the typed records.
+
+    Raises
+    ------
+    OSError
+        If the chapter cannot be opened or read.
+    UnicodeDecodeError
+        If the chapter is not UTF-8 text.
+    ContractError
+        If the chapter has no Transitions section.
+    """
     errors: list[str] = []
     declared = [
         (
@@ -171,7 +212,7 @@ def compare_chapter(transitions: list[LiveTransition]) -> list[str]:
         )
         for record in transitions
     ]
-    actual = chapter_rows()
+    actual = chapter_rows(path)
     errors.extend(
         f"chapter 08 is missing transition {row!r}"
         for row in sorted(set(declared) - set(actual))
@@ -240,12 +281,33 @@ def _check_figure_row(
         )
 
 
-def compare_figure(transitions: list[LiveTransition]) -> list[str]:
-    """Check that the rendered state figure labels every transition field."""
+def compare_figure(transitions: list[LiveTransition], path: Path) -> list[str]:
+    """Check that the rendered state figure labels every transition field.
+
+    Parameters
+    ----------
+    transitions
+        The typed transition records to compare.
+    path
+        The rendered state figure to read.
+
+    Returns
+    -------
+    list[str]
+        One diagnostic per transition the figure does not render, plus one per
+        transition row the figure renders that the typed source omits.
+
+    Raises
+    ------
+    OSError
+        If the figure cannot be opened or read.
+    ElementTree.ParseError
+        If the figure is not well-formed XML.
+    """
     errors: list[str] = []
-    if not FIGURE.exists():
-        return [f"{FIGURE.name} does not exist; run make figures"]
-    root = ElementTree.parse(FIGURE).getroot()
+    if not path.exists():
+        return [f"{path.name} does not exist; run make figures"]
+    root = ElementTree.parse(path).getroot()
     groups = _transition_groups(root)
     for record in transitions:
         _check_figure_row(record, groups, errors)

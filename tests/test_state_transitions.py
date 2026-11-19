@@ -2,17 +2,16 @@
 
 Chapter 08 states its transitions as invariants rather than examples: a reply
 that does not match the in-flight request never changes the accepted value, a
-denied grant never projects anything but Denied, and every prefix of an event
-sequence projects one of the declared states. These tests draw fact sets, reply
-identities and event sequences from the declared vocabulary.
+denied grant never projects anything but Denied, and each event leaves the
+projection its own rule implies. These tests draw fact sets, reply identities
+and event sequences from the declared vocabulary.
 """
 
 from __future__ import annotations
 
 import copy
-import typing as typ
 
-from hypothesis import given
+from hypothesis import example, given
 from hypothesis import strategies as st
 from statecheck.contract import (
     DATA_PATH,
@@ -23,13 +22,14 @@ from statecheck.contract import (
     load_document,
     states,
 )
-from statecheck.events import EVENTS, PROVIDER_EVENTS, apply
+from statecheck.events import EVENTS, PROVIDER_EVENTS, REPLY_FIELDS, apply
 from statecheck.projection import project
 
 DATA = load_document(DATA_PATH)
 FIXTURES = load_document(FIXTURES_PATH)
 DEFAULT_FACTS = defaults(FIXTURES)
 STATE_NAMES = states(DATA)
+REPLY_EVENTS = frozenset(REPLY_FIELDS)
 VECTORS = st.dictionaries(
     st.sampled_from(["document", "profile", "rate"]),
     st.integers(min_value=0, max_value=8),
@@ -48,44 +48,128 @@ def facts_for(overrides: dict[str, object]) -> Facts:
     return facts
 
 
-def step_for(event: str) -> st.SearchStrategy[Step]:
-    """Return a strategy for one well-formed event of the given kind."""
-    fields: dict[str, st.SearchStrategy[object]] = {
-        "event": st.just(event),
-        "expected": st.just("Current"),
-    }
+def _step(event: str, facts: Facts, match: bool, vector: dict[str, int]) -> Step:
+    """Return an event step, matching the in-flight request when asked.
+
+    A matching reply reuses the in-flight generation and epoch and validates
+    every value the request claimed to cover, so the success rule accepts it.
+    Any other reply shifts the generation, so the rule must ignore it.
+    """
+    step: Step = {"event": event, "expected": "Current"}
+    if event not in REPLY_EVENTS:
+        return step
+    step["generation"] = (
+        facts["request_generation"] if match else facts["request_generation"] + 1
+    )
+    if event == "refresh_cancelled":
+        return step
+    step["epoch"] = (
+        facts["invalidation_epoch"] if match else facts["invalidation_epoch"] + 1
+    )
     if event == "refresh_succeeded":
-        fields |= {
-            "generation": GENERATIONS,
-            "epoch": EPOCHS,
-            "validated": VECTORS,
-        }
-    elif event == "refresh_failed":
-        fields |= {"generation": GENERATIONS, "epoch": EPOCHS}
-    elif event == "refresh_cancelled":
-        fields |= {"generation": GENERATIONS}
-    return st.fixed_dictionaries(fields).map(lambda raw: typ.cast("Step", raw))
+        covered = {**facts["known_source"], **facts["request_covers"]}
+        step["validated"] = {**covered, **vector} if match else vector
+    return step
 
 
 @given(
     st.lists(
-        st.sampled_from(sorted(EVENTS)).flatmap(step_for),
+        st.tuples(st.sampled_from(sorted(EVENTS)), st.booleans(), VECTORS),
         max_size=6,
     )
 )
-def test_an_event_sequence_never_leaves_the_declared_states(
-    steps: list[Step],
+@example(
+    [
+        ("refresh_requested", True, {"rate": 1}),
+        ("refresh_succeeded", True, {"rate": 2}),
+    ]
+)
+@example(
+    [
+        ("refresh_requested", True, {"rate": 1}),
+        ("refresh_failed", True, {"rate": 2}),
+        ("refresh_succeeded", True, {"rate": 2}),
+    ]
+)
+@example(
+    [
+        ("refresh_requested", True, {"rate": 1}),
+        ("refresh_succeeded", False, {"rate": 2}),
+    ]
+)
+@example(
+    [
+        ("source_advanced", True, {"rate": 1}),
+        ("refresh_succeeded", True, {"rate": 3}),
+    ]
+)
+@example(
+    [
+        ("grant_revoked", True, {"rate": 1}),
+        ("provider_lost", True, {"rate": 1}),
+        ("grant_issued", True, {"rate": 1}),
+        ("refresh_requested", True, {"rate": 1}),
+    ]
+)
+def test_each_event_leaves_the_projection_its_rule_implies(
+    drawn: list[tuple[str, bool, dict[str, int]]],
 ) -> None:
-    """Every prefix of declared events keeps a declared projection."""
+    """Every event's effect decides the projection that follows it.
+
+    Half the drawn replies match the in-flight request and half do not, so
+    both the accepted and the ignored reply are covered. An applied event
+    must leave the projection its own rule requires, so a rule that writes
+    the wrong facts fails here rather than merely leaving the state
+    undeclared.
+    """
     facts = facts_for({"authorized": True})
-    assert project(facts) in STATE_NAMES, (
-        "the starting facts project to a declared state"
+    assert project(facts) == "Broken", (
+        "a cache that has accepted nothing projects Broken"
     )
-    for step in steps:
+    for event, match, vector in drawn:
+        step = _step(event, facts, match, vector)
+        before = copy.deepcopy(facts)
+        projection_before = project(facts)
         apply(facts, step)
-        assert project(facts) in STATE_NAMES, (
-            "every event prefix keeps a declared projection"
-        )
+        projection = project(facts)
+        assert projection in STATE_NAMES, "the projection stays declared"
+        changed = facts != before
+        if event in REPLY_EVENTS:
+            permitted = before["request_active"] and (
+                before["authorized"] or event == "refresh_cancelled"
+            )
+            assert changed == (match and permitted), (
+                "only a permitted reply that matches the request changes a fact"
+            )
+        if event in {"refresh_requested", "source_advanced"}:
+            assert projection == ("Refreshing" if changed else projection_before), (
+                "a dispatched request projects Refreshing and a refused one "
+                "leaves the projection untouched"
+            )
+        elif event == "refresh_succeeded":
+            assert projection == ("Current" if changed else projection_before), (
+                "an accepted reply projects Current and an ignored one changes "
+                "nothing"
+            )
+            if changed:
+                assert facts["accepted_validated"] == step["validated"], (
+                    "the matching reply's vector becomes the accepted value"
+                )
+        elif event == "refresh_failed":
+            assert projection == ("Broken" if changed else projection_before), (
+                "a refused source projects Broken and an ignored reply changes "
+                "nothing"
+            )
+        elif event == "grant_revoked":
+            assert projection == "Denied", "a revoked grant always projects Denied"
+        elif event == "provider_lost":
+            assert projection == (
+                "Denied" if not facts["authorized"] else "Broken"
+            ), "a lost provider projects Broken unless the grant is denied"
+        else:
+            assert changed or projection == projection_before, (
+                "an event that changes nothing leaves the projection alone"
+            )
 
 
 @given(VECTORS, VECTORS, GENERATIONS, EPOCHS)
