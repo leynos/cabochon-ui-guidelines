@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import copy
 
+import pytest
 from hypothesis import example, given
 from hypothesis import strategies as st
 from statecheck.contract import (
@@ -52,10 +53,11 @@ def _step(event: str, facts: Facts, match: bool, vector: dict[str, int]) -> Step
     """Return an event step, matching the in-flight request when asked.
 
     A matching reply reuses the in-flight generation and epoch and validates
-    every value the request claimed to cover. The drawn vector supplies the
-    rest of the reply, but the required value wins wherever it is higher, so
-    a matching reply always covers the source it must. Any other reply shifts
-    the generation, so the rule must ignore it whatever it validates.
+    every value the known source or the in-flight request requires, taking
+    the higher where the two disagree. The drawn vector supplies the rest of
+    the reply, but a required value wins wherever it is higher, so a matching
+    reply always covers both vectors it must. Any other reply shifts the
+    generation, so the rule must ignore it whatever it validates.
     """
     step: Step = {"event": event, "expected": "Current"}
     if event not in REPLY_EVENTS:
@@ -72,12 +74,62 @@ def _step(event: str, facts: Facts, match: bool, vector: dict[str, int]) -> Step
         if not match:
             step["validated"] = vector
         else:
-            required = {**facts["known_source"], **facts["request_covers"]}
+            required = dict(facts["known_source"])
+            for key, value in facts["request_covers"].items():
+                required[key] = max(required.get(key, 0), value)
             step["validated"] = {
                 key: max(value, required.get(key, 0))
                 for key, value in {**required, **vector}.items()
             }
     return step
+
+
+@pytest.mark.parametrize(
+    ("known", "covers", "drawn", "expected"),
+    [
+        pytest.param(
+            {"rate": 2}, {"rate": 1}, {"rate": 0}, {"rate": 2}, id="source-higher"
+        ),
+        pytest.param(
+            {"rate": 1}, {"rate": 2}, {"rate": 0}, {"rate": 2}, id="request-higher"
+        ),
+        pytest.param(
+            {"rate": 1},
+            {"document": 3},
+            {"rate": 0, "document": 1},
+            {"rate": 1, "document": 3},
+            id="disjoint-keys",
+        ),
+        pytest.param(
+            {"rate": 1}, {"rate": 1}, {"rate": 5}, {"rate": 5}, id="reply-higher"
+        ),
+    ],
+)
+def test_a_matching_reply_covers_the_higher_of_every_required_vector(
+    known: dict[str, int],
+    covers: dict[str, int],
+    drawn: dict[str, int],
+    expected: dict[str, int],
+) -> None:
+    """A matching reply validates the component-wise maximum of all three.
+
+    The known source and the in-flight request can disagree, and a key may
+    appear in only one of them. The reply must still cover both, so the drawn
+    value never lowers a required component.
+    """
+    facts = facts_for(
+        {
+            "known_source": known,
+            "request_covers": covers,
+            "request_active": True,
+            "request_generation": 4,
+            "invalidation_epoch": 2,
+        }
+    )
+    step = _step("refresh_succeeded", facts, True, drawn)
+    assert step["validated"] == expected, (
+        "the reply covers the highest required value for every key"
+    )
 
 
 @given(
