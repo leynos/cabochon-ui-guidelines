@@ -12,6 +12,8 @@ import re
 import typing as typ
 from xml.etree import ElementTree
 
+from markdown_structure import strip_fences_and_comments
+
 from statecheck.contract import (
     EDGE_ID,
     SVG_NS,
@@ -137,6 +139,9 @@ def validate_transitions(
 def chapter_rows(path: Path) -> list[tuple[str, str, str, str]]:
     """Read the transition table under the chapter's Transitions heading.
 
+    Fenced examples are dropped before the heading is searched for, so a
+    fenced sample that spells the heading cannot stand in for the section.
+
     Parameters
     ----------
     path
@@ -156,7 +161,7 @@ def chapter_rows(path: Path) -> list[tuple[str, str, str, str]]:
     ContractError
         If the chapter has no Transitions section.
     """
-    text = path.read_text(encoding="utf-8")
+    text = strip_fences_and_comments(path.read_text(encoding="utf-8"))
     match = re.search(
         r"^## Transitions\n(.*?)(?=^## |\Z)", text, re.MULTILINE | re.DOTALL
     )

@@ -99,10 +99,11 @@ def validate_step(
     errors: list[str] = []
     event = step.get("event")
     where = f"scenario {scenario!r} step {index + 1}"
-    if event not in EVENTS:
+    if not isinstance(event, str) or event not in EVENTS:
         return [f"{where}: unknown event {event!r}"]
-    if step.get("expected") not in states:
-        errors.append(f"{where}: invalid expected state {step.get('expected')!r}")
+    expected = step.get("expected")
+    if not isinstance(expected, str) or expected not in states:
+        errors.append(f"{where}: invalid expected state {expected!r}")
     fields = REPLY_FIELDS.get(str(event), ())
     allowed = {"event", "expected"} | set(fields)
     extra = set(step) - allowed

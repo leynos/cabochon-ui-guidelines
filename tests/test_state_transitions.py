@@ -10,6 +10,7 @@ and event sequences from the declared vocabulary.
 from __future__ import annotations
 
 import copy
+import typing as typ
 
 import pytest
 from hypothesis import example, given
@@ -132,6 +133,100 @@ def test_a_matching_reply_covers_the_higher_of_every_required_vector(
     )
 
 
+class _Effect(typ.NamedTuple):
+    """The facts and projections either side of one applied event."""
+
+    event: str
+    match: bool
+    before: Facts
+    step: Step
+    facts: Facts
+    projection_before: str
+    projection: str
+    changed: bool
+
+
+def _reply_permitted(effect: _Effect) -> bool:
+    """Return whether a reply was permitted from the facts before it."""
+    return effect.before["request_active"] and (
+        effect.before["authorized"] or effect.event == "refresh_cancelled"
+    )
+
+
+def _dispatch_expected(effect: _Effect) -> bool:
+    """Return whether the event dispatches, read from the facts before it."""
+    required = (
+        {"present", "uncertain"}
+        if effect.event == "refresh_requested"
+        else {"present"}
+    )
+    return effect.before["authorized"] and effect.before["availability"] in required
+
+
+def _assert_reply_effect(effect: _Effect) -> None:
+    """Assert the rule a permitted, matching reply leaves behind."""
+    assert effect.changed == (effect.match and _reply_permitted(effect)), (
+        "only a permitted reply that matches the request changes a fact"
+    )
+    if effect.event == "refresh_succeeded":
+        assert effect.projection == (
+            "Current" if effect.changed else effect.projection_before
+        ), "an accepted reply projects Current and an ignored one changes nothing"
+        if effect.changed:
+            assert effect.facts["accepted_validated"] == effect.step["validated"], (
+                "the matching reply's vector becomes the accepted value"
+            )
+    elif effect.event == "refresh_failed":
+        assert effect.projection == (
+            "Broken" if effect.changed else effect.projection_before
+        ), "a refused source projects Broken and an ignored reply changes nothing"
+    else:
+        assert effect.changed or effect.projection == effect.projection_before, (
+            "a cancelled reply that changes nothing leaves the projection alone"
+        )
+
+
+def _assert_dispatch_effect(effect: _Effect) -> None:
+    """Assert that a permitted dispatch projects Refreshing and a refusal not."""
+    dispatch = _dispatch_expected(effect)
+    assert effect.changed == dispatch, (
+        "a permitted dispatch changes the facts and a refused one does not"
+    )
+    assert effect.projection == (
+        "Refreshing" if dispatch else effect.projection_before
+    ), "a permitted dispatch projects Refreshing and a refused one leaves it alone"
+
+
+def _assert_revoked_effect(effect: _Effect) -> None:
+    """Assert that a revoked grant projects Denied whatever came before it."""
+    assert effect.projection == "Denied", "a revoked grant always projects Denied"
+
+
+def _assert_provider_effect(effect: _Effect) -> None:
+    """Assert that a lost provider projects Broken unless the grant is denied."""
+    assert effect.projection == (
+        "Denied" if not effect.facts["authorized"] else "Broken"
+    ), "a lost provider projects Broken unless the grant is denied"
+
+
+def _assert_unchanged_effect(effect: _Effect) -> None:
+    """Assert that an event with no rule of its own leaves the projection alone."""
+    assert effect.changed or effect.projection == effect.projection_before, (
+        "an event that changes nothing leaves the projection alone"
+    )
+
+
+EFFECT_CHECKERS: dict[str, typ.Callable[[_Effect], None]] = {
+    "refresh_succeeded": _assert_reply_effect,
+    "refresh_failed": _assert_reply_effect,
+    "refresh_cancelled": _assert_reply_effect,
+    "refresh_requested": _assert_dispatch_effect,
+    "source_advanced": _assert_dispatch_effect,
+    "grant_revoked": _assert_revoked_effect,
+    "provider_lost": _assert_provider_effect,
+}
+
+
 @given(
     st.lists(
         st.tuples(st.sampled_from(sorted(EVENTS)), st.booleans(), VECTORS),
@@ -201,51 +296,17 @@ def test_each_event_leaves_the_projection_its_rule_implies(
         apply(facts, step)
         projection = project(facts)
         assert projection in STATE_NAMES, "the projection stays declared"
-        changed = facts != before
-        if event in REPLY_EVENTS:
-            permitted = before["request_active"] and (
-                before["authorized"] or event == "refresh_cancelled"
-            )
-            assert changed == (match and permitted), (
-                "only a permitted reply that matches the request changes a fact"
-            )
-        if event in {"refresh_requested", "source_advanced"}:
-            dispatch = before["authorized"] and before["availability"] in (
-                {"present", "uncertain"}
-                if event == "refresh_requested"
-                else {"present"}
-            )
-            assert changed == dispatch, (
-                "a permitted dispatch changes the facts and a refused one does not"
-            )
-            assert projection == ("Refreshing" if dispatch else projection_before), (
-                "a permitted dispatch projects Refreshing and a refused one "
-                "leaves the projection untouched"
-            )
-        elif event == "refresh_succeeded":
-            assert projection == ("Current" if changed else projection_before), (
-                "an accepted reply projects Current and an ignored one changes "
-                "nothing"
-            )
-            if changed:
-                assert facts["accepted_validated"] == step["validated"], (
-                    "the matching reply's vector becomes the accepted value"
-                )
-        elif event == "refresh_failed":
-            assert projection == ("Broken" if changed else projection_before), (
-                "a refused source projects Broken and an ignored reply changes "
-                "nothing"
-            )
-        elif event == "grant_revoked":
-            assert projection == "Denied", "a revoked grant always projects Denied"
-        elif event == "provider_lost":
-            assert projection == (
-                "Denied" if not facts["authorized"] else "Broken"
-            ), "a lost provider projects Broken unless the grant is denied"
-        else:
-            assert changed or projection == projection_before, (
-                "an event that changes nothing leaves the projection alone"
-            )
+        effect = _Effect(
+            event=event,
+            match=match,
+            before=before,
+            step=step,
+            facts=facts,
+            projection_before=projection_before,
+            projection=projection,
+            changed=facts != before,
+        )
+        EFFECT_CHECKERS.get(event, _assert_unchanged_effect)(effect)
 
 
 @given(VECTORS, VECTORS, GENERATIONS, EPOCHS)
@@ -396,6 +457,67 @@ def test_a_matching_reply_that_under_covers_the_source_is_ignored(
         "a reply that under-covers the known source changes no fact"
     )
     assert project(facts) == "Refreshing", "the under-covering reply leaves the request"
+
+
+@pytest.mark.parametrize(
+    ("known", "covers", "validated", "accepted"),
+    [
+        pytest.param(
+            {"rate": 2}, {"rate": 1}, {"rate": 1}, False, id="covers-request-only"
+        ),
+        pytest.param(
+            {"rate": 1}, {"rate": 2}, {"rate": 1}, False, id="covers-source-only"
+        ),
+        pytest.param({"rate": 1}, {"rate": 1}, {"rate": 1}, True, id="covers-both"),
+    ],
+)
+@given(GENERATIONS, EPOCHS)
+def test_a_matching_reply_must_cover_the_source_and_the_request(
+    known: dict[str, int],
+    covers: dict[str, int],
+    validated: dict[str, int],
+    accepted: bool,
+    generation: int,
+    epoch: int,
+) -> None:
+    """Each coverage guard refuses a reply the other guard alone would accept.
+
+    The generation, epoch and grant are valid in every case, so only coverage
+    can decide the reply. A reply that covers one required vector but not the
+    other is ignored whole; one that covers both becomes the accepted value.
+    """
+    facts = facts_for(
+        {
+            "availability": "uncertain",
+            "known_source": dict(known),
+            "request_active": True,
+            "request_generation": generation,
+            "request_covers": dict(covers),
+            "invalidation_epoch": epoch,
+        }
+    )
+    before = copy.deepcopy(facts)
+    apply(
+        facts,
+        {
+            "event": "refresh_succeeded",
+            "expected": "Current",
+            "generation": generation,
+            "epoch": epoch,
+            "validated": dict(validated),
+        },
+    )
+    if accepted:
+        assert facts["accepted"] is True, "a fully covering reply is accepted"
+        assert facts["accepted_validated"] == validated, (
+            "the covering reply becomes the accepted value"
+        )
+        assert project(facts) == "Current", "the covering reply projects Current"
+    else:
+        assert facts == before, "a partially covering reply changes no fact"
+        assert project(facts) == "Refreshing", (
+            "the partially covering reply leaves the request in flight"
+        )
 
 
 @given(st.integers(min_value=1, max_value=8), GENERATIONS, EPOCHS)
