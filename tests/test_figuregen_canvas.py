@@ -33,6 +33,10 @@ def test_a_word_longer_than_the_limit_is_kept_whole() -> None:
         "supercalifragilistic",
         "a",
     ], "an over-long word is neither split nor dropped"
+    assert wrap_words("a supercalifragilistic", 5) == [
+        "a",
+        "supercalifragilistic",
+    ], "a word that overruns a started line is kept whole on the next one"
 
 
 @pytest.mark.parametrize("value", ["", "   ", "\n"], ids=["empty", "spaces", "newline"])

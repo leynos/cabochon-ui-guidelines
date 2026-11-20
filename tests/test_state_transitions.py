@@ -52,8 +52,10 @@ def _step(event: str, facts: Facts, match: bool, vector: dict[str, int]) -> Step
     """Return an event step, matching the in-flight request when asked.
 
     A matching reply reuses the in-flight generation and epoch and validates
-    every value the request claimed to cover, so the success rule accepts it.
-    Any other reply shifts the generation, so the rule must ignore it.
+    every value the request claimed to cover. The drawn vector supplies the
+    rest of the reply, but the required value wins wherever it is higher, so
+    a matching reply always covers the source it must. Any other reply shifts
+    the generation, so the rule must ignore it whatever it validates.
     """
     step: Step = {"event": event, "expected": "Current"}
     if event not in REPLY_EVENTS:
@@ -67,8 +69,14 @@ def _step(event: str, facts: Facts, match: bool, vector: dict[str, int]) -> Step
         facts["invalidation_epoch"] if match else facts["invalidation_epoch"] + 1
     )
     if event == "refresh_succeeded":
-        covered = {**facts["known_source"], **facts["request_covers"]}
-        step["validated"] = {**covered, **vector} if match else vector
+        if not match:
+            step["validated"] = vector
+        else:
+            required = {**facts["known_source"], **facts["request_covers"]}
+            step["validated"] = {
+                key: max(value, required.get(key, 0))
+                for key, value in {**required, **vector}.items()
+            }
     return step
 
 
@@ -82,6 +90,12 @@ def _step(event: str, facts: Facts, match: bool, vector: dict[str, int]) -> Step
     [
         ("refresh_requested", True, {"rate": 1}),
         ("refresh_succeeded", True, {"rate": 2}),
+    ]
+)
+@example(
+    [
+        ("refresh_requested", True, {"rate": 1}),
+        ("refresh_succeeded", True, {"rate": 0}),
     ]
 )
 @example(
@@ -117,9 +131,11 @@ def test_each_event_leaves_the_projection_its_rule_implies(
     """Every event's effect decides the projection that follows it.
 
     Half the drawn replies match the in-flight request and half do not, so
-    both the accepted and the ignored reply are covered. An applied event
-    must leave the projection its own rule requires, so a rule that writes
-    the wrong facts fails here rather than merely leaving the state
+    both the accepted and the ignored reply are covered. A dispatch is
+    expected from the facts before the event rather than from what the
+    handler did, so a dispatch that changes nothing fails here. An applied
+    event must leave the projection its own rule requires, so a rule that
+    writes the wrong facts fails here rather than merely leaving the state
     undeclared.
     """
     facts = facts_for({"authorized": True})
@@ -142,8 +158,16 @@ def test_each_event_leaves_the_projection_its_rule_implies(
                 "only a permitted reply that matches the request changes a fact"
             )
         if event in {"refresh_requested", "source_advanced"}:
-            assert projection == ("Refreshing" if changed else projection_before), (
-                "a dispatched request projects Refreshing and a refused one "
+            dispatch = before["authorized"] and before["availability"] in (
+                {"present", "uncertain"}
+                if event == "refresh_requested"
+                else {"present"}
+            )
+            assert changed == dispatch, (
+                "a permitted dispatch changes the facts and a refused one does not"
+            )
+            assert projection == ("Refreshing" if dispatch else projection_before), (
+                "a permitted dispatch projects Refreshing and a refused one "
                 "leaves the projection untouched"
             )
         elif event == "refresh_succeeded":
@@ -282,6 +306,44 @@ def test_a_success_while_denied_is_ignored(
     )
     assert facts == before, "a success while denied changes no fact"
     assert project(facts) == "Denied", "the grant stays denied"
+
+
+@given(VECTORS, GENERATIONS, EPOCHS)
+def test_a_matching_reply_that_under_covers_the_source_is_ignored(
+    reply: dict[str, int], generation: int, epoch: int
+) -> None:
+    """A reply at the request's identity is ignored unless it covers the source.
+
+    The reply carries the in-flight generation and epoch, so only its
+    coverage can refuse it. Every drawn component sits one below the value
+    the source already knows, which no covering reply may do.
+    """
+    known = {key: value + 1 for key, value in reply.items()}
+    facts = facts_for(
+        {
+            "availability": "uncertain",
+            "known_source": known,
+            "request_active": True,
+            "request_generation": generation,
+            "request_covers": dict(known),
+            "invalidation_epoch": epoch,
+        }
+    )
+    before = copy.deepcopy(facts)
+    apply(
+        facts,
+        {
+            "event": "refresh_succeeded",
+            "expected": "Refreshing",
+            "generation": generation,
+            "epoch": epoch,
+            "validated": dict(reply),
+        },
+    )
+    assert facts == before, (
+        "a reply that under-covers the known source changes no fact"
+    )
+    assert project(facts) == "Refreshing", "the under-covering reply leaves the request"
 
 
 @given(st.integers(min_value=1, max_value=8), GENERATIONS, EPOCHS)
