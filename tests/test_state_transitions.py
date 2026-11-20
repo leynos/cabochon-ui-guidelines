@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import copy
 import typing as typ
+from collections.abc import Callable
 
 import pytest
 from hypothesis import example, given
@@ -209,6 +210,20 @@ def _assert_provider_effect(effect: _Effect) -> None:
     ), "a lost provider projects Broken unless the grant is denied"
 
 
+def _assert_grant_issued_effect(effect: _Effect) -> None:
+    """Assert that an issued grant authorizes access, even after a revocation."""
+    assert effect.facts["authorized"] is True, (
+        "an issued grant authorizes access, so a denied grant cannot stay denied"
+    )
+
+
+def _assert_provider_recovered_effect(effect: _Effect) -> None:
+    """Assert that a recovered provider is present, even after a loss."""
+    assert effect.facts["availability"] == "present", (
+        "a recovered provider is present, so a lost provider cannot stay lost"
+    )
+
+
 def _assert_unchanged_effect(effect: _Effect) -> None:
     """Assert that an event with no rule of its own leaves the projection alone."""
     assert effect.changed or effect.projection == effect.projection_before, (
@@ -216,14 +231,16 @@ def _assert_unchanged_effect(effect: _Effect) -> None:
     )
 
 
-EFFECT_CHECKERS: dict[str, typ.Callable[[_Effect], None]] = {
+EFFECT_CHECKERS: dict[str, Callable[[_Effect], None]] = {
     "refresh_succeeded": _assert_reply_effect,
     "refresh_failed": _assert_reply_effect,
     "refresh_cancelled": _assert_reply_effect,
     "refresh_requested": _assert_dispatch_effect,
     "source_advanced": _assert_dispatch_effect,
     "grant_revoked": _assert_revoked_effect,
+    "grant_issued": _assert_grant_issued_effect,
     "provider_lost": _assert_provider_effect,
+    "provider_recovered": _assert_provider_recovered_effect,
 }
 
 
@@ -272,6 +289,12 @@ EFFECT_CHECKERS: dict[str, typ.Callable[[_Effect], None]] = {
         ("refresh_requested", True, {"rate": 1}),
     ]
 )
+@example(
+    [
+        ("provider_lost", True, {"rate": 1}),
+        ("provider_recovered", True, {"rate": 1}),
+    ]
+)
 def test_each_event_leaves_the_projection_its_rule_implies(
     drawn: list[tuple[str, bool, dict[str, int]]],
 ) -> None:
@@ -283,7 +306,9 @@ def test_each_event_leaves_the_projection_its_rule_implies(
     handler did, so a dispatch that changes nothing fails here. An applied
     event must leave the projection its own rule requires, so a rule that
     writes the wrong facts fails here rather than merely leaving the state
-    undeclared.
+    undeclared. An issued grant and a recovered provider assert their own
+    postcondition, so a no-op where one of them must act cannot hide behind
+    an unchanged projection.
     """
     facts = facts_for({"authorized": True})
     assert project(facts) == "Broken", (
