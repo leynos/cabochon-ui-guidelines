@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80" role="img" data-figure-class="production" data-figure-scale="1.0" data-figure-profile="substrate" aria-labelledby="title desc">
+  <metadata>{&quot;bounds&quot;: {&quot;primary_action&quot;: {&quot;height&quot;: 36, &quot;width&quot;: 120, &quot;x&quot;: 8, &quot;y&quot;: 8}, &quot;tool_button&quot;: {&quot;height&quot;: 30, &quot;width&quot;: 80, &quot;x&quot;: 144, &quot;y&quot;: 11}}, &quot;class&quot;: &quot;production&quot;, &quot;components&quot;: [&quot;primary_action&quot;, &quot;tool_button&quot;], &quot;name&quot;: &quot;fig-prod-control&quot;, &quot;profile&quot;: &quot;substrate&quot;, &quot;scale&quot;: 1.0, &quot;size&quot;: {&quot;height&quot;: 80, &quot;width&quot;: 320}, &quot;states&quot;: {}}</metadata>
+  <title id="title">Production control fixture</title>
+  <desc id="desc">Primary action and tool button drawn at exact catalogue heights.</desc>
+  <rect width="320" height="80" fill="#F1EEE5"/>
+<g data-component="primary_action" data-height="36"><rect x="8" y="8" width="120" height="36" fill="#FAF8F2" stroke="#17201C" stroke-width="1" rx="0"/><text x="16" y="30.0" fill="#17201C" font-family="&#x27;DejaVu Sans Mono&#x27;, &#x27;Liberation Mono&#x27;, monospace" font-size="10" font-weight="normal" text-anchor="start" font-style="normal">PRIMARY · 36 lu</text></g><g data-component="tool_button" data-height="30"><rect x="144" y="11" width="80" height="30" fill="#FAF8F2" stroke="#17201C" stroke-width="1" rx="0"/><text x="152" y="30.0" fill="#17201C" font-family="&#x27;DejaVu Sans Mono&#x27;, &#x27;Liberation Mono&#x27;, monospace" font-size="10" font-weight="normal" text-anchor="start" font-style="normal">TOOL · 30 lu</text></g>
+</svg>
+

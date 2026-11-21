@@ -1,0 +1,8 @@
+# Generated preview output
+*.png
+*.webp
+tmp/
+build/
+.sites-runtime/
+__pycache__/
+.venv/

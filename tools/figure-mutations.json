@@ -1,0 +1,177 @@
+[
+  {
+    "label": "state mark removed",
+    "filename": "fig-06-state.svg",
+    "old": "<circle cx=\"86\" cy=\"194\" r=\"3\" fill=\"#285E50\" stroke-width=\"1\"/>",
+    "new": "",
+    "expected": "does not draw it"
+  },
+  {
+    "label": "state colour changed",
+    "filename": "fig-06-state.svg",
+    "old": "fill=\"#285E50\" font-family=\"&#x27;DejaVu Sans Mono&#x27;,",
+    "new": "fill=\"#8A302F\" font-family=\"&#x27;DejaVu Sans Mono&#x27;,",
+    "expected": "drawn in"
+  },
+  {
+    "label": "mark declaration removed",
+    "filename": "fig-06-state.svg",
+    "old": "<g data-mark=\"dot\" data-state-id=\"current\" data-role=\"pine2\">",
+    "new": "<g data-state-id=\"current\" data-role=\"pine2\">",
+    "expected": "has no declared mark"
+  },
+  {
+    "label": "zero radius dot",
+    "filename": "fig-06-state.svg",
+    "old": "<circle cx=\"86\" cy=\"194\" r=\"3\"",
+    "new": "<circle cx=\"86\" cy=\"194\" r=\"0\"",
+    "expected": "zero radius"
+  },
+  {
+    "label": "invisible dot",
+    "filename": "fig-06-state.svg",
+    "old": "<circle cx=\"86\" cy=\"194\" r=\"3\"",
+    "new": "<circle cx=\"86\" cy=\"194\" r=\"3\" opacity=\"0\"",
+    "expected": "zero opacity"
+  },
+  {
+    "label": "contradictory label",
+    "filename": "fig-06-state.svg",
+    "old": "data-state=\"denied\">DENIED</text>",
+    "new": "data-state=\"denied\">CURRENT</text>",
+    "expected": "label 'CURRENT' disagrees"
+  },
+  {
+    "label": "annotation removed",
+    "filename": "fig-06-state.svg",
+    "old": "data-state=\"current\">CURRENT</text>",
+    "new": "data-state=\"current-removed\">CURRENT</text>",
+    "expected": "unknown state identity"
+  },
+  {
+    "label": "state removed from inventory",
+    "filename": "fig-06-state.svg",
+    "old": "data-state=\"current\">CURRENT</text>",
+    "new": "data-state-removed=\"current\">CURRENT</text>",
+    "expected": "state inventory expects 1 of 'current', found 0"
+  },
+  {
+    "label": "transformed production geometry",
+    "filename": "fig-prod-chrome.svg",
+    "old": "<g data-component=\"title_bar\" data-height=\"31\">",
+    "new": "<g data-component=\"title_bar\" data-height=\"31\" transform=\"scale(1,2)\">",
+    "expected": "rendered height"
+  },
+  {
+    "label": "production scale metadata",
+    "filename": "fig-prod-chrome.svg",
+    "old": "data-figure-scale=\"1.0\"",
+    "new": "data-figure-scale=\"2.0\"",
+    "expected": "declares scale"
+  },
+  {
+    "label": "hidden production component",
+    "filename": "fig-prod-chrome.svg",
+    "old": "<g data-component=\"menu_bar\" data-height=\"29\">",
+    "new": "<g data-component=\"menu_bar\" data-height=\"29\" display=\"none\">",
+    "expected": "is not visible"
+  },
+  {
+    "label": "figure class changed",
+    "filename": "fig-06-state.svg",
+    "old": "data-figure-class=\"schematic\"",
+    "new": "data-figure-class=\"production\"",
+    "expected": "disagrees with data"
+  },
+  {
+    "label": "metadata removed",
+    "filename": "fig-06-state.svg",
+    "old": "<metadata>",
+    "new": "<metadata xmlns=\"urn:removed\">",
+    "expected": "missing embedded metadata"
+  },
+  {
+    "label": "path without segments",
+    "filename": "fig-06-state.svg",
+    "old": "d=\"M 308.60 192.60 A 2.9 2.9 0 1 0 308.70 195.20\"",
+    "new": "d=\"M 308.60 192.60 M 308.70 195.20\"",
+    "expected": "draws no segments"
+  },
+  {
+    "label": "hidden styled root",
+    "filename": "fig-06-state.svg",
+    "old": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1200 910\"",
+    "new": "<svg xmlns=\"http://www.w3.org/2000/svg\" style=\"display:none\" viewBox=\"0 0 1200 910\"",
+    "expected": "is not visible"
+  },
+  {
+    "label": "zero stroke width",
+    "filename": "fig-06-state.svg",
+    "old": "stroke=\"#456A62\" stroke-width=\"1.5\"",
+    "new": "stroke=\"#456A62\" stroke-width=\"0\"",
+    "expected": "draws nothing visible"
+  },
+  {
+    "label": "filled dashed mark",
+    "filename": "fig-29-embed.svg",
+    "old": "fill=\"none\" stroke=\"#8A302F\" stroke-width=\"1.2\" rx=\"0\" stroke-dasharray=\"1.6 1.4\"",
+    "new": "fill=\"#8A302F\" stroke=\"#8A302F\" stroke-width=\"1.2\" rx=\"0\" stroke-dasharray=\"1.6 1.4\"",
+    "expected": "does not draw it"
+  },
+  {
+    "label": "wrong-colour crossed line",
+    "filename": "fig-29-embed.svg",
+    "old": "<line x1=\"728\" y1=\"650\" x2=\"732\" y2=\"654\" stroke=\"#8A302F\" stroke-width=\"1.2\"/>",
+    "new": "<line x1=\"728\" y1=\"650\" x2=\"732\" y2=\"654\" stroke=\"#285E50\" stroke-width=\"1.2\"/>",
+    "expected": "does not draw it"
+  },
+  {
+    "label": "shifted viewBox origin",
+    "filename": "fig-prod-chrome.svg",
+    "old": "viewBox=\"0 0 320 140\"",
+    "new": "viewBox=\"10 0 320 140\"",
+    "expected": "viewBox disagrees with the declared canvas"
+  },
+  {
+    "label": "hidden state label",
+    "filename": "fig-06-state.svg",
+    "old": "data-state=\"current\">CURRENT</text>",
+    "new": "data-state=\"current\" opacity=\"0\">CURRENT</text>",
+    "expected": "label is not visible"
+  },
+  {
+    "label": "clipped state mark",
+    "filename": "fig-06-state.svg",
+    "old": "<circle cx=\"86\" cy=\"194\" r=\"3\" fill=\"#285E50\" stroke-width=\"1\"/>",
+    "new": "<circle cx=\"86\" cy=\"194\" r=\"3\" fill=\"#285E50\" stroke-width=\"1\" clip-path=\"url(#c)\"/>",
+    "expected": "uses clipping"
+  },
+  {
+    "label": "mark outside the viewBox",
+    "filename": "fig-06-state.svg",
+    "old": "<g data-mark=\"dot\" data-state-id=\"current\" data-role=\"pine2\">",
+    "new": "<g data-mark=\"dot\" data-state-id=\"current\" data-role=\"pine2\" transform=\"translate(-87.5,0)\">",
+    "expected": "clipped by the viewBox"
+  },
+  {
+    "label": "trailing subpath outside the viewBox",
+    "filename": "fig-06-state.svg",
+    "old": "d=\"M 309.40 191.40 L 308.60 192.60 L 307.40 192.20\"",
+    "new": "d=\"M 309.40 191.40 L 308.60 192.60 L 307.40 192.20 M 2000 2000 2001 2001\"",
+    "expected": "clipped by the viewBox"
+  },
+  {
+    "label": "inline zero stroke width",
+    "filename": "fig-06-state.svg",
+    "old": "<line x1=\"743.2\" y1=\"191.6\" x2=\"744.2\" y2=\"192.8\" stroke=\"#8A302F\" stroke-width=\"1\"/>",
+    "new": "<line x1=\"743.2\" y1=\"191.6\" x2=\"744.2\" y2=\"192.8\" stroke=\"#8A302F\" stroke-width=\"1\" style=\"stroke-width:0\"/>",
+    "expected": "draws nothing visible"
+  },
+  {
+    "label": "inherited zero stroke width",
+    "filename": "fig-06-state.svg",
+    "old": "<g data-mark=\"broken\" data-state-id=\"broken\" data-role=\"oxide\"><line x1=\"742.6\" y1=\"194\" x2=\"744.7\" y2=\"194\" stroke=\"#8A302F\" stroke-width=\"1.8\"/>",
+    "new": "<g data-mark=\"broken\" data-state-id=\"broken\" data-role=\"oxide\" stroke-width=\"0\"><line x1=\"742.6\" y1=\"194\" x2=\"744.7\" y2=\"194\" stroke=\"#8A302F\"/>",
+    "expected": "draws nothing visible"
+  }
+]
