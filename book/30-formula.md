@@ -91,7 +91,7 @@ runtime's capability broker granted it for this invocation.
   result, a shape, a row count or a timing.
 - The tool must not request a broader capability than the expression uses.
 
-The grant that authorises the preview is scoped to the invocation. It permits
+The grant that authorizes the preview is scoped to the invocation. It permits
 the computation the user is about to see and the insertion that follows, and
 the tool does not retain it after the popover closes. The broker, not the
 provider, issues, scopes, delegates and revokes grants. A provider validates
@@ -131,7 +131,7 @@ the still-valid captured destination or asks the user to resolve the change; it
 never retargets silently to the new selection.
 
 Insertion is one atomic operation: the runtime creates the result, establishes
-its authorised dependency and inserts the reference, or none of the three
+its authorized dependency and inserts the reference, or none of the three
 happens. A failure leaves no orphaned half-result, no dangling reference and no
 retained grant.
 
@@ -181,18 +181,18 @@ The expression field supports the usual editing keys and must not swallow Tab,
 so that the user can reach the actions without a pointer. Enter accepts the
 highlighted selector completion while one is open. Otherwise it activates the
 current primary action. When the expression field has focus and the destination
-accepts a live value, that action inserts the value; when the destination cannot
-accept it, the action is **Copy result** and Enter copies. Enter while another
-control has focus activates that control and does not insert the value. While an
-input-method composition is active, Enter commits the composition first, and an
-open completion is accepted only when no composition is active. The input-mode
-rules are those of [Focus and keyboard](18-focus-keyboard.md).
+accepts a live value, that action inserts the value; when the destination
+cannot accept it, the action is **Copy result** and Enter copies. Enter while
+another control has focus activates that control and does not insert the value.
+While an input-method composition is active, Enter commits the composition
+first, and an open completion is accepted only when no composition is active.
+The input-mode rules are those of [Focus and keyboard](18-focus-keyboard.md).
 
 A selector completion lives inside the expression field and never traps focus.
 The first Escape dismisses an open completion and leaves the expression
 unchanged; the next Escape reverts the draft and leaves the innermost mode.
-Arrow keys move within the completion list while it is open, and the list closes
-without invoking anything when focus leaves the field.
+Arrow keys move within the completion list while it is open, and the list
+closes without invoking anything when focus leaves the field.
 
 ## What the tool is not
 

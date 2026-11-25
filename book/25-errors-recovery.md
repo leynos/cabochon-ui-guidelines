@@ -178,7 +178,7 @@ document content by default. A log entry carries the object identity, the
 operation, the outcome and the provider version when disclosure permits. It
 does not carry the value that was read, and it does not carry a protected
 identity, revision, count or timestamp. A log is one of the output surfaces
-covered by the authorisation matrix: it is not exempt because it is not visible.
+covered by the authorization matrix: it is not exempt because it is not visible.
 
 ## Testing
 

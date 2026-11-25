@@ -32,8 +32,7 @@ A timing promise names its start and its end. A duration without both is not
 testable.
 
 - The **start** is the moment the state change that initiates the transition is
-  accepted, whether that change follows a user action or a background
-  operation.
+  accepted, whether that change follows a user action or a background operation.
 - The **end** is the first frame that shows the new state, not the moment an
   internal task finishes.
 - A state word changes at the start of a transition, not at its end, so that a

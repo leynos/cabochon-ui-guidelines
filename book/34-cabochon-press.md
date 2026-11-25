@@ -100,7 +100,7 @@ Every rule declares its override policy.
 - A **quality warning** may be acknowledged and recorded.
 - A **policy warning** may be overridden only by a user with the relevant
   authority, and the override is recorded in the manifest.
-- An **authorisation failure** cannot be overridden. A warning acknowledgement
+- An **authorization failure** cannot be overridden. A warning acknowledgement
   does not grant authority.
 - A **structural failure** cannot be overridden. Corrupt output, an unsupported
   mandatory feature or a missing required font is not made valid by

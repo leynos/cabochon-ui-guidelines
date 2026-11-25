@@ -43,7 +43,7 @@ an inspector.
 - Tool palette: 48 logical units wide, one column of the **tool button** role
   from [Spacing and metrics](14-spacing-metrics.md): 30 units high, 28 units
   minimum, with a 16-unit glyph and a 28-unit effective target.
-- Document plane: the image on a checkerboard for transparency, at the current
+- Document plane: the image on a chequerboard for transparency, at the current
   zoom.
 - Inspector: 240 logical units, showing dimensions, resolution, colour space,
   intent and state.
@@ -89,8 +89,8 @@ exist when the pointer is released.
   caret.
 - Typed characters accumulate in the draft and are drawn on the canvas. The
   draft is not part of the image: it is not saved, exported or counted in a
-  revision until it is committed. The inspector names it as a draft that has not
-  been committed, as [Inspector](21-inspector.md) requires.
+  revision until it is committed. The inspector names it as a draft that has
+  not been committed, as [Inspector](21-inspector.md) requires.
 - Return commits the draft as one transaction: one revision entry and one undo
   step.
 - Pressing the pointer elsewhere on the canvas commits the draft and opens a
@@ -151,7 +151,7 @@ physical resolution or identity.
   interface palette.
 - The eyedropper samples the document pixel by default and reports the stored
   colour and the colour space. A display-composited sampling mode, which
-  includes the checkerboard and display transform, is a separately labelled
+  includes the chequerboard and display transform, is a separately labelled
   choice.
 - A sampled colour is converted explicitly before it is written back when the
   document's colour space differs from the sampled colour's space. The
@@ -166,10 +166,10 @@ physical resolution or identity.
 
 ## Transparency
 
-Transparency is shown as a checkerboard in the document plane and is never
+Transparency is shown as a chequerboard in the document plane and is never
 flattened into white on save.
 
-- The checkerboard uses two neutral values derived from the palette, at low
+- The chequerboard uses two neutral values derived from the palette, at low
   contrast, so that it does not compete with the image.
 - An opaque export flattens transparency against a chosen colour and records
   that choice in the export manifest.

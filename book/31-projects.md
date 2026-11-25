@@ -131,7 +131,7 @@ are preserved. It must be readable by another Cabochon installation without the
 original application that created each object.
 
 The bundle never contains capability grants, host secrets or machine-local
-authorisation handles. On import the runtime reacquires authority; it does not
+authorization handles. On import the runtime reacquires authority; it does not
 restore an old **Granted** badge as proof of access.
 
 An object whose provider is absent exports as an opaque object only when its

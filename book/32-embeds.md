@@ -31,7 +31,7 @@ what makes an embed portable without making it leak authority.
 
 A reference record is not a copy of the object. A portable bundle is not a
 backup of the runtime's authority. Capability grants, host secrets and
-machine-local authorisation handles never travel in a bundle. On import the
+machine-local authorization handles never travel in a bundle. On import the
 runtime reacquires authority; it does not restore an old **Granted** badge as
 proof of access.
 
@@ -50,19 +50,19 @@ resolve the embed; it does not reach the provider directly.
 
 The interface consequence is that an embed can fail independently of the
 document. The document remains open, printable and exportable while one embed
-is unavailable, subject to the authorisation rules below.
+is unavailable, subject to the authorization rules below.
 
 ## Resolution, authority and cache are independent
 
 Resolution asks whether this machine can turn the reference into a
 presentation. It does not ask whether the payload may be disclosed, and it does
-not ask whether an authorised cached value exists. Those are three independent
+not ask whether an authorized cached value exists. Those are three independent
 facts.
 
 | Resolution  | Meaning                                        | What remains                             | Mark           |
 | ----------- | ---------------------------------------------- | ---------------------------------------- | -------------- |
 | Resolved    | A provider loaded the object                   | The presentation and its live state      | Filled dot     |
-| Opaque      | The bytes are intact; no provider is installed | An authorised preview or a placeholder   | Hatched square |
+| Opaque      | The bytes are intact; no provider is installed | An authorized preview or a placeholder   | Hatched square |
 | Unavailable | The provider exists but cannot load the object | Name or placeholder, identity, retry     | Dashed square  |
 | Malformed   | The provider rejected the payload              | Name or placeholder, identity, diagnosis | Crossed square |
 
@@ -83,15 +83,15 @@ resolution either.
 
 Removing, crashing or reinstalling a provider changes resolution and
 availability. It does not change whether the payload may be disclosed. An
-unresolved embed that is not authorised shows a non-disclosing placeholder and
+unresolved embed that is not authorized shows a non-disclosing placeholder and
 offers no preview, no **Export original**, no clipboard copy and no diagnostic
 bytes. **Export original** is offered only when the current grant permits
 exporting the original bytes.
 
-Opaque is not a failure of the document. When export is authorised, it is a
+Opaque is not a failure of the document. When export is authorized, it is a
 promise kept: the content is preserved even though this machine cannot render
 it. The placeholder must say so and offer **Export original**. When export is
-not authorised, the placeholder says that the content exists but may not be
+not authorized, the placeholder says that the content exists but may not be
 shown.
 
 ## Inserting an embed
@@ -104,12 +104,12 @@ picker, chooses one of the available presentations in the same surface, and
 confirms once. The runtime asks the capability broker for the delegated grant
 before it writes anything. A refusal is reported as a denial; no reference is
 committed, the document is unchanged and a grant failure never becomes a
-successful authorised insertion.
+successful authorized insertion.
 
 Once authority is settled, the reference record and its document-owned
 placement, revision and presentation commit together in one transaction and
 with one undo step. Where the same action also creates a new object, the object
-envelope's authorised metadata commits in that transaction too. A failure in
+envelope's authorized metadata commits in that transaction too. A failure in
 any required semantic write leaves no half-reference and no orphan placement.
 The atomic unit is always the document-owned records; the provider's resolution
 is not part of it.
@@ -181,13 +181,13 @@ not change the document selection.
 
 The host application must not add its own private chrome around the embed. A
 dataframe embedded in a note and a dataframe embedded in a report should be
-recognisably the same object in the same envelope.
+recognizably the same object in the same envelope.
 
 ## Printing and export
 
 An embed prints through its chosen presentation, using the shared Burin target.
 Every artefact that includes the embed is produced from one accepted snapshot
-with one authorised scene, as described in
+with one authorized scene, as described in
 [Output parity](37-output-parity.md). If the provider is unavailable at print
 time, the last cached presentation may print only when current authority
 permits that use; it carries a visible state mark, and the preflight report

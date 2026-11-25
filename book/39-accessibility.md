@@ -136,11 +136,10 @@ dimensions; 32 is preferred, and a dialog's primary action is 36.
   visible mark is 8 units. Their hit region is 20 units, inset into the object
   from the corner so that the whole region stays inside the object's bounds for
   an object at least 20 units on each axis; an object smaller than 20 units
-  uses its own bounds. The fixed
-  picking order, Tab cycling and numeric inspector fields in
-  [Selection and tools](24-selection-tools.md) are the alternative route; a
-  handle that cannot meet the pointer minimum is still reachable and operable
-  from the keyboard and from the property fields.
+  uses its own bounds. The fixed picking order, Tab cycling and numeric
+  inspector fields in [Selection and tools](24-selection-tools.md) are the
+  alternative route; a handle that cannot meet the pointer minimum is still
+  reachable and operable from the keyboard and from the property fields.
 - A drag interaction has a keyboard alternative.
 - A context menu is reachable from the keyboard.
 - Clipping is declared. When an expanded hit region is clipped by its

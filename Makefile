@@ -5,7 +5,10 @@ PYTHON ?= python3
 UV ?= uv
 MDLINT ?= markdownlint-cli2
 MDTABLEFIX ?= mdtablefix
-TYPOS ?= typos
+TYPOS_CONFIG_BUILDER_VERSION ?= v0.1.4
+TYPOS_CONFIG_BUILDER = $(UV) tool run --python 3.14 --from \
+	"git+https://github.com/leynos/typos-config-builder.git@$(TYPOS_CONFIG_BUILDER_VERSION)" \
+	typos-config-builder
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z0-9_-]+:.*##/ {printf "%-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -30,8 +33,8 @@ fmt: ## Format Markdown tables and wrap prose
 markdownlint: ## Lint Markdown
 	$(MDLINT) "*.md" "book/**/*.md" "docs/**/*.md"
 
-spelling: ## Check spelling with typos
-	$(TYPOS)
+spelling: ## Enforce en-GB-oxendict spelling
+	$(TYPOS_CONFIG_BUILDER) gate --repository .
 
 python-lint: ## Lint the Python tools with ruff, interrogate and pylint
 	$(UV) run ruff check tools
