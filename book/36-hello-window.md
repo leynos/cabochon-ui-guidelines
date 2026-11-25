@@ -86,7 +86,7 @@ promise the rest of the environment depends on.
 | `content.png`        | Raster at the declared scale                      |
 | `thumbnail.png`      | Small raster for lists and previews               |
 | `accessibility.json` | Roles, names, states and bounds                   |
-| `clipboard/`         | Serialised payload of the live clipboard transfer |
+| `clipboard/`         | Serialized payload of the live clipboard transfer |
 | `hit-map.json`       | Hit regions keyed by scene node                   |
 | `export.json`        | Manifest of intents, tolerances and versions      |
 
@@ -97,7 +97,7 @@ must describe the same nodes that were drawn.
 
 The eight artefacts form a **conformance bundle**, not the shape of every user
 export. The clipboard is a live transfer, not a file; `clipboard/` is its
-serialised representation in the bundle. Each of the eight maps to one target
+serialized representation in the bundle. Each of the eight maps to one target
 representation, and each required target representation maps to exactly one
 artefact. They are produced by the review command that proves the contract, and
 they all read one accepted snapshot: the scene revision, the presentation

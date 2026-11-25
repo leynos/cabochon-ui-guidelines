@@ -15,12 +15,12 @@ relationship can be current, refreshing, stale, broken or denied. Each state
 has a distinct appearance and a distinct promise.
 
 The five labels are a projection. They are computed from independent facts:
-whether the runtime's capability broker currently authorises the read; whether
+whether the runtime's capability broker currently authorizes the read; whether
 a provider is present; whether an accepted value exists; which source revisions
 that value was validated against; the latest source revision the provider has
 reported; whether an interruption has invalidated an earlier validation; and
-whether an authorised request generation is in flight. No single fact is
-allowed to stand in for another. In particular, resolution and authorisation
+whether an authorized request generation is in flight. No single fact is
+allowed to stand in for another. In particular, resolution and authorization
 are independent: an object can be unresolved and still denied, or resolved and
 still denied.
 
@@ -34,7 +34,7 @@ cannot be changed in one place and left stale in another.
 | State      | Meaning                                                                           | Colour role        | Mark          |
 | ---------- | --------------------------------------------------------------------------------- | ------------------ | ------------- |
 | Current    | An accepted value satisfies the freshness condition.                              | Pine text or chip. | Filled dot.   |
-| Refreshing | An authorised request is in flight; an accepted value may show.                   | Refresh text chip. | Rotation arc. |
+| Refreshing | An authorized request is in flight; an accepted value may show.                   | Refresh text chip. | Rotation arc. |
 | Stale      | The source is ahead of the accepted value, or validation lapsed.                  | Amber ink chip.    | Triangle.     |
 | Broken     | No request is in flight and the provider is absent or no value has been accepted. | Oxide chip.        | Broken link.  |
 | Denied     | Current authority does not permit the read.                                       | Oxide chip.        | Padlock.      |
@@ -51,7 +51,7 @@ in this order. The order is exhaustive and total; it is not a severity ranking.
 1. **Denied** if current authority does not permit the read. A request in
    flight does not mask a denial. Denial is not a variety of failure and never
    renders as Broken.
-2. **Refreshing** if an authorised request generation is in flight. This holds
+2. **Refreshing** if an authorized request generation is in flight. This holds
    even when no accepted value exists yet, so first load is Refreshing and not
    Broken. Revocation and provider loss terminate the request before the
    projection runs.
@@ -71,7 +71,7 @@ vector covers every component of the current known-source vector, its
 validation epoch is the current epoch, no request is in flight, and current
 authority still permits the read.
 
-The order above is the projection. The separate order used to summarise
+The order above is the projection. The separate order used to summarize
 children in [Aggregating child states](#aggregating-child-states) is a severity
 ranking: Denied, Broken, Refreshing, Stale, Current. A summary may therefore be
 more severe than any individual projection rule would suggest for one child,
@@ -97,9 +97,9 @@ refresh that reads the new revision.
   authority permits and a provider is present, the notification is itself a
   dispatch: the application allocates a new request generation that covers the
   advanced vector, and the relationship moves to **Refreshing**. A generation
-  already in flight is superseded, and the relationship stays **Refreshing**.
-  A **Broken** relationship with no provider receives no notification, because
-  no provider is present to send one. A **Broken** relationship that has a
+  already in flight is superseded, and the relationship stays **Refreshing**. A
+  **Broken** relationship with no provider receives no notification, because no
+  provider is present to send one. A **Broken** relationship that has a
   provider but no accepted value is still notified and dispatches a refresh.
 
 The runtime's capability broker owns the authority decision. A host-resource
@@ -132,7 +132,7 @@ following transitions.
 | Denied                  | A grant is issued; an accepted value exists and a provider is present      | Stale      | Capability broker                       |
 | Denied                  | A grant is issued; no value has been accepted                              | Broken     | Capability broker                       |
 | Denied                  | A grant is issued while the provider is absent                             | Broken     | Capability broker                       |
-| Current, Stale, Broken  | A refresh request is dispatched while authorised and a provider is present | Refreshing | Application                             |
+| Current, Stale, Broken  | A refresh request is dispatched while authorized and a provider is present | Refreshing | Application                             |
 | Denied                  | A grant is issued, then a refresh is dispatched with a provider present    | Refreshing | Application after the Capability broker |
 | Refreshing              | A validated result satisfies the freshness condition                       | Current    | Application                             |
 | Refreshing              | The transport fails or the request times out                               | Broken     | Application                             |
@@ -140,7 +140,7 @@ following transitions.
 | Refreshing              | The request is cancelled                                                   | Recomputed | Application                             |
 | Refreshing              | A superseded reply arrives                                                 | No change  | Application                             |
 
-A refresh enters **Refreshing** logically when an authorised request is
+A refresh enters **Refreshing** logically when an authorized request is
 dispatched, even when it completes within 200 milliseconds, too quickly to
 paint the chip. A relationship does not move from **Current** to **Broken** by
 inventing a refresh first: the availability event moves it directly. A
@@ -156,9 +156,10 @@ invalidation epoch or is behind the known source, and is discarded.
 
 A source notification is itself a scheduling event. When it arrives with no
 request in flight, and authority permits and a provider is present, the
-application dispatches a refresh. The relationship then moves to **Refreshing**,
-and the freshest accepted value, if any, remains visible. The dispatch uses the
-same generation, coverage and cancellation rules as an explicit request.
+application dispatches a refresh. The relationship then moves to
+**Refreshing**, and the freshest accepted value, if any, remains visible. The
+dispatch uses the same generation, coverage and cancellation rules as an
+explicit request.
 
 ## The logical refresh lifecycle
 
@@ -170,7 +171,7 @@ paints.
    the invalidation epoch at dispatch and the authority decision. No accepted
    value is discarded. A dispatch is refused while authority or a provider is
    absent; the relationship then stays **Denied** or **Broken**.
-2. **In flight.** The relationship is **Refreshing**. If an authorised cached
+2. **In flight.** The relationship is **Refreshing**. If an authorized cached
    value exists, it remains visible and selectable. If none exists, the object
    shows a non-disclosing loading placeholder, not an empty value and not a
    zero. A first load with no cached value is therefore **Refreshing**, not
@@ -276,13 +277,13 @@ diagnostic, a search result or a manifest. It shows:
   supports it.
 
 A broken object shows the word **Broken**, a one-sentence diagnosis drawn from
-the provider, and a retry action. If an authorised cached value exists, it is
+the provider, and a retry action. If an authorized cached value exists, it is
 shown with the state mark. It must not show a stack trace, an internal error
 code as the primary message, or a blank rectangle with no explanation.
 
 ## Metadata disclosure
 
-Content authorisation does not automatically authorise the metadata around it.
+Content authorization does not automatically authorize the metadata around it.
 The runtime's disclosure policy classifies each of the following as public or
 protected for the current grant: the object's name, its identity, its revision,
 its type, its timestamps, its source chip, its backlinks, its row and cell
@@ -340,13 +341,13 @@ result and does not make that result a fresh computation.
 ## Embeds that are not resolved
 
 An embed has a resolution state, which is separate from both its live
-relationship state and its authorisation state. Resolution asks whether this
+relationship state and its authorization state. Resolution asks whether this
 machine can turn the envelope into a presentation at all.
 
 | Resolution  | Meaning                                        | What the embed shows                     |
 | ----------- | ---------------------------------------------- | ---------------------------------------- |
 | Resolved    | A provider loaded the object                   | The presentation and its live state      |
-| Opaque      | Bytes intact; no provider is installed         | Authorised preview or placeholder        |
+| Opaque      | Bytes intact; no provider is installed         | Authorized preview or placeholder        |
 | Unavailable | The provider exists but cannot load the object | Name or placeholder, identity, retry     |
 | Malformed   | The provider exists and rejected the payload   | Name or placeholder, identity, diagnosis |
 
@@ -358,15 +359,15 @@ into a single label.
 Resolution does not grant authority and does not preserve it. Removing a
 provider, crashing it or reinstalling it changes resolution and availability;
 it does not change whether the payload may be disclosed. An unresolved embed
-that is not authorised shows a non-disclosing placeholder and offers no
+that is not authorized shows a non-disclosing placeholder and offers no
 **Export original**, no cached preview, no clipboard copy and no diagnostic
 bytes. **Export original** is offered only for an Opaque embed whose current
 authority permits export of the original bytes.
 
-Opaque is not an error. When export is authorised, it is a promise that the
+Opaque is not an error. When export is authorized, it is a promise that the
 document has kept the content even though this machine cannot show it. The
 placeholder must say so, and must offer **Export original** so that the bytes
-can leave the environment intact. When export is not authorised, the
+can leave the environment intact. When export is not authorized, the
 placeholder says that the content exists but may not be shown.
 
 ## Testing the states
@@ -391,7 +392,7 @@ notification during **Current** and while **Broken**, a source advance during a
 refresh, cancellation after that advance, supersession by generation, a
 rejected reply vector, a reply from an older invalidation epoch, a timeout, a
 stale failure, a grant change during a request, provider loss while denied,
-recovery while denied and a late completion after denial.
-`make states` runs the fixtures and compares the chapter and figure with the
-typed transition source. The [checklist](40-checklist.md) lists the transitions
-that must be witnessed before release.
+recovery while denied and a late completion after denial. `make states` runs
+the fixtures and compares the chapter and figure with the typed transition
+source. The [checklist](40-checklist.md) lists the transitions that must be
+witnessed before release.

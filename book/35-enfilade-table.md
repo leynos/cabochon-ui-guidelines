@@ -136,7 +136,7 @@ definition, depending on the selection.
   committing.
 - A failed record is reported with a structured location: record and field plus
   the physical line span for delimited text, row group, row and column for
-  Parquet, or a file-level failure when the format cannot localise it.
+  Parquet, or a file-level failure when the format cannot localize it.
 - A failed record does not abort the imported rows in an explicit partial-import
   mode. That mode states its commit units, its undo grouping and its recovery
   behaviour. An all-or-nothing import commits nothing on failure.

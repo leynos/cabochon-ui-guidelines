@@ -6,3 +6,7 @@ build/
 .sites-runtime/
 __pycache__/
 .venv/
+
+# Untracked cache of the estate-wide en-GB-oxendict dictionary.
+.typos-oxendict-base.json
+.typos-oxendict-base.toml

@@ -10,7 +10,7 @@ summary: Window anatomy, the measured bands and the rules for size, state and ho
 ![Window anatomy with labelled metrics.](../figures/fig-13-window.svg)
 
 A Cabochon window is assembled from a fixed set of horizontal bands. The bands
-give every application the same rhythm and make a window recognisable before
+give every application the same rhythm and make a window recognizable before
 its contents are read.
 
 ## The bands

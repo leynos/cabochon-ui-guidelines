@@ -77,10 +77,10 @@ properties are independent and must not be collapsed into one "type" label.
 - A reference cell holds another object's identity and shows its name and its
   relationship state. It is **Denied** when the current grant does not permit
   reading it, which takes precedence over availability. Otherwise it is
-  **Refreshing** when the referenced object's source revision has advanced and a
-  refresh has been dispatched, and **Broken** when the provider is unavailable.
-  Unavailable is not stale, and the cell must not claim knowledge of a revision
-  it cannot read.
+  **Refreshing** when the referenced object's source revision has advanced and
+  a refresh has been dispatched, and **Broken** when the provider is
+  unavailable. Unavailable is not stale, and the cell must not claim knowledge
+  of a revision it cannot read.
 
 ## Formula bar
 
@@ -207,7 +207,7 @@ The dataframe keeps four independent kinds of state apart.
 - **Relationship state.** A reference cell carries **Current**, **Refreshing**,
   **Stale**, **Broken** or **Denied** from
   [Live relationships](08-live-relationships.md). The table's status chip
-  summarises these with the same precedence as a document.
+  summarizes these with the same precedence as a document.
 - **Draft validity.** An incomplete or malformed expression in the formula bar
   is a draft error. The committed cell or computed column keeps its last valid
   result and reports the draft error beside the editor.
@@ -220,7 +220,7 @@ The dataframe keeps four independent kinds of state apart.
 An empty table still has a type and a revision. Its status line says "0 rows"
 when the disclosure policy permits that count and otherwise reports the table
 as empty without a number; neither form implies that content failed to load. A
-table with no reference columns has no relationship state to summarise.
+table with no reference columns has no relationship state to summarize.
 
 ## Large tables
 

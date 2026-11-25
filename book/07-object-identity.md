@@ -49,7 +49,7 @@ following table is the reference for every instrument.
 
 | Operation                        | Semantic identity                             | Content and history effect                                     | View and container effect                                            |
 | -------------------------------- | --------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Edit existing content            | Preserved                                     | Commit under the platform revision and transaction policy      | Reflect the accepted revision in authorised presentations            |
+| Edit existing content            | Preserved                                     | Commit under the platform revision and transaction policy      | Reflect the accepted revision in authorized presentations            |
 | Cancel a draft or tool operation | Preserved                                     | No committed content mutation                                  | Discard or retain the draft according to the declared editing policy |
 | Undo committed content           | Preserved                                     | Restore content through the declared undo and revision policy  | Update relevant views without reallocating the object                |
 | Change one embed's presentation  | Source identity preserved                     | Source content unchanged                                       | Change the containing document's reference record and history        |

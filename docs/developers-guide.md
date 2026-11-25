@@ -8,16 +8,16 @@ does, and how the Python code is configured.
 
 The gates run on Linux. Install these tools before running `make check`:
 
-| Tool              | Version used here          | Purpose                                       |
-| :---------------- | :------------------------- | :-------------------------------------------- |
-| Python            | 3.12.15                    | Runs every checker and the figure generator   |
-| uv                | 0.13.2                     | Supplies the pinned Python environment        |
-| xmllint           | libxml 2.12                | Checks that each SVG is well-formed XML       |
-| agent-browser     | 0.34.0                     | Renders the SVG proof sheet in Chromium       |
-| Chromium          | bundled with agent-browser | Draws the proof sheet and per-figure captures |
-| markdownlint-cli2 | 0.23.2                     | Lints the Markdown                            |
-| mdtablefix        | 0.6.1                      | Formats tables and wraps prose                |
-| typos             | 1.50.1                     | Checks spelling                               |
+| Tool                 | Version used here          | Purpose                                       |
+| :------------------- | :------------------------- | :-------------------------------------------- |
+| Python               | 3.12.15                    | Runs every checker and the figure generator   |
+| uv                   | 0.13.2                     | Supplies the pinned Python environment        |
+| xmllint              | libxml 2.12                | Checks that each SVG is well-formed XML       |
+| agent-browser        | 0.34.0                     | Renders the SVG proof sheet in Chromium       |
+| Chromium             | bundled with agent-browser | Draws the proof sheet and per-figure captures |
+| markdownlint-cli2    | 0.23.2                     | Lints the Markdown                            |
+| mdtablefix           | 0.6.1                      | Formats tables and wraps prose                |
+| typos-config-builder | v0.1.4 (Python 3.14)       | Generates the spelling config and runs Typos  |
 
 The Python linting, typing and test tools are declared in
 `[dependency-groups] dev` in `pyproject.toml` and pinned in `uv.lock`, so `uv`
@@ -36,7 +36,7 @@ Run `make help` for the same list. Each target is safe to run on its own.
 | `check-fmt`        | Check Markdown table and paragraph formatting                                                           |
 | `fmt`              | Apply that formatting in place                                                                          |
 | `markdownlint`     | Lint the root, `book/` and `docs/` Markdown                                                             |
-| `spelling`         | Check spelling with `typos`                                                                             |
+| `spelling`         | Enforce en-GB-oxendict spelling with the `typos-config-builder` gate                                    |
 | `python-lint`      | Run ruff, interrogate and pylint over `tools/`                                                          |
 | `python-typecheck` | Type-check `tools/` with ty                                                                             |
 | `python-test`      | Run the property tests under `tests/`                                                                   |
@@ -111,13 +111,14 @@ provoke. The Makefile runs both the plain check and its self-test for each
 checker, so a gate that silently stops checking anything fails the build.
 
 The mutations differ by checker. The figure checker copies the committed SVGs
-into a temporary directory and edits one copy at a time. The link checker copies
-the repository, and the requirement checker copies `book/`, into a temporary
-directory before editing it. The state, layout and keyboard checkers mutate
-in-memory copies of the declared transitions, tokens, table rows and facts
-instead of writing files. Two state probes compare a hand-written projection
-with the real one rather than mutating `project()`, so they guard the expected
-failures and the fixtures, not every branch of the projection itself.
+into a temporary directory and edits one copy at a time. The link checker
+copies the repository, and the requirement checker copies `book/`, into a
+temporary directory before editing it. The state, layout and keyboard checkers
+mutate in-memory copies of the declared transitions, tokens, table rows and
+facts instead of writing files. Two state probes compare a handwritten
+projection with the real one rather than mutating `project()`, so they guard
+the expected failures and the fixtures, not every branch of the projection
+itself.
 
 ## Shared Markdown parsers
 
@@ -141,12 +142,11 @@ through its keyword-only `images` argument: `True` keeps only embedded images,
 `False` keeps only ordinary links, and the default `None` keeps both.
 `link_targets` returns only those reached through an ordinary link, and
 `image_targets` only those reached through an image. Inline destinations are
-reported first, then
-`[text][label]` references, then shortcut `[label]` references whose label has
-a definition in the same chapter. Labels are compared after collapsing
-whitespace, trimming and case folding, and the first definition of a label
-wins. A destination may contain one level of balanced parentheses, and the
-angle brackets CommonMark permits around it are removed.
+reported first, then `[text][label]` references, then shortcut `[label]`
+references whose label has a definition in the same chapter. Labels are
+compared after collapsing whitespace, trimming and case folding, and the first
+definition of a label wins. A destination may contain one level of balanced
+parentheses, and the angle brackets CommonMark permits around it are removed.
 
 The module resolves CommonMark's backslash rule rather than counting
 characters. Only an odd run of backslashes makes the following punctuation
@@ -187,15 +187,15 @@ practical. `linkcheck.run_checks` takes the book directory,
 `layoutcheck.check_chapter` takes the chapter text that the entry point reads,
 `figurecheck.run` takes the figure directory, and the requirement and figure
 checks take the contract their entry point loaded. A test can therefore drive
-those checks from a temporary book or a hand-written document.
+those checks from a temporary book or a handwritten document.
 
-The entry points resolve `ROOT`, `BOOK`, `FIGURES` and `DATA_PATH`. Two
-readers inside the checks still take no argument.
-`statecheck.transitions.chapter_rows` and `compare_figure` read the fixed
-`CHAPTER` and `FIGURE` paths, so they are exercised only against the committed
-book and figure. `tools/check-keyboard.py` is a single script rather than a
-package and loads `tools/keyboard-fixtures.json` into a module constant when it
-is imported, so it too runs only against the committed fixtures.
+The entry points resolve `ROOT`, `BOOK`, `FIGURES` and `DATA_PATH`. Two readers
+inside the checks still take no argument. `statecheck.transitions.chapter_rows`
+and `compare_figure` read the fixed `CHAPTER` and `FIGURE` paths, so they are
+exercised only against the committed book and figure. `tools/check-keyboard.py`
+is a single script rather than a package and loads
+`tools/keyboard-fixtures.json` into a module constant when it is imported, so
+it too runs only against the committed fixtures.
 
 ## Documented exemptions
 
@@ -234,20 +234,20 @@ alone.
 The generator is the `tools/figuregen/` package. `figuregen.palette` holds the
 colour roles and font stacks every drawing shares, and `figuregen.canvas`
 provides the SVG element and text helpers. `figuregen.ornaments` draws the
-shared page furniture, state chips, state marks and miniature document
-previews; `figuregen.widgets` draws the window chrome, form controls, pane
-headers and inspector rows; `figuregen.glyphs` draws the tool-strip glyphs
-once; and `figuregen.production` annotates every rendered figure and draws the
+shared page furniture, state chips, state marks and miniature document previews;
+`figuregen.widgets` draws the window chrome, form controls, pane headers and
+inspector rows; `figuregen.glyphs` draws the tool-strip glyphs once; and
+`figuregen.production` annotates every rendered figure and draws the
 catalogue-height fixtures.
 
 Each figure has one module under `figuregen/figures/` that exposes a builder
-function, except the two production fixtures: their builders,
-`fig_prod_chrome` and `fig_prod_control`, sit in `figuregen.production` beside
+function, except the two production fixtures: their builders, `fig_prod_chrome`
+and `fig_prod_control`, sit in `figuregen.production` beside
 `production_component`, which draws one block at a catalogue height and records
 the component's name in `data-component` and its height in `data-height`.
-`figuregen.cli` maps every figure name to its builder. A builder that
-reads only the state records takes `Catalogue.states`, one that reads more of
-the catalogue takes the whole `Catalogue`, and the rest take no argument.
+`figuregen.cli` maps every figure name to its builder. A builder that reads
+only the state records takes `Catalogue.states`, one that reads more of the
+catalogue takes the whole `Catalogue`, and the rest take no argument.
 `figuregen.figdata` loads and validates the catalogue's `live_states`,
 `live_transitions`, `resolution_states` and `figures` sections, and its
 `StateTables` record exposes the live and resolution tables that the state chip

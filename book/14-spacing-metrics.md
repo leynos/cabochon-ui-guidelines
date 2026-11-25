@@ -230,7 +230,7 @@ Focus toggling changes none of layout, visual, hit or accessible bounds. A
 control allocates its border in every state; focus adds a decoration outside
 it. The accessibility adapter reports the accessible bounds of the semantic
 region it exposes, and that region need not equal the hit region: a merged
-group, a virtualised row or an expanded target legitimately differs. The test
+group, a virtualized row or an expanded target legitimately differs. The test
 compares each bound with its own contract, never one with another.
 
 ## Density

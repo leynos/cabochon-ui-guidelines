@@ -85,7 +85,7 @@ Four failures are distinct and must not share one label.
   the renderer cannot draw it. The object keeps its last successful drawing,
   reports the render failure and offers the diagnostic.
 - **Provider failure.** The provider that supplies the diagram or its data is
-  unavailable. The relationship is **Broken** and the last authorised drawing
+  unavailable. The relationship is **Broken** and the last authorized drawing
   may remain visible with its state mark.
 
 ## Diagnostics

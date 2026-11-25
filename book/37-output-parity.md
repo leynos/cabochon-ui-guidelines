@@ -28,7 +28,7 @@ interchangeable.
 | Print         | Printer-bound output at a declared intent        | Yes                                                                          |
 | Thumbnail     | Small raster for lists and previews              | Yes                                                                          |
 | Raster        | PNG or equivalent at a declared scale            | Yes                                                                          |
-| Clipboard     | Text plus geometry for other applications        | No live file; a transfer. Serialised as `clipboard/` in a conformance bundle |
+| Clipboard     | Text plus geometry for other applications        | No live file; a transfer. Serialized as `clipboard/` in a conformance bundle |
 | Accessibility | Roles, names, states and bounds                  | Yes, as a diagnostic projection                                              |
 | Hit map       | Regions keyed by presentation instance           | Yes                                                                          |
 | Manifest      | Intents, snapshots, tolerances and substitutions | Yes                                                                          |
@@ -36,7 +36,7 @@ interchangeable.
 Nine logical targets therefore produce eight persisted artefacts in a
 conformance bundle. The display produces none because it is not a file. The
 clipboard produces no live file because it is a transfer, but the conformance
-bundle serialises exactly one payload for it. These counts describe the
+bundle serializes exactly one payload for it. These counts describe the
 conformance bundle, not an arbitrary user export.
 
 A target may omit a feature that it cannot represent. It may not invent
