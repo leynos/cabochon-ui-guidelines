@@ -31,6 +31,7 @@ class MutationChecks:
     """Accumulate the outcome of self-test mutations."""
 
     def __init__(self) -> None:
+        """Start with no checks counted and no failures recorded."""
         self.count = 0
         self.failures: list[str] = []
 

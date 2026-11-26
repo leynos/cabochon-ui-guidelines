@@ -30,6 +30,7 @@ def test_write_svg_survives_two_concurrent_writers(tmp_path: Path) -> None:
     errors: list[Exception] = []
 
     def write() -> None:
+        """Write the SVG once both writers reach the barrier."""
         try:
             barrier.wait(timeout=5)
             _write_svg(destination, SVG_TEXT)
