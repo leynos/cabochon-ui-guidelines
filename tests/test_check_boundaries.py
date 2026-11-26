@@ -174,7 +174,7 @@ def _naming(
     """Return a mutation that replaces one field of a named contract section."""
 
     def mutate(document: dict[str, object]) -> None:
-        """Replace the key in the named section of the document."""
+        """Set the value for the key in the named section of the document."""
         part = document[section]
         assert isinstance(part, dict), "the fixture declares the section"
         part[key] = value
