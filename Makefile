@@ -1,4 +1,4 @@
-.PHONY: help figures figures-check validate-svg check-fmt fmt markdownlint spelling python-lint python-typecheck python-test links states keyboard layout requirements check all
+.PHONY: help figures figures-check validate-svg check-fmt fmt markdownlint spelling lint python-lint python-typecheck python-test links states keyboard layout requirements check all
 
 SHELL := bash
 PYTHON ?= python3
@@ -38,8 +38,10 @@ spelling: ## Enforce en-GB-oxendict spelling
 
 python-lint: ## Lint the Python tools with ruff, interrogate and pylint
 	$(UV) run ruff check tools
-	$(UV) run interrogate tools
+	$(UV) run interrogate tools tests
 	$(UV) run pylint tools
+
+lint: markdownlint spelling python-lint ## Run the Markdown, spelling and Python lints
 
 python-typecheck: ## Type-check the Python tools with ty
 	$(UV) run ty check tools

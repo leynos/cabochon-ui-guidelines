@@ -336,6 +336,7 @@ def _replace(**changes: object) -> Callable[[dict[str, object]], None]:
     """Return a mutation that replaces named configuration fields."""
 
     def mutate(document: dict[str, object]) -> None:
+        """Apply the changes to the document's configuration."""
         _configuration(document).update(changes)
 
     return mutate
@@ -345,6 +346,7 @@ def _remove(field: str) -> Callable[[dict[str, object]], None]:
     """Return a mutation that removes one configuration field."""
 
     def mutate(document: dict[str, object]) -> None:
+        """Delete the field from the document's configuration."""
         del _configuration(document)[field]
 
     return mutate
@@ -354,6 +356,7 @@ def _set_profile_bands(bands: list[str]) -> Callable[[dict[str, object]], None]:
     """Return a mutation that replaces the declared profile's bands."""
 
     def mutate(document: dict[str, object]) -> None:
+        """Set the document profile's bands."""
         document["profiles"] = {"document": bands}
 
     return mutate
@@ -363,6 +366,7 @@ def _drop_token(name: str) -> Callable[[dict[str, object]], None]:
     """Return a mutation that removes one declared token."""
 
     def mutate(document: dict[str, object]) -> None:
+        """Delete the named token from the document."""
         tokens = document["tokens"]
         assert isinstance(tokens, dict), "the fixture declares a token table"
         del tokens[name]
@@ -374,6 +378,7 @@ def _set_token(name: str, value: object) -> Callable[[dict[str, object]], None]:
     """Return a mutation that replaces one declared token's value."""
 
     def mutate(document: dict[str, object]) -> None:
+        """Set the named token's value in the document."""
         tokens = document["tokens"]
         assert isinstance(tokens, dict), "the fixture declares a token table"
         tokens[name] = value
@@ -385,6 +390,7 @@ def _configurations(value: object) -> Callable[[dict[str, object]], None]:
     """Return a mutation that replaces the configurations array."""
 
     def mutate(document: dict[str, object]) -> None:
+        """Replace the document's configurations array."""
         document["configurations"] = value
 
     return mutate
