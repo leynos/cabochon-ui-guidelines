@@ -37,7 +37,8 @@ Run `make help` for the same list. Each target is safe to run on its own.
 | `fmt`              | Apply that formatting in place                                                                          |
 | `markdownlint`     | Lint the root, `book/` and `docs/` Markdown                                                             |
 | `spelling`         | Enforce en-GB-oxendict spelling with the `typos-config-builder` gate                                    |
-| `python-lint`      | Run ruff, interrogate and pylint over `tools/`                                                          |
+| `lint`             | Run `markdownlint`, `spelling` and `python-lint`                                                        |
+| `python-lint`      | Run ruff and pylint over `tools/`, and interrogate over `tools/` and `tests/`                           |
 | `python-typecheck` | Type-check `tools/` with ty                                                                             |
 | `python-test`      | Run the property tests under `tests/`                                                                   |
 | `links`            | Check links, anchors, figures, owners and the structural contract                                       |
@@ -59,7 +60,7 @@ The tools are checked with the df12 Python health standards imported from the
 
 ```sh
 uv run ruff check tools
-uv run interrogate tools
+uv run interrogate tools tests
 uv run pylint tools
 uv run ty check tools
 uv run pytest
